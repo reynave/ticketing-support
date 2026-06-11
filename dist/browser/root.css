@@ -1,0 +1,124 @@
+/* ============================================================
+   root.css — Design Tokens & CSS Custom Properties
+   HelpDesk Ticketing System
+   ============================================================ */
+
+:root {
+  /* ── Brand Colors ── */
+  --primary:          #1a56db;
+  --primary-hover:    #1447c0;
+  --primary-light:    #eff6ff;
+  --primary-ring:     rgba(26, 86, 219, 0.12);
+
+  /* ── Neutral Palette ── */
+  --color-white:      #ffffff;
+  --color-bg:         #f5f7fa;
+  --color-bg-subtle:  #f8fafc;
+  --color-bg-muted:   #f1f5f9;
+  --color-bg-input:   #f8fafc;
+
+  --color-border:     #e2e8f0;
+  --color-border-md:  #d1d5db;
+  --color-border-sm:  #f1f5f9;
+
+  --color-text:       #374151;
+  --color-text-dark:  #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #9ca3af;
+
+  /* ── Status Colors ── */
+  --status-open-bg:       #eff6ff;
+  --status-open-color:    #1d4ed8;
+
+  --status-progress-bg:   #fffbeb;
+  --status-progress-color:#b45309;
+
+  --status-resolved-bg:   #f0fdf4;
+  --status-resolved-color:#15803d;
+
+  --status-closed-bg:     #f3f4f6;
+  --status-closed-color:  #4b5563;
+
+  /* ── Priority Colors ── */
+  --prio-urgent-bg:    #fef2f2;
+  --prio-urgent-color: #b91c1c;
+
+  --prio-high-bg:      #fff7ed;
+  --prio-high-color:   #c2410c;
+
+  --prio-medium-bg:    #fffbeb;
+  --prio-medium-color: #b45309;
+
+  --prio-low-bg:       #f0fdf4;
+  --prio-low-color:    #15803d;
+
+  /* ── Semantic Colors ── */
+  --color-success:        #16a34a;
+  --color-success-hover:  #15803d;
+  --color-success-bg:     #f0fdf4;
+  --color-success-ring:   #bbf7d0;
+
+  --color-warning:        #d97706;
+  --color-warning-bg:     #fffbeb;
+
+  --color-danger:         #dc2626;
+  --color-danger-bg:      #fef2f2;
+  --color-danger-ring:    #fecaca;
+
+  /* ── Avatar Palette (for user initials) ── */
+  --avatar-purple:  #7c3aed;
+  --avatar-cyan:    #0891b2;
+  --avatar-red:     #dc2626;
+  --avatar-amber:   #d97706;
+  --avatar-green:   #16a34a;
+  --avatar-blue:    #1a56db;
+
+  /* ── Layout ── */
+  --navbar-h:   56px;
+  --sidebar-w:  240px;
+
+  /* ── Spacing ── */
+  --space-xs:  0.25rem;
+  --space-sm:  0.5rem;
+  --space-md:  0.75rem;
+  --space-lg:  1rem;
+  --space-xl:  1.25rem;
+  --space-2xl: 1.5rem;
+
+  /* ── Border Radius ── */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   10px;
+  --radius-xl:   12px;
+  --radius-2xl:  14px;
+  --radius-full: 9999px;
+
+  /* ── Typography ── */
+  --font-sans:  'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:  ui-monospace, 'Cascadia Code', monospace;
+
+  --text-xs:    0.7rem;
+  --text-sm:    0.75rem;
+  --text-base:  0.8rem;
+  --text-md:    0.8125rem;
+  --text-body:  0.875rem;
+  --text-lg:    0.9rem;
+  --text-xl:    1rem;
+  --text-2xl:   1.1rem;
+  --text-3xl:   1.15rem;
+  --text-4xl:   1.35rem;
+
+  /* ── Shadows ── */
+  --shadow-card:    0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown:0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* ── Z-index ── */
+  --z-sidebar:   90;
+  --z-navbar:   100;
+  --z-dropdown: 200;
+  --z-modal:    300;
+
+  /* ── Transitions ── */
+  --transition-fast: background 0.15s ease;
+}
