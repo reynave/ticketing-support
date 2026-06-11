@@ -1,0 +1,148 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div class="page-title">User List</div>
+      <div class="page-subtitle">Manage internal and external users.</div>
+    </div>
+  </div>
+
+  @if (message) {
+    <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="stat-value small-title">Users</div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" [(ngModel)]="selectedUserTypeFilter" (change)="loadUsers()">
+          <option value="">All Type</option>
+          <option value="1">Internal</option>
+          <option value="2">External</option>
+        </select>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedStatusFilter" (change)="loadUsers()">
+          <option value="">All Status</option>
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+        <button type="button" class="btn btn-primary-sm" (click)="openCreateModal()">Create New</button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="text-muted">Loading users...</div>
+    } @else if (!rows.length) {
+      <div class="text-muted">No user data.</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>ClientId</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track trackById($index, row)) {
+              <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.email }}</td>
+                <td>{{ row.firstName }} {{ row.lastName }}</td>
+                <td>{{ row.userTypeId === 2 ? 'External' : 'Internal' }}</td>
+                <td>{{ row.clientId }}</td>
+                <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
+                <td class="text-end action-buttons">
+                  <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/users', row.id]">Edit</a>
+                  <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id" (click)="deleteUser(row)">
+                    {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Create Modal -->
+<ng-template #createUserModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Create User</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <form #userFormNg="ngForm" (ngSubmit)="saveUser(userFormNg)">
+    <div class="modal-body d-grid gap-2">
+      @if (message) {
+        <div class="alert alert-success py-2">{{ message }}</div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+      }
+
+      <div>
+        <label class="form-label" for="list-user-email">Email</label>
+        <input id="list-user-email" class="form-control" name="email" [(ngModel)]="userForm.email" required placeholder="Input email" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-password">Password</label>
+        <input id="list-user-password" class="form-control" type="password" name="password" [(ngModel)]="userForm.password" required placeholder="Input password" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-firstName">First Name</label>
+        <input id="list-user-firstName" class="form-control" name="firstName" [(ngModel)]="userForm.firstName" required placeholder="Input first name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-lastName">Last Name</label>
+        <input id="list-user-lastName" class="form-control" name="lastName" [(ngModel)]="userForm.lastName" placeholder="Input last name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-authlevelId">Auth Level</label>
+        <input id="list-user-authlevelId" class="form-control" type="number" name="authlevelId" [(ngModel)]="userForm.authlevelId" required placeholder="Input auth level" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-userTypeId">User Type</label>
+        <select id="list-user-userTypeId" class="form-select" name="userTypeId" [(ngModel)]="userForm.userTypeId" (change)="onUserTypeChange()">
+          <option [ngValue]="1">Internal</option>
+          <option [ngValue]="2">External</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-clientId">Client ID</label>
+        <input id="list-user-clientId" class="form-control" type="number" name="clientId" [(ngModel)]="userForm.clientId" [readonly]="userForm.userTypeId === 1" placeholder="Input client id" />
+      </div>
+
+      <div>
+        <label class="form-label" for="list-user-status">Status</label>
+        <select id="list-user-status" class="form-select" name="status" [(ngModel)]="userForm.status">
+          <option [ngValue]="1">Active</option>
+          <option [ngValue]="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="userFormNg.invalid || saving">
+        {{ saving ? 'Saving...' : 'Create User' }}
+      </button>
+    </div>
+  </form>
+</ng-template>

@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div class="page-title">User Module</div>
+      <div class="page-subtitle">Manage internal and external users (separate from master data).</div>
+    </div>
+  </div>
+
+  @if (message) {
+    <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-4">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="stat-value small-title">{{ isEditMode ? 'Edit User' : 'Create User' }}</div>
+          @if (isEditMode) {
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openCreate()">New</button>
+          }
+        </div>
+
+        <form #userForm="ngForm" (ngSubmit)="save(userForm)" class="d-grid gap-2">
+          <input class="form-control" name="email" [(ngModel)]="formModel.email" required placeholder="Email" />
+          <input class="form-control" type="password" name="password" [(ngModel)]="formModel.password" [required]="!isEditMode" placeholder="Password" />
+          <input class="form-control" name="firstName" [(ngModel)]="formModel.firstName" required placeholder="First Name" />
+          <input class="form-control" name="lastName" [(ngModel)]="formModel.lastName" placeholder="Last Name" />
+          <input class="form-control" type="number" name="authlevelId" [(ngModel)]="formModel.authlevelId" required placeholder="Auth Level Id" />
+
+          <select class="form-select" name="userTypeId" [(ngModel)]="formModel.userTypeId" (change)="onUserTypeChange()">
+            <option [ngValue]="1">Internal</option>
+            <option [ngValue]="2">External</option>
+          </select>
+
+          <input class="form-control" type="number" name="clientId" [(ngModel)]="formModel.clientId" [readonly]="formModel.userTypeId === 1" placeholder="Client Id" />
+
+          <select class="form-select" name="status" [(ngModel)]="formModel.status">
+            <option [ngValue]="1">Active</option>
+            <option [ngValue]="0">Inactive</option>
+          </select>
+
+          <button class="btn btn-primary-sm" type="submit" [disabled]="userForm.invalid || saving">
+            {{ saving ? 'Saving...' : (isEditMode ? 'Update User' : 'Create User') }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-8">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="stat-value small-title">User List</div>
+          <div class="d-flex gap-2">
+            <select class="form-select form-select-sm" [(ngModel)]="selectedUserTypeFilter" (change)="loadUsers()">
+              <option value="">All Type</option>
+              <option value="1">Internal</option>
+              <option value="2">External</option>
+            </select>
+            <select class="form-select form-select-sm" [(ngModel)]="selectedStatusFilter" (change)="loadUsers()">
+              <option value="">All Status</option>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        @if (loading) {
+          <div class="text-muted">Loading users...</div>
+        } @else if (!rows.length) {
+          <div class="text-muted">No user data.</div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>ClientId</th>
+                  <th>Status</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of rows; track trackById($index, row)) {
+                  <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.email }}</td>
+                    <td>{{ row.firstName }} {{ row.lastName }}</td>
+                    <td>{{ row.userTypeId === 2 ? 'External' : 'Internal' }}</td>
+                    <td>{{ row.clientId }}</td>
+                    <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
+                    <td class="text-end action-buttons">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(row)">Edit</button>
+                      <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id" (click)="deleteUser(row)">
+                        {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

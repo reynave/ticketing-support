@@ -1,0 +1,9 @@
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.small-title {
+  font-size: 1.05rem;
+}

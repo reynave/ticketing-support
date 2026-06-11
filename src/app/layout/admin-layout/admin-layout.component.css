@@ -1,0 +1,10 @@
+.profile-box {
+  margin-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.menu-icon {
+  font-size: 20px;
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

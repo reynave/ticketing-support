@@ -1,0 +1,158 @@
+<div class="container">
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="page-title">User Detail</div>
+        <div class="page-subtitle">View and manage user information.</div>
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="goBack()">Back to List</button>
+    </div>
+  </div>
+
+  @if (message) {
+    <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="stat-card">
+      <div class="text-muted">Loading user detail...</div>
+    </div>
+  } @else if (!user) {
+    <div class="stat-card">
+      <div class="text-muted">User not found.</div>
+    </div>
+  } @else {
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div class="stat-value small-title">{{ user.firstName }} {{ user.lastName }}</div>
+              <div class="text-muted">{{ user.email }}</div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-primary-sm" (click)="openEditModal()">Edit</button>
+              <button type="button" class="btn btn-outline-danger" (click)="deleteUser()">Delete</button>
+            </div>
+          </div>
+
+          <div class="detail-info">
+            <div class="info-row">
+              <span class="info-label">ID</span>
+              <span class="info-value">{{ user.id }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Name</span>
+              <span class="info-value">{{ user.firstName }} {{ user.lastName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">User Type</span>
+              <span class="info-value">{{ user.userTypeId === 2 ? 'External' : 'Internal' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Auth Level</span>
+              <span class="info-value">{{ user.authlevelId }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Client ID</span>
+              <span class="info-value">{{ user.clientId }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">{{ user.status === 1 ? 'Active' : 'Inactive' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Input Date</span>
+              <span class="info-value">{{ user.inputDate | date:'short' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Update Date</span>
+              <span class="info-value">{{ user.updateDate | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Edit Modal -->
+<ng-template #editUserModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Edit User</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <form #userFormNg="ngForm" (ngSubmit)="saveUser(userFormNg)">
+    <div class="modal-body d-grid gap-2">
+      @if (message) {
+        <div class="alert alert-success py-2">{{ message }}</div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+      }
+
+      <div>
+        <label class="form-label" for="detail-edit-email">Email</label>
+        <input id="detail-edit-email" class="form-control" name="email" [(ngModel)]="userForm.email" required placeholder="Input email" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-password">Password</label>
+        <input id="detail-edit-password" class="form-control" type="password" name="password" [(ngModel)]="userForm.password" placeholder="Leave blank to keep current" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-firstName">First Name</label>
+        <input id="detail-edit-firstName" class="form-control" name="firstName" [(ngModel)]="userForm.firstName" required placeholder="Input first name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-lastName">Last Name</label>
+        <input id="detail-edit-lastName" class="form-control" name="lastName" [(ngModel)]="userForm.lastName" placeholder="Input last name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-authlevelId">Auth Level</label>
+        <input id="detail-edit-authlevelId" class="form-control" type="number" name="authlevelId" [(ngModel)]="userForm.authlevelId" required placeholder="Input auth level" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-userTypeId">User Type</label>
+        <select id="detail-edit-userTypeId" class="form-select" name="userTypeId" [(ngModel)]="userForm.userTypeId" (change)="onUserTypeChange()">
+          <option [ngValue]="1">Internal</option>
+          <option [ngValue]="2">External</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-clientId">Client ID</label>
+        <input id="detail-edit-clientId" class="form-control" type="number" name="clientId" [(ngModel)]="userForm.clientId" [readonly]="userForm.userTypeId === 1" placeholder="Input client id" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-edit-status">Status</label>
+        <select id="detail-edit-status" class="form-select" name="status" [(ngModel)]="userForm.status">
+          <option [ngValue]="1">Active</option>
+          <option [ngValue]="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="userFormNg.invalid || saving">
+        {{ saving ? 'Saving...' : 'Update User' }}
+      </button>
+    </div>
+  </form>
+</ng-template>

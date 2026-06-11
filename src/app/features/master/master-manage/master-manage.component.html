@@ -1,0 +1,155 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Master Data - {{ config?.label || masterKey }}</div>
+      <div class="page-subtitle">Reusable list and form for all master keys.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to Master Menu</a>
+      @if (!isUpdateOnly) {
+        <button class="btn btn-primary-sm" type="button" (click)="openCreate()">
+          <i class="bi bi-plus-lg me-1"></i>Add Data
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (!config) {
+    <div class="alert alert-warning">Unknown master key: {{ masterKey }}</div>
+  } @else {
+    <div class="stat-card mb-3">
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        @if (config.hasStatusFilter) {
+          <div class="d-flex align-items-center gap-2">
+            <label class="small text-muted mb-0">Filter Status</label>
+            <select class="form-select form-select-sm filter-input" [(ngModel)]="selectedStatus" (change)="onFilterStatusChange()">
+              <option value="">All</option>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+        }
+        <button class="btn btn-outline-primary btn-sm" type="button" (click)="loadList()" [disabled]="loading">
+          <i class="bi bi-arrow-repeat me-1"></i>Refresh
+        </button>
+      </div>
+    </div>
+
+    @if (message) {
+      <div class="alert alert-success py-2">{{ message }}</div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+    }
+
+    <div class="table-card mb-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              @for (column of columns; track column) {
+                <th class="text-uppercase">{{ getColumnLabel(column) }}</th>
+              }
+              <th class="action-col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading) {
+              <tr>
+                <td [attr.colspan]="columns.length + 1" class="text-center py-4">Loading data...</td>
+              </tr>
+            } @else if (!rows.length) {
+              <tr>
+                <td [attr.colspan]="columns.length + 1" class="text-center py-4 text-muted">No data available.</td>
+              </tr>
+            } @else {
+              @for (row of rows; track trackByRow($index, row)) {
+                <tr>
+                  @for (column of columns; track column) {
+                    <td>
+                      @let cell = getCellDisplay(column, row[column]);
+
+                      @if (cell.badgeClass) {
+                        <span [class]="cell.badgeClass + ' cell-badge'">
+                          @if (cell.iconClass) {
+                            <i [class]="cell.iconClass"></i>
+                          }
+                          {{ cell.text }}
+                        </span>
+                      } @else {
+                        <span class="cell-text">
+                          @if (cell.iconClass) {
+                            <i [class]="cell.iconClass"></i>
+                          }
+                          {{ cell.text }}
+                        </span>
+                      }
+                    </td>
+                  }
+                  <td>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-primary" type="button" (click)="openEdit(row)">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      @if (!isUpdateOnly) {
+                        <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteRow(row)" [disabled]="deletingId === row.id">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  }
+</div>
+
+<ng-template #masterFormModal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ isEditMode ? 'Edit Data' : 'Add New Data' }}</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeForm()"></button>
+  </div>
+
+  <div class="modal-body">
+    <form #masterForm="ngForm" (ngSubmit)="save(masterForm)">
+      <div class="row g-3">
+        @for (field of config?.fields || []; track field.key) {
+          <div class="col-12" [class.col-md-6]="field.type !== 'textarea'">
+            <label class="form-label small fw-semibold">{{ field.label }} @if (field.required) {<span class="text-danger">*</span>}</label>
+
+            @if (field.type === 'textarea') {
+              <textarea
+                class="form-control"
+                rows="3"
+                [name]="field.key"
+                [(ngModel)]="formModel[field.key]"
+                [required]="field.required === true"
+              ></textarea>
+            } @else {
+              <input
+                class="form-control"
+                [type]="field.type"
+                [name]="field.key"
+                [(ngModel)]="formModel[field.key]"
+                [required]="field.required === true"
+              />
+            }
+          </div>
+        }
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-outline-secondary" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn btn-primary" type="submit" [disabled]="saving || masterForm.invalid">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

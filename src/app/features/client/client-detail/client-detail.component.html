@@ -1,0 +1,189 @@
+<div class="container">
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+      <div class="page-title">Client Detail</div>
+      <div class="page-subtitle">Update, insert, delete client and manage external users.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back To List</a>
+       <button type="button" class="btn btn-sm btn-outline-primary" (click)="openUpdateClientModal()">Update Client</button>
+      <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingClient" (click)="deleteClient()">
+        {{ deletingClient ? 'Deleting...' : 'Delete Client' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="alert alert-warning">
+    <strong>Warning:</strong> Deleting client will deactivate all external users under this client.
+  </div>
+
+  @if (message) {
+    <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    @if (loading) {
+      <div class="text-muted">Loading client detail...</div>
+    } @else if (!client) {
+      <div class="text-muted">Client not found.</div>
+    } @else {
+      <div class="row g-2">
+        <div class="col-12 col-md-6"><strong>ID:</strong> {{ client.id }}</div>
+        <div class="col-12 col-md-6"><strong>Code:</strong> {{ client.code }}</div>
+            <div class="col-12 col-md-6"><strong>Name:</strong> {{ client.name }}</div>
+        <div class="col-12 col-md-6"><strong>Industry:</strong> {{ client.industryName }}</div>
+        <div class="col-12 col-md-6"><strong>Status:</strong> {{ client.status === 1 ? 'Active' : 'Inactive' }}</div>
+        <div class="col-12"><strong>Address:</strong> {{ client.address }}</div>
+      </div>
+    }
+  </div>
+
+  <div class="stat-card">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="stat-value small-title">External Users</div>
+      <button type="button" class="btn btn-primary-sm" (click)="openCreateUserModal()">Create User</button>
+    </div>
+
+    @if (loadingUsers) {
+      <div class="text-muted">Loading users...</div>
+    } @else if (!users.length) {
+      <div class="text-muted">No external user for this client.</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of users; track trackById($index, row)) {
+              <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.email }}</td>
+                <td>{{ row.firstName }} {{ row.lastName }}</td>
+                <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
+                <td class="text-end action-buttons">
+                  <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/users', row.id]">Edit</a>
+                  <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingUserId === row.id" (click)="deleteUser(row)">
+                    {{ deletingUserId === row.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #clientFormModal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ clientFormMode === 'create' ? 'Insert New Client' : 'Update Client' }}</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeClientModal()"></button>
+  </div>
+
+  <form #clientFormNg="ngForm" (ngSubmit)="saveClient(clientFormNg)">
+    <div class="modal-body d-grid gap-2">
+      <div>
+        <label class="form-label" for="detail-client-code">Code</label>
+        <input id="detail-client-code" class="form-control" name="code" [(ngModel)]="clientForm.code" required placeholder="Input client code" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-client-name">Name</label>
+        <input id="detail-client-name" class="form-control" name="name" [(ngModel)]="clientForm.name" required placeholder="Input client name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-client-address">Address</label>
+        <textarea id="detail-client-address" class="form-control" name="address" [(ngModel)]="clientForm.address" required placeholder="Input client address"></textarea>
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-client-industry">Industry</label>
+        <select id="detail-client-industry" class="form-select" name="IndustryId" [(ngModel)]="clientForm.IndustryId" [disabled]="loadingIndustries" required>
+          <option [ngValue]="0">Select industry</option>
+          @for (industry of industries; track trackById($index, industry)) {
+            <option [ngValue]="industry.id">{{ industry.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-client-status">Status</label>
+        <select id="detail-client-status" class="form-select" name="status" [(ngModel)]="clientForm.status">
+          <option [ngValue]="1">Active</option>
+          <option [ngValue]="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="closeClientModal()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="clientFormNg.invalid || savingClient">
+        {{ savingClient ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #clientUserFormModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Create External User</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeUserModal()"></button>
+  </div>
+
+  <form #userFormNg="ngForm" (ngSubmit)="saveUser(userFormNg)">
+    <div class="modal-body d-grid gap-2">
+      <div>
+        <label class="form-label" for="detail-user-email">Email</label>
+        <input id="detail-user-email" class="form-control" name="email" [(ngModel)]="userForm.email" required placeholder="Input email" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-user-password">Password</label>
+        <input id="detail-user-password" class="form-control" type="password" name="password" [(ngModel)]="userForm.password" required placeholder="Input password" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-user-firstName">First Name</label>
+        <input id="detail-user-firstName" class="form-control" name="firstName" [(ngModel)]="userForm.firstName" required placeholder="Input first name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-user-lastName">Last Name</label>
+        <input id="detail-user-lastName" class="form-control" name="lastName" [(ngModel)]="userForm.lastName" placeholder="Input last name" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-user-authlevelId">Auth Level</label>
+        <input id="detail-user-authlevelId" class="form-control" type="number" name="authlevelId" [(ngModel)]="userForm.authlevelId" required placeholder="Input auth level" />
+      </div>
+
+      <div>
+        <label class="form-label" for="detail-user-status">Status</label>
+        <select id="detail-user-status" class="form-select" name="status" [(ngModel)]="userForm.status">
+          <option [ngValue]="1">Active</option>
+          <option [ngValue]="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="closeUserModal()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="userFormNg.invalid || savingUser">
+        {{ savingUser ? 'Creating...' : 'Create User' }}
+      </button>
+    </div>
+  </form>
+</ng-template>

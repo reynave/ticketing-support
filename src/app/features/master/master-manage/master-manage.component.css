@@ -1,0 +1,19 @@
+.filter-input {
+  width: 180px;
+}
+
+.action-col {
+  width: 110px;
+}
+
+.cell-badge,
+.cell-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cell-badge i,
+.cell-text i {
+  font-size: 0.8rem;
+}

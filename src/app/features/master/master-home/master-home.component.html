@@ -1,0 +1,25 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Master Data</div>
+      <div class="page-subtitle">Select a master dataset to manage.</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    @for (menu of masterMenus; track menu.key) {
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="stat-card h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="stat-label">MASTER KEY</div>
+            <div class="stat-value small-title">{{ menu.label }}</div>
+            <div class="stat-change text-muted">Key: {{ menu.key }}</div>
+          </div>
+          <div class="mt-3">
+            <a class="btn btn-primary-sm" [routerLink]="['/master', menu.key]">Buka</a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
