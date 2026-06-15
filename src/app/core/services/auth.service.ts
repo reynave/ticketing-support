@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 interface LoginForm {
@@ -17,8 +17,10 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
-  private readonly tokenKey = 'tt_auth_token';
-  private readonly userKey = 'tt_auth_user';
+  private readonly tokenKey = '8tt_auth_token';
+  private readonly userKey = '8tt_auth_user';
+  private readonly legacyTokenKey = 'tt_auth_token';
+  private readonly legacyUserKey = 'tt_auth_user';
 
   private readonly currentUserSubject = new BehaviorSubject<any | null>(null);
   readonly currentUser$ = this.currentUserSubject.asObservable();
@@ -36,6 +38,8 @@ export class AuthService {
   }
 
   bootstrapSession(): void {
+    this.migrateLegacySession();
+
     const token = localStorage.getItem(this.tokenKey);
     const storedUser = localStorage.getItem(this.userKey);
 
@@ -87,7 +91,7 @@ export class AuthService {
         this.currentUserSubject.next(user);
       }),
       catchError(() => {
-        this.clearSession(false);
+        this.currentUserSubject.next(null);
         return of(null);
       })
     );
@@ -100,6 +104,8 @@ export class AuthService {
   private clearSession(redirectToLogin: boolean): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.legacyTokenKey);
+    localStorage.removeItem(this.legacyUserKey);
     this.currentUserSubject.next(null);
 
     if (redirectToLogin) {
@@ -126,5 +132,26 @@ export class AuthService {
     }
 
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+
+  private migrateLegacySession(): void {
+    const legacyToken = localStorage.getItem(this.legacyTokenKey);
+    const legacyUser = localStorage.getItem(this.legacyUserKey);
+
+    if (!localStorage.getItem(this.tokenKey) && legacyToken) {
+      localStorage.setItem(this.tokenKey, legacyToken);
+    }
+
+    if (!localStorage.getItem(this.userKey) && legacyUser) {
+      localStorage.setItem(this.userKey, legacyUser);
+    }
+
+    if (legacyToken) {
+      localStorage.removeItem(this.legacyTokenKey);
+    }
+
+    if (legacyUser) {
+      localStorage.removeItem(this.legacyUserKey);
+    }
   }
 }

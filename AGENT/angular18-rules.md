@@ -52,3 +52,8 @@ this.http.post<any>(`${this.baseUrl}/auth/login`, payload)
 10. **Signal** hanya dipakai untuk state lokal di dalam komponen, jangan untuk variable global atau variable yang diakses oleh banyak komponen, atau yang banyak merubah tampilan html. Contoh : Tab History.
 11. untuk variable global atau variable yang diakses oleh banyak komponen, gunakan **Service**.
 12. untuk date pakai datePicker dari https://ng-bootstrap.github.io/releases/17.x/#/components/datepicker/api
+13. JWT token hasil login wajib disimpan di `localStorage`, bukan `sessionStorage`.
+14. Prefix key `localStorage` untuk auth wajib pakai `8tt_`.
+15. Session login harus tetap bertahan saat browser refresh / reload / F5 selama token masih ada di `localStorage`.
+16. Dilarang menghapus token `localStorage` saat proses bootstrap app / refresh hanya karena request `me` atau validasi awal gagal sekali. Hapus token hanya saat logout eksplisit atau ada instruksi khusus.
+17. Jika ada migrasi nama key `localStorage`, wajib sediakan migrasi dari key lama ke key baru agar user tidak force logout tanpa kebutuhan.

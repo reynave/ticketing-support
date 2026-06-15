@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 interface UserFormModel {
   email: string;
   password: string;
-  authlevelId: number;
+  userAuthLevelId: number;
   firstName: string;
   lastName: string;
   userTypeId: number;
@@ -24,12 +23,9 @@ interface UserFormModel {
   styleUrl: './user-detail.component.css',
 })
 export class UserDetailComponent implements OnInit {
-  @ViewChild('editUserModal') editUserModal!: TemplateRef<any>;
-
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
-  private readonly modalService = inject(NgbModal);
 
   userId: string | null = null;
   user: any = null;
@@ -40,13 +36,25 @@ export class UserDetailComponent implements OnInit {
 
   userForm: UserFormModel = this.defaultForm();
   formMode: 'view' | 'edit' = 'view';
-  modalRef: NgbModalRef | null = null;
+  accessRightOptions: any[] = [];
 
   ngOnInit(): void {
+    this.loadAccessRightOptions();
     this.userId = this.route.snapshot.paramMap.get('id');
     if (this.userId) {
       this.loadUserDetail();
     }
+  }
+
+  loadAccessRightOptions(): void {
+    this.apiService.get('/master/user-auth-level').subscribe({
+      next: (response) => {
+        this.accessRightOptions = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.accessRightOptions = [];
+      },
+    });
   }
 
   loadUserDetail(): void {
@@ -61,6 +69,7 @@ export class UserDetailComponent implements OnInit {
       next: (response) => {
         this.loading = false;
         this.user = response?.data;
+        this.populateFormFromUser();
       },
       error: (error) => {
         this.loading = false;
@@ -69,29 +78,21 @@ export class UserDetailComponent implements OnInit {
     });
   }
 
-  openEditModal(): void {
+  startEdit(): void {
     if (!this.user) {
       return;
     }
 
     this.formMode = 'edit';
-    this.userForm = {
-      email: String(this.user?.email || ''),
-      password: '',
-      authlevelId: Number(this.user?.authlevelId ?? 1),
-      firstName: String(this.user?.firstName || ''),
-      lastName: String(this.user?.lastName || ''),
-      userTypeId: Number(this.user?.userTypeId ?? 1),
-      clientId: Number(this.user?.clientId ?? 0),
-      status: Number(this.user?.status ?? 1),
-    };
+    this.populateFormFromUser();
     this.message = '';
     this.errorMessage = '';
-    this.modalRef = this.modalService.open(this.editUserModal, {
-      centered: true,
-      backdrop: 'static',
-      size: 'lg',
-    });
+  }
+
+  cancelEdit(): void {
+    this.formMode = 'view';
+    this.populateFormFromUser();
+    this.errorMessage = '';
   }
 
   saveUser(form: NgForm): void {
@@ -101,7 +102,7 @@ export class UserDetailComponent implements OnInit {
 
     const payload: Record<string, string | number> = {
       email: this.userForm.email.trim(),
-      authlevelId: Number(this.userForm.authlevelId),
+      userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
       userTypeId: Number(this.userForm.userTypeId),
@@ -121,7 +122,7 @@ export class UserDetailComponent implements OnInit {
       next: (response) => {
         this.saving = false;
         this.message = response?.message || 'User updated.';
-        this.modalRef?.close();
+        this.formMode = 'view';
         this.loadUserDetail();
       },
       error: (error) => {
@@ -166,12 +167,34 @@ export class UserDetailComponent implements OnInit {
     return {
       email: '',
       password: '',
-      authlevelId: 1,
+      userAuthLevelId: 1,
       firstName: '',
       lastName: '',
       userTypeId: 1,
       clientId: 0,
       status: 1,
     };
+  }
+
+  private populateFormFromUser(): void {
+    this.userForm = {
+      email: String(this.user?.email || ''),
+      password: '',
+      userAuthLevelId: Number(this.user?.userAuthLevelId ?? 1),
+      firstName: String(this.user?.firstName || ''),
+      lastName: String(this.user?.lastName || ''),
+      userTypeId: Number(this.user?.userTypeId ?? 1),
+      clientId: Number(this.user?.clientId ?? 0),
+      status: Number(this.user?.status ?? 1),
+    };
+  }
+
+  private buildAccessRightLabel(row: any): string {
+    const id = Number(row?.id);
+    const authLevelId = Number(row?.authLevelId ?? 0);
+    const name = String(row?.name ?? '');
+    const status = Number(row?.status ?? 0) === 1 ? 'Active' : 'Inactive';
+
+    return `#${id} - Auth ${authLevelId} / Module ${name} (${status})`;
   }
 }
