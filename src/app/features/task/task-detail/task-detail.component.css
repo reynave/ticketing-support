@@ -1,0 +1,32 @@
+.task-detail-page .card {
+  border-color: #e9ecef;
+}
+
+.task-detail-page .card-header {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.task-detail-page .form-label {
+  margin-bottom: 0.35rem;
+}
+
+.task-form-table {
+  border: 1px solid #e9ecef;
+}
+
+.task-form-table td {
+  padding: 0.1rem 0.75rem;
+  vertical-align: middle;
+  border-color: #eef1f4;
+}
+
+.task-form-table .label-col {
+  width: 240px;
+  background: #f8f9fb;
+}
+
+@media (max-width: 768px) {
+  .task-form-table .label-col {
+    width: 140px;
+  }
+}

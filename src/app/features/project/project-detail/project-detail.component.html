@@ -1,0 +1,223 @@
+<div class="container py-3 project-detail-page">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div>
+      <h5 class="fw-bold mb-0">Project Detail</h5>
+      <p class="text-muted small mb-0">View and update project information in one place.</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
+  </div>
+
+  @if (message) {
+    <div class="alert alert-success py-2 mb-3">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="card border shadow-sm">
+      <div class="card-body text-muted">Loading project detail...</div>
+    </div>
+  } @else if (!project) {
+    <div class="card border shadow-sm">
+      <div class="card-body text-muted">Project not found.</div>
+    </div>
+  } @else {
+    <div class="card border shadow-sm mb-4">
+      <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
+        <span class="fw-semibold small">Project Form</span>
+        <div class="d-flex gap-2">
+          @if (formMode === 'view') {
+            <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+          } @else {
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
+          }
+          <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteProject()">
+            {{ deleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+
+      <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
+        <div class="card-body p-3">
+          @if (loadingOptions) {
+            <div class="small text-muted mb-2">Loading master options...</div>
+          }
+
+          <div class="row g-2">
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-id">Project ID</label>
+              <input id="detail-project-id" class="form-control form-control-sm" [value]="project.id" disabled />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-status">Status</label>
+              <select
+                id="detail-project-status"
+                class="form-select form-select-sm"
+                name="status"
+                [(ngModel)]="formModel.status"
+                [disabled]="formMode === 'view'"
+              >
+                <option [ngValue]="1">Active</option>
+                <option [ngValue]="0">Inactive</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-client">Client <span class="text-danger">*</span></label>
+              <select
+                id="detail-project-client"
+                class="form-select form-select-sm"
+                name="clientId"
+                [(ngModel)]="formModel.clientId"
+                [disabled]="formMode === 'view'"
+                required
+              >
+                <option value="">Select client</option>
+                @for (client of clients; track client.id) {
+                  <option [value]="client.id">{{ client.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-type">Project Type <span class="text-danger">*</span></label>
+              <select
+                id="detail-project-type"
+                class="form-select form-select-sm"
+                name="projectTypeId"
+                [(ngModel)]="formModel.projectTypeId"
+                [disabled]="formMode === 'view'"
+                required
+              >
+                <option [ngValue]="0">Select project type</option>
+                @for (projectType of projectTypes; track projectType.id) {
+                  <option [ngValue]="projectType.id">{{ projectType.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-billeable">Project Billeable <span class="text-danger">*</span></label>
+              <select
+                id="detail-project-billeable"
+                class="form-select form-select-sm"
+                name="projectBilleableId"
+                [(ngModel)]="formModel.projectBilleableId"
+                [disabled]="formMode === 'view'"
+                required
+              >
+                <option [ngValue]="0">Select billeable type</option>
+                @for (projectBilleable of projectBilleables; track projectBilleable.id) {
+                  <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-category">Project Category <span class="text-danger">*</span></label>
+              <select
+                id="detail-project-category"
+                class="form-select form-select-sm"
+                name="projectCategoryId"
+                [(ngModel)]="formModel.projectCategoryId"
+                [disabled]="formMode === 'view'"
+                required
+              >
+                <option [ngValue]="0">Select category</option>
+                @for (projectCategory of projectCategories; track projectCategory.id) {
+                  <option [ngValue]="projectCategory.id">{{ projectCategory.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-product">Product <span class="text-danger">*</span></label>
+              <select
+                id="detail-project-product"
+                class="form-select form-select-sm"
+                name="productId"
+                [(ngModel)]="formModel.productId"
+                [disabled]="formMode === 'view'"
+                required
+              >
+                <option [ngValue]="0">Select product</option>
+                @for (product of products; track product.id) {
+                  <option [ngValue]="product.id">{{ product.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-template">Template Master</label>
+              <input
+                id="detail-project-template"
+                class="form-control form-control-sm"
+                name="templateMaster"
+                [(ngModel)]="formModel.templateMaster"
+                [readonly]="formMode === 'view'"
+                placeholder="Example: TB-001"
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-startDate">Start Date <span class="text-danger">*</span></label>
+              <input
+                id="detail-project-startDate"
+                class="form-control form-control-sm"
+                type="date"
+                name="startDate"
+                [(ngModel)]="formModel.startDate"
+                [readonly]="formMode === 'view'"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-endDate">End Date <span class="text-danger">*</span></label>
+              <input
+                id="detail-project-endDate"
+                class="form-control form-control-sm"
+                type="date"
+                name="endDate"
+                [(ngModel)]="formModel.endDate"
+                [readonly]="formMode === 'view'"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-inputDate">Input Date</label>
+              <input
+                id="detail-project-inputDate"
+                class="form-control form-control-sm"
+                [value]="project.inputDate ? (project.inputDate | date:'short') : '-'"
+                disabled
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold" for="detail-project-updateDate">Update Date</label>
+              <input
+                id="detail-project-updateDate"
+                class="form-control form-control-sm"
+                [value]="project.updateDate ? (project.updateDate | date:'short') : '-'"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-end gap-2 py-2 px-3">
+          @if (formMode === 'edit') {
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="projectFormNg.invalid || saving || loadingOptions">
+              {{ saving ? 'Saving...' : 'Save' }}
+            </button>
+          }
+        </div>
+      </form>
+    </div>
+  }
+</div>

@@ -7,6 +7,10 @@ import { ClientListComponent } from './features/client/client-list/client-list.c
 import { ClientDetailComponent } from './features/client/client-detail/client-detail.component';
 import { UserListComponent } from './features/user/user-list/user-list.component';
 import { UserDetailComponent } from './features/user/user-detail/user-detail.component';
+import { ProjectListComponent } from './features/project/project-list/project-list.component';
+import { ProjectDetailComponent } from './features/project/project-detail/project-detail.component';
+import { TaskListComponent } from './features/task/task-list/task-list.component';
+import { TaskDetailComponent } from './features/task/task-detail/task-detail.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 
 export const routes: Routes = [
@@ -41,6 +45,22 @@ export const routes: Routes = [
 				component: UserDetailComponent,
 			},
 			{
+				path: 'projects',
+				component: ProjectListComponent,
+			},
+			{
+				path: 'projects/:id',
+				component: ProjectDetailComponent,
+			},
+			{
+				path: 'tasks',
+				component: TaskListComponent,
+			},
+			{
+				path: 'tasks/:id',
+				component: TaskDetailComponent,
+			},
+			{
 				path: 'master',
 				component: MasterHomeComponent,
 			},
@@ -48,6 +68,7 @@ export const routes: Routes = [
 				path: 'master/:masterKey',
 				component: MasterManageComponent,
 			},
+			
 		],
 	},
 	{

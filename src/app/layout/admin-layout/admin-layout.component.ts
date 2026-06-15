@@ -16,6 +16,8 @@ export class AdminLayoutComponent {
   readonly moduleMenus = [
     { path: '/clients', label: 'Clients', icon: 'apartment' },
     { path: '/users', label: 'Users', icon: 'group' },
+    { path: '/projects', label: 'Projects', icon: 'workspaces' },
+    { path: '/tasks', label: 'Tasks', icon: 'task_alt' },
   ];
 
   readonly masterMenus = [
