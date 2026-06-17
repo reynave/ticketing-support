@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 
 interface ProjectFormModel {
+  name: string;
   projectTypeId: number;
   projectBilleableId: number;
   projectCategoryId: number;
@@ -134,6 +135,7 @@ export class ProjectDetailComponent implements OnInit {
     }
 
     const payload = {
+      name: this.project.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
       projectBilleableId: Number(this.formModel.projectBilleableId),
       projectCategoryId: Number(this.formModel.projectCategoryId),
@@ -144,6 +146,7 @@ export class ProjectDetailComponent implements OnInit {
       status: Number(this.formModel.status),
       templateMaster: this.formModel.templateMaster.trim() || '0',
     };
+    console.log('Payload for saving project:', payload);
 
     this.saving = true;
     this.message = '';
@@ -204,11 +207,13 @@ export class ProjectDetailComponent implements OnInit {
       endDate: this.toDateInputValue(plusThirtyDays),
       status: 1,
       templateMaster: '',
+      name: '',
     };
   }
 
   private populateFormFromProject(): void {
     this.formModel = {
+      name: String(this.project?.name ?? ''),
       projectTypeId: Number(this.project?.projectTypeId ?? 0),
       projectBilleableId: Number(this.project?.projectBilleableId ?? 0),
       projectCategoryId: Number(this.project?.projectCategoryId ?? 0),

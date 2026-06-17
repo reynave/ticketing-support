@@ -13,11 +13,20 @@ import { AuthService } from '../../core/services/auth.service';
 export class AdminLayoutComponent {
   private readonly authService = inject(AuthService);
 
-  readonly moduleMenus = [
-    { path: '/clients', label: 'Clients', icon: 'apartment' },
-    { path: '/users', label: 'Users', icon: 'group' },
+  readonly moduleMenus = [ 
+    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '5' },
+    { path: '/issues', label: 'Issues', icon: 'report_problem', badge: '2' },
+    {
+      path: '/change-requests',
+      label: 'Change Requests',
+      icon: 'change_circle',
+      badge: '5',
+    },
+
     { path: '/projects', label: 'Projects', icon: 'workspaces' },
-    { path: '/tasks', label: 'Tasks', icon: 'task_alt' },
+    { path: '/clients', label: 'Clients', icon: 'apartment' },
+
+    { path: '/users', label: 'Users', icon: 'group' },
   ];
 
   readonly masterMenus = [
@@ -25,10 +34,18 @@ export class AdminLayoutComponent {
     { key: 'product', label: 'Product', icon: 'inventory_2' },
     { key: 'project-type', label: 'Project Type', icon: 'schema' },
     { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
-    { key: 'project-categories', label: 'Project Categories', icon: 'category' },
+    {
+      key: 'project-categories',
+      label: 'Project Categories',
+      icon: 'category',
+    },
     { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },
     { key: 'user-type', label: 'User Type', icon: 'groups' },
-    { key: 'global-setting', label: 'Global Setting', icon: 'settings_applications' },
+    {
+      key: 'global-setting',
+      label: 'Global Setting',
+      icon: 'settings_applications',
+    },
   ];
 
   get userName(): string {

@@ -8,6 +8,7 @@ import { ApiService } from '../../../core/services/api.service';
 
 interface ProjectFormModel {
   id: string;
+  name : string;
   projectTypeId: number;
   projectBilleableId: number;
   projectCategoryId: number;
@@ -160,6 +161,7 @@ export class ProjectListComponent {
     }
 
     const payload: Record<string, string | number> = {
+      name: this.formModel.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
       projectBilleableId: Number(this.formModel.projectBilleableId),
       projectCategoryId: Number(this.formModel.projectCategoryId),
@@ -247,6 +249,7 @@ export class ProjectListComponent {
   private defaultForm(): ProjectFormModel {
     return {
       id: '',
+      name: '',
       projectTypeId: 0,
       projectBilleableId: 0,
       projectCategoryId: 0,

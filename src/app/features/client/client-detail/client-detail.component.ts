@@ -64,6 +64,7 @@ export class ClientDetailComponent implements OnInit {
   userFormMode: 'create' = 'create';
   editingUserId: string | null = null;
 
+  projects: any = [];
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const id = Number(params.get('id'));
@@ -77,6 +78,7 @@ export class ClientDetailComponent implements OnInit {
       this.loadIndustries();
       this.loadClientDetail();
       this.loadClientUsers();
+      this.loadClientProjects();
     });
   }
 
@@ -103,6 +105,30 @@ export class ClientDetailComponent implements OnInit {
         this.errorMessage = error?.error?.message || 'Failed to load client detail.';
       },
     });
+  }
+
+  loadClientProjects(): void {
+     if (!this.clientId) {
+      return;
+    }
+
+    this.loadingUsers = true;
+
+    this.apiService.get(`/client/${this.clientId}/projects`).subscribe({
+      next: (response) => {
+        this.loadingUsers = false;
+        this.projects = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: (error) => {
+        this.loadingUsers = false;
+        this.projects = [];
+        this.errorMessage = error?.error?.message || 'Failed to load client projects.';
+      },
+    });
+  }
+
+  deleteProject(id: number): void {
+
   }
 
   loadClientUsers(): void {

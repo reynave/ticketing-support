@@ -45,9 +45,56 @@
     }
   </div>
 
+
+  
+  <div class="stat-card mb-3">
+     <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="stat-value small-title">Projects </div> 
+    </div>
+    @if (loading) {
+    <div class="text-muted">Loading projects...</div>
+    } @else if (!projects.length) {
+    <div class="text-muted">No project data.</div>
+    } @else {
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th> 
+            <th>Name</th>
+            <th>Product</th>
+            <th>Start Date</th> 
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of projects; track trackById($index, row)) {
+          <tr>
+            <td>{{ row.id }}</td> 
+            <td>{{ row.name  }}</td> 
+            <td>{{ row.productName || row.productId }} - {{ row.projectTypeName || row.projectTypeId }}</td>
+            <td>{{ row.startDate | date: 'mediumDate' }}</td>  
+            <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
+            <td class="text-end action-buttons">
+               <button type="button" class="btn btn-sm btn-outline-primary" [routerLink]="['/projects', row.id]" routerLinkActive="router-link-active" >Detail</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" 
+                (click)="deleteProject(row)">
+           Delete
+              </button>   
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+
+
   <div class="stat-card">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="stat-value small-title">External Users</div>
+      <div class="stat-value small-title">Contacts (External Users)</div>
       <button type="button" class="btn btn-primary-sm" (click)="openCreateUserModal()">Create User</button>
     </div>
 

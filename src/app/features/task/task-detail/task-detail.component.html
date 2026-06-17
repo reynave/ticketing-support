@@ -9,272 +9,313 @@
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
   </div>
 
-  @if (message) {
-  <div class="alert alert-success py-2 mb-3">{{ message }}</div>
-  }
+  <div class="row g-1 mb-3">
+    <div *ngFor="let item of ticketStatusOptions" class="col ">
+      <div class="border text-center py-1 rounded small"
+        [class]="item.id == formModel.ticketStatusId ? 'bg-dark text-white' : 'bg-light'">
+        <div>
+          <span *ngIf="item.id == formModel.ticketStatusId"><i class="bi bi-check-square"></i></span>
+          <span *ngIf="item.id !== formModel.ticketStatusId"><i class="bi bi-square"></i></span>
 
-  @if (errorMessage) {
-  <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
-  }
-
-  @if (loading) {
-  <div class="card border shadow-sm">
-    <div class="card-body text-muted">Loading task detail...</div>
-  </div>
-  } @else if (!task) {
-  <div class="card border shadow-sm">
-    <div class="card-body text-muted">Task not found.</div>
-  </div>
-  } @else {
-  <div class="card border shadow-sm mb-4">
-    <form #taskFormNg="ngForm" (ngSubmit)="saveTask(taskFormNg)">
-      <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
-        <span class="fw-semibold small">Task Form</span>
-        <div class="d-flex gap-2">
-          @if (formMode === 'edit') {
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || saving">
-            {{ saving ? 'Saving...' : 'Save' }}
-          </button>
-          }
-          @if (formMode === 'view') {
-          <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
-          } @else {
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
-          }
-          <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
-            {{ deleting ? 'Deleting...' : 'Delete' }}
-          </button>
+          <div class="fw-semibold">{{ item.name }}</div>
         </div>
       </div>
-
-
-      <div class="row g-1">
-        <div class="col-md-6 col-12">
-          <table class="table table-sm align-middle task-form-table mb-0">
-            <tbody>
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Task ID</label>
-                </td>
-                <td>
-                  <input id="detail-task-id" class="form-control form-control-sm" [value]="task.id" disabled />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold"
-                    for="detail-task-project">Project</label>
-                </td>
-                <td>
-                  <div class="form-control form-control-sm">{{ task.productName }}</div>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold"
-                    for="detail-task-client">Client</label>
-                </td>
-                <td>
-                  <div class="form-control form-control-sm">{{ task.clientName }}</div>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-project-type">Project
-                    Type</label>
-                </td>
-                <td>
-                  <div class="form-control form-control-sm">{{ task.projectType }}</div>
-                </td>
-              </tr>
-
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-title">Title
-                    <span class="text-danger">*</span></label></td>
-                <td>
-                  <input id="detail-task-title" class="form-control form-control-sm" name="title"
-                    [(ngModel)]="formModel.title" [readonly]="formMode === 'view'" required />
-                </td>
-              </tr> 
-            </tbody>
-          </table>
-        </div>
-
-        <div class="col-md-6 col-12">
-          <table class="table table-sm align-middle task-form-table mb-0">
-            <tbody>
-                
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Task
-                    Status <span class="text-danger">*</span></label>
-                </td>
-                <td>
-                  <select id="detail-task-status" class="form-select form-select-sm" name="ticketStatusId"
-                    [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'" required>
-                    @for (status of ticketStatusOptions; track status.id) {
-                    <option [ngValue]="status.id">{{ status.name }}</option>
-                    }
-                  </select>
-                </td>
-              </tr>
-
-               
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit Date</label></td>
-                <td>
-                  <div class="form-control form-control-sm" >{{ formModel.submitDate | date:'medium' }}</div>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-target-date">Target
-                    Completion <span class="text-danger">*</span></label>
-                </td>
-                <td>
-                  <input id="detail-task-target-date" class="form-control form-control-sm" type="date"
-                    name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate"
-                    [readonly]="formMode === 'view'" required />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
-                    Completion Date</label></td>
-                <td>
-                  <input id="detail-task-actual-date" class="form-control form-control-sm" type="date"
-                    name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate"
-                    [readonly]="formMode === 'view'" />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-by">Submit By</label>
-                </td>
-                <td>
-                  <div id="detail-task-submit-by" class="form-control form-control-sm">{{ task.submitByName }}</div>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign To
-                    <span class="text-danger">*</span></label>
-                </td>
-                <td>
-                  <select
-                    id="detail-task-assign-to"
-                    class="form-select form-select-sm"
-                    name="assignTo"
-                    [(ngModel)]="formModel.assignTo"
-                    [disabled]="formMode === 'view' || loadingOptions"
-                    required
-                  > 
-                    @for (user of internalUsers; track user.id) {
-                      <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
-                    }
-                  </select>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-cr">CR No
-                    Ref</label></td>
-                <td>
-                  <input id="detail-task-cr" class="form-control form-control-sm" name="crNoRef"
-                    [(ngModel)]="formModel.crNoRef" [readonly]="formMode === 'view'" />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-issue">Issue
-                    No</label></td>
-                <td>
-                  <input id="detail-task-issue" class="form-control form-control-sm" name="issueNo"
-                    [(ngModel)]="formModel.issueNo" [readonly]="formMode === 'view'" />
-                </td>
-              </tr>
-
-            
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold"
-                    for="detail-task-rating">Rating</label></td>
-                <td>
-                  <input id="detail-task-rating" class="form-control form-control-sm" type="number" min="0"
-                    name="rating" [(ngModel)]="formModel.rating" [readonly]="formMode === 'view'" />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-ratesby">Rates
-                    By</label></td>
-                <td>
-                  <input id="detail-task-ratesby" class="form-control form-control-sm" type="number" min="0"
-                    name="ratesBy" [(ngModel)]="formModel.ratesBy" [readonly]="formMode === 'view'" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="col-12">
-          <div class="p-3">
-            <label class="form-label small fw-semibold" for="detail-task-description">Description <span
-                class="text-danger">*</span></label>
-
-            @if (formMode === 'view') {
-            <div class="form-control" [innerHtml]="formModel.description"></div>
-            }
-            @else{
-            <div class="NgxEditor__Wrapper">
-              <ngx-editor-menu [editor]="editor1" [toolbar]="toolbar"> </ngx-editor-menu>
-              <ngx-editor [editor]="editor1" name="description" [(ngModel)]="formModel.description"
-                [placeholder]="'Type here...'"></ngx-editor>
-            </div>
-            }
-
-
-          </div>
-
-          <div class="p-3">
-            <label class="form-label small fw-semibold" for="detail-task-solution">Task Solution</label>
- 
-            @if (formMode === 'view') {
-            <div class="form-control" [innerHtml]="formModel.taskSolution"></div>
-            }
-            @else{
-            <div class="NgxEditor__Wrapper">
-              <ngx-editor-menu [editor]="editor2" [toolbar]="toolbar"> </ngx-editor-menu>
-              <ngx-editor [editor]="editor2" name="taskSolution" [(ngModel)]="formModel.taskSolution"
-                [placeholder]="'Type here...'"></ngx-editor>
-            </div>
-            }
-
-          </div>
-        </div>
-      </div>  
-    
-    </form>
-
-    <div class=" bg-light p-2 border-top">
-      <h6 class="fw-semibold small mb-2">Logs Activity</h6>
-      <table class="table table-sm align-middle task-form-table mb-0">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>sdf</td>
-             <td>sdf</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
-  </div>
-  }
 
-  
-</div>
+    @if (message) {
+    <div class="alert alert-success py-2 mb-3">{{ message }}</div>
+    }
+
+    @if (errorMessage) {
+    <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+    <div class="card border shadow-sm">
+      <div class="card-body text-muted">Loading task detail...</div>
+    </div>
+    } @else if (!task) {
+    <div class="card border shadow-sm">
+      <div class="card-body text-muted">Task not found.</div>
+    </div>
+    } @else {
+    <div class="card border shadow-sm mb-4">
+      <form #taskFormNg="ngForm" (ngSubmit)="saveTask(taskFormNg)">
+        <div
+          class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
+          <span class="fw-semibold small">Task Form</span>
+          <div class="d-flex gap-2">
+
+            <button type="button" class="btn btn-success btn-sm" (click)="open(addActivity)">Add Activity</button>
+            @if (formMode === 'edit') {
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || saving">
+              {{ saving ? 'Saving...' : 'Save' }}
+            </button>
+            }
+            @if (formMode === 'view') {
+            <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+            } @else {
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
+            }
+            <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
+              {{ deleting ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+
+
+        <div class="row g-1">
+          <div class="col-md-6 col-12">
+            <table class="table table-sm align-middle task-form-table mb-0">
+              <tbody>
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Task ID</label>
+                  </td>
+                  <td>
+                    <input id="detail-task-id" class="form-control form-control-sm" [value]="task.id" disabled />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project">Project</label>
+                  </td>
+                  <td>
+                    <div class="form-control form-control-sm">{{ task.productName }}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-client">Client</label>
+                  </td>
+                  <td>
+                    <div class="form-control form-control-sm">{{ task.clientName }}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project-type">Project
+                      Type</label>
+                  </td>
+                  <td>
+                    <div class="form-control form-control-sm">{{ task.projectType }}</div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-title">Title
+                      <span class="text-danger">*</span></label></td>
+                  <td>
+                    <input id="detail-task-title" class="form-control form-control-sm" name="title"
+                      [(ngModel)]="formModel.title" [readonly]="formMode === 'view'" required />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-md-6 col-12">
+            <table class="table table-sm align-middle task-form-table mb-0">
+              <tbody>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Task
+                      Status <span class="text-danger">*</span></label>
+                  </td>
+                  <td>
+
+
+                    <select id="detail-task-status" class="form-select form-select-sm" name="ticketStatusId"
+                      [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'" required>
+                      `
+                      <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id">{{ status.name }}
+                      </option>
+
+                    </select>
+                  </td>
+                </tr>
+
+
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
+                      Date</label></td>
+                  <td>
+                    <div class="form-control form-control-sm">{{ formModel.submitDate | date:'medium' }}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-target-date">Target
+                      Completion <span class="text-danger">*</span></label>
+                  </td>
+                  <td>
+                    <input id="detail-task-target-date" class="form-control form-control-sm" type="date"
+                      name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate"
+                      [readonly]="formMode === 'view'" required />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
+                      Completion Date</label></td>
+                  <td>
+                    <input id="detail-task-actual-date" class="form-control form-control-sm" type="date"
+                      name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate"
+                      [readonly]="formMode === 'view'" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-by">Submit
+                      By</label>
+                  </td>
+                  <td>
+                    <div id="detail-task-submit-by" class="form-control form-control-sm">{{ task.submitByName }}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign
+                      To
+                      <span class="text-danger">*</span></label>
+                  </td>
+                  <td>
+                    <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
+                      [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
+                      @for (user of internalUsers; track user.id) {
+                      <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
+                      }
+                    </select>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-cr">CR No
+                      Ref</label></td>
+                  <td>
+                    <input id="detail-task-cr" class="form-control form-control-sm" name="crNoRef"
+                      [(ngModel)]="formModel.crNoRef" [readonly]="formMode === 'view'" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-issue">Issue
+                      No</label></td>
+                  <td>
+                    <input id="detail-task-issue" class="form-control form-control-sm" name="issueNo"
+                      [(ngModel)]="formModel.issueNo" [readonly]="formMode === 'view'" />
+                  </td>
+                </tr>
+
+
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-rating">Rating</label></td>
+                  <td>
+                    <input id="detail-task-rating" class="form-control form-control-sm" type="number" min="0"
+                      name="rating" [(ngModel)]="formModel.rating" [readonly]="formMode === 'view'" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-ratesby">Rates
+                      By</label></td>
+                  <td>
+                    <input id="detail-task-ratesby" class="form-control form-control-sm" type="number" min="0"
+                      name="ratesBy" [(ngModel)]="formModel.ratesBy" [readonly]="formMode === 'view'" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-12">
+            <div class="p-3">
+              <label class="form-label small fw-semibold" for="detail-task-description">Description <span
+                  class="text-danger">*</span></label>
+
+              @if (formMode === 'view') {
+              <div class="form-control" [innerHtml]="formModel.description"></div>
+              }
+              @else{
+              <div class="NgxEditor__Wrapper">
+                <ngx-editor-menu [editor]="editor1" [toolbar]="toolbar"> </ngx-editor-menu>
+                <ngx-editor [editor]="editor1" name="description" [(ngModel)]="formModel.description"
+                  [placeholder]="'Type here...'"></ngx-editor>
+              </div>
+              }
+
+
+            </div>
+
+            <div class="p-3">
+              <label class="form-label small fw-semibold" for="detail-task-solution">Task Solution</label>
+
+              @if (formMode === 'view') {
+              <div class="form-control" [innerHtml]="formModel.taskSolution"></div>
+              }
+              @else{
+              <div class="NgxEditor__Wrapper">
+                <ngx-editor-menu [editor]="editor2" [toolbar]="toolbar"> </ngx-editor-menu>
+                <ngx-editor [editor]="editor2" name="taskSolution" [(ngModel)]="formModel.taskSolution"
+                  [placeholder]="'Type here...'"></ngx-editor>
+              </div>
+              }
+
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <div class=" bg-light p-2 border-top">
+        <h6 class="fw-semibold small mb-2">Logs Activity</h6>
+        <table class="table table-sm align-middle task-form-table mb-0">
+          <thead>
+            <tr>
+              <th width="200px">Date</th>
+
+              <th>Note</th>
+              <th width="100px">Posted By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of taskLogs">
+              <td>{{ log.inputDate | date:'medium' }}</td>
+
+              <td>{{ log.description }}</td>
+              <td>{{ log.inputName }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    }
+
+
+  </div>
+
+  <ng-template #addActivity let-modal>
+    <div class="modal-header">
+      <strong class="modal-title" id="modal-basic-title">Add Activity</strong>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="mb-3">
+          <label class="mb-3" for="descriptionLog">Description</label>
+          <textarea id="descriptionLog" [(ngModel)]="descriptionLog" name="descriptionLog" class="form-control"
+            rows="5"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="submitActivity()">Submit</button>
+    </div>
+  </ng-template>

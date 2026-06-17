@@ -6,11 +6,12 @@ import { firstValueFrom } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 
 import { ApiService } from '../../../core/services/api.service';
- 
+ import { ModalDismissReasons, NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule],
+  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule],
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.css',
 })
@@ -32,18 +33,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     ['align_left', 'align_center', 'align_right', 'align_justify'],
   ];
   readonly taskTypeId = 1;
-  readonly ticketStatusOptions = [
-    { id: 100, name: 'Open' },
-    { id: 101, name: 'Open - Assigned' },
-    { id: 105, name: 'Open - On Review' },
-    { id: 106, name: 'Open - Submit' },
-    { id: 107, name: 'Open - Approved' },
-    { id: 300, name: 'Complete - Review' },
-    { id: 700, name: 'Tested' },
-    { id: 800, name: 'On Progress' },
-    { id: 900, name: 'Close' },
-    { id: 904, name: 'Cancelled' },
-  ];
+ ticketStatusOptions : any = [];
 
   taskId = '';
   task: any = null;
@@ -58,7 +48,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   formMode: 'view' | 'edit' = 'view';
   message = '';
   errorMessage = '';
-
+taskLogs : any = [];
   formModel: any = this.defaultForm();
 
   ngOnInit(): void {
@@ -73,6 +63,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
     this.loadOptions();
     this.loadTaskDetail();
+    this.loadTaskDetailLog();
   }
   ngOnDestroy(): void {
     this.editor1.destroy();
@@ -107,15 +98,48 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       },
     });
   }
+  loadTaskDetailLog(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.apiService.get(`/ticket/${this.taskId}/logs`).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.taskLogs = response?.data || []  ; 
+      },
+      error: (error) => {
+        this.loading = false;
+        this.task = null;
+        this.errorMessage =
+          error?.error?.message || 'Failed to load task detail.';
+      },
+    });
+  }
+	private modalService = inject(NgbModal);
+  open(content: any): void {
+		this.modalService.open(content, { size: 'md' }).result.then(
+			(result) => {
+				//this.closeResult = `Closed with: ${result}`;
+			},
+			(reason) => {
+				//this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+			},
+		);
+	}
 
   async loadOptions(): Promise<void> {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse] = await Promise.all([
+      const [projectResponse, internalUserResponse, ticketStatusResponse] = await Promise.all([
         firstValueFrom(this.apiService.get('/project', { status: 1 })),
         firstValueFrom(this.apiService.get('/user', { userTypeId: 1, status: 1 })),
+        firstValueFrom(this.apiService.get('/master/ticketStatus', {  presence: 1 })),
+        
       ]);
+       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
+        ? ticketStatusResponse.data
+        : [];
 
       this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
@@ -127,6 +151,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     } catch {
       this.projects = [];
       this.internalUsers = [];
+      this.ticketStatusOptions = [];
     } finally {
       this.loadingOptions = false;
     }
@@ -229,7 +254,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.apiService.delete(`/ticket/${this.taskId}`).subscribe({
       next: () => {
         this.deleting = false;
-        void this.router.navigate(['/tasks']);
+        history.back();
       },
       error: (error) => {
         this.deleting = false;
@@ -238,6 +263,34 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  descriptionLog : string = '';
+  submitActivity() {
+     const payload = {
+      ticketId: this.taskId, 
+      description: this.descriptionLog.trim(),
+      submitBy: this.formModel.submitBy
+    };
+    console.log('submitActivity payload', payload);
+
+    this.saving = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    this.apiService.post(`/ticket/log/${this.taskId}`, payload).subscribe({
+      next: (response) => {
+        this.saving = false;
+        this.descriptionLog = '';
+        this.message = response?.message || 'Activity submitted.';
+        this.formMode = 'view';
+        this.modalService.dismissAll();
+        this.loadTaskDetail();
+      },
+      error: (error) => {
+        this.saving = false;
+        this.errorMessage = error?.error?.message || 'Failed to submit activity.';
+      },
+    });
+  }
   private defaultForm(): any {
     const now = new Date();
     const plusSevenDays = new Date();

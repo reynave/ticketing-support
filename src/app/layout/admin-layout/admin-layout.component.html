@@ -7,7 +7,7 @@
   <div class="nav-search ms-3">
     <div class="search-wrapper">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" placeholder="Cari menu atau data..." />
+      <input type="text" class="form-control" placeholder="Search by ticket Id / ticket subject" />
     </div>
   </div>
 
@@ -32,20 +32,23 @@
   <div class="sidebar-section">
     <div class="sidebar-label">Modules</div>
     @for (menu of moduleMenus; track menu.path) {
-      <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
-        <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
-        {{ menu.label }}
-      </a>
+    <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
+      <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
+      {{ menu.label }}
+      <span *ngIf="menu.badge" class="badge bg-danger badge-sm">{{ menu.badge }}</span>
+    </a>
     }
-  </div>
+    </div>
+
+    
 
   <div class="sidebar-section">
     <div class="sidebar-label">Master Data</div>
     @for (menu of masterMenus; track menu.key) {
-      <a [routerLink]="['/master', menu.key]" routerLinkActive="active" class="sidebar-link">
-        <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
-        {{ menu.label }}
-      </a>
+    <a [routerLink]="['/master', menu.key]" routerLinkActive="active" class="sidebar-link">
+      <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
+      {{ menu.label }}
+    </a>
     }
   </div>
 
