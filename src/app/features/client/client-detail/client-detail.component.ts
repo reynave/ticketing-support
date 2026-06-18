@@ -1,8 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbModal,
+  NgbModalModule,
+  NgbModalRef,
+} from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
 
 interface ClientFormModel {
@@ -75,14 +85,17 @@ export class ClientDetailComponent implements OnInit {
       }
 
       this.clientId = id;
-      this.loadIndustries();
-      this.loadClientDetail();
-      this.loadClientUsers();
-      this.loadClientProjects();
+      this.onLoad();
     });
   }
+  onLoad(): void {
+    this.loadIndustries();
+    this.loadClientDetail();
+    this.loadClientUsers();
+    this.loadClientProjects();
+  }
 
-  goBack(){
+  goBack() {
     history.back();
   }
 
@@ -102,13 +115,14 @@ export class ClientDetailComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.client = null;
-        this.errorMessage = error?.error?.message || 'Failed to load client detail.';
+        this.errorMessage =
+          error?.error?.message || 'Failed to load client detail.';
       },
     });
   }
 
   loadClientProjects(): void {
-     if (!this.clientId) {
+    if (!this.clientId) {
       return;
     }
 
@@ -122,13 +136,39 @@ export class ClientDetailComponent implements OnInit {
       error: (error) => {
         this.loadingUsers = false;
         this.projects = [];
-        this.errorMessage = error?.error?.message || 'Failed to load client projects.';
+        this.errorMessage =
+          error?.error?.message || 'Failed to load client projects.';
       },
     });
   }
 
-  deleteProject(id: number): void {
-
+  removeProject(item: any): void {
+    if (
+      confirm(
+        `Remove project ${item?.name || item?.id}? This will not delete the project but will disassociate it from this client.`,
+      )
+    ) { 
+      const authUser = JSON.parse(localStorage.getItem('8tt_auth_user') || '{}');
+      console.log('Removing project with payload:', {
+        id: item.id,
+        updateBy: authUser?.id || 'unknown',
+      });
+      this.apiService
+        .post(`/client/${this.clientId}/removeProject`, { id: item.id, updateBy: authUser?.id || 'unknown' })
+        .subscribe({
+          next: (response) => {
+            this.loadingUsers = false;
+            this.users = Array.isArray(response?.data) ? response.data : [];
+            this.onLoad();
+          },
+          error: (error) => {
+            this.loadingUsers = false;
+            this.users = [];
+            this.errorMessage =
+              error?.error?.message || 'Failed to load client users.';
+          },
+        });
+    }
   }
 
   loadClientUsers(): void {
@@ -146,7 +186,8 @@ export class ClientDetailComponent implements OnInit {
       error: (error) => {
         this.loadingUsers = false;
         this.users = [];
-        this.errorMessage = error?.error?.message || 'Failed to load client users.';
+        this.errorMessage =
+          error?.error?.message || 'Failed to load client users.';
       },
     });
   }
@@ -205,9 +246,10 @@ export class ClientDetailComponent implements OnInit {
     this.errorMessage = '';
     this.message = '';
 
-    const request$ = this.clientFormMode === 'create'
-      ? this.apiService.post('/client', payload)
-      : this.apiService.put(`/client/${this.clientId}`, payload);
+    const request$ =
+      this.clientFormMode === 'create'
+        ? this.apiService.post('/client', payload)
+        : this.apiService.put(`/client/${this.clientId}`, payload);
 
     request$.subscribe({
       next: (response) => {
@@ -237,7 +279,9 @@ export class ClientDetailComponent implements OnInit {
       return;
     }
 
-    const confirmed = confirm('Delete this client? All external users under this client will be deactivated.');
+    const confirmed = confirm(
+      'Delete this client? All external users under this client will be deactivated.',
+    );
 
     if (!confirmed) {
       return;

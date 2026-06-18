@@ -79,8 +79,8 @@
             <td class="text-end action-buttons">
                <button type="button" class="btn btn-sm btn-outline-primary" [routerLink]="['/projects', row.id]" routerLinkActive="router-link-active" >Detail</button>
                 <button type="button" class="btn btn-sm btn-outline-danger" 
-                (click)="deleteProject(row)">
-           Delete
+                (click)="removeProject(row)">
+           Remove this project
               </button>   
             </td>
           </tr>

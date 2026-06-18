@@ -30,7 +30,7 @@
 
 <aside class="sidebar">
   <div class="sidebar-section">
-    <div class="sidebar-label">Modules</div>
+    <div class="sidebar-label">MENU</div>
     @for (menu of moduleMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
@@ -38,9 +38,18 @@
       <span *ngIf="menu.badge" class="badge bg-danger badge-sm">{{ menu.badge }}</span>
     </a>
     }
-    </div>
+  </div>
 
-    
+  <div class="sidebar-section">
+    <div class="sidebar-label">AUDIT</div>
+    @for (menu of auditMenus; track menu.path) {
+    <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
+      <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
+      {{ menu.label }}
+    </a>
+    }
+  </div>
+
 
   <div class="sidebar-section">
     <div class="sidebar-label">Master Data</div>

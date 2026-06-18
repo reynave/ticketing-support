@@ -12,11 +12,17 @@ import { ProjectDetailComponent } from './features/project/project-detail/projec
 import { TaskListComponent } from './features/task/task-list/task-list.component';
 import { TaskDetailComponent } from './features/task/task-detail/task-detail.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
-
+import { NotFoundComponent } from './layout/not-found/not-found.component';
+import { ReloginComponent } from './features/auth/relogin/relogin.component';
+ 
 export const routes: Routes = [
 	{
 		path: 'login',
 		component: LoginComponent,
+	},
+	{
+		path: 'relogin',
+		component: ReloginComponent,
 	},
 	{
 		path: '',
@@ -73,6 +79,7 @@ export const routes: Routes = [
 	},
 	{
 		path: '**',
-		redirectTo: '',
+		component: NotFoundComponent,
 	},
+
 ];

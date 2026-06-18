@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -10,24 +11,35 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css',
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
+
+  private readonly apiService = inject(ApiService);
   private readonly authService = inject(AuthService);
 
   readonly moduleMenus = [ 
-    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '5' },
-    { path: '/issues', label: 'Issues', icon: 'report_problem', badge: '2' },
+    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '' },
+    { path: '/issues', label: 'Issues', icon: 'report_problem', badge: '' },
     {
       path: '/change-requests',
       label: 'Change Requests',
       icon: 'change_circle',
-      badge: '5',
+      badge: '',
     },
 
     { path: '/projects', label: 'Projects', icon: 'workspaces' },
     { path: '/clients', label: 'Clients', icon: 'apartment' },
-
-    { path: '/users', label: 'Users', icon: 'group' },
+    { path: '/contact', label: 'Contact', icon: 'group' },
+     { path: '/users', label: 'Users', icon: 'account_circle' },
+    
   ];
+
+   readonly auditMenus = [ 
+    { path: '/userLogin', label: 'Log In', icon: 'search_activity' },
+    { path: '/ticketBalance', label: 'Ticket Balance', icon: 'fact_check'  },
+    { path: '/audit', label: 'Activity Audit', icon: 'history_toggle_off' },
+    
+  ];
+
 
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain' },
@@ -58,6 +70,23 @@ export class AdminLayoutComponent {
 
   get userInitials(): string {
     return this.authService.initials(this.userName);
+  }
+
+  ngOnInit(): void {
+    this.loadbBadge();
+  }
+  loadbBadge(){
+    this.apiService.get('/master/loadbBadge').subscribe({
+      next: (response) => {
+        const badgeData = response.data;
+        this.moduleMenus[0].badge = badgeData.find((b: { name: string; }) => b.name === 'task')?.total || '';
+        this.moduleMenus[1].badge = badgeData.find((b: { name: string; }) => b.name === 'issue')?.total || '';
+        this.moduleMenus[2].badge = badgeData.find((b: { name: string; }) => b.name === 'cr')?.total || '';
+      },
+      error: () => {
+       
+      },
+    });
   }
 
   back(): void {
