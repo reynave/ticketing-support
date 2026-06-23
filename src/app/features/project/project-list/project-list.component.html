@@ -73,7 +73,7 @@
         <thead>
           <tr>
             <th>ID</th>
-          
+
             <th>Name</th>
             <th>Product</th>
             <th>Start Date</th>
@@ -85,11 +85,11 @@
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr>
-            <td>{{ row.id }}</td> 
-            <td>{{ row.name  }}</td> 
+            <td>{{ row.id }}</td>
+            <td>{{ row.name }}</td>
             <td>{{ row.productName || row.productId }} - {{ row.projectTypeName || row.projectTypeId }}</td>
-            <td>{{ row.startDate | date: 'mediumDate' }}</td> 
-               <td>{{ row.clientName || row.clientId }}</td>
+            <td>{{ row.startDate | date: 'mediumDate' }}</td>
+            <td>{{ row.clientName || row.clientId }}</td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <td class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
@@ -126,7 +126,7 @@
             <input id="project-id" class="form-control" name="id" [(ngModel)]="formModel.id"
               placeholder="Auto generated if empty" />
           </div>
-         
+
           <div class="form-group">
             <label class="form-label" for="project-name">Name</label>
             <input id="project-name" class="form-control" name="name" [(ngModel)]="formModel.name"
@@ -152,12 +152,15 @@
             </select>
           </div>
 
-           <div class="form-group">
+          <div class="form-group">
             <label class="form-label" for="project-start-date">Start Date</label>
-            <input id="project-start-date" class="form-control" type="date" name="startDate"
-              [(ngModel)]="formModel.startDate" required />
+            <div class="input-group">
+              <input id="project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
+                #d="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+            </div>
           </div>
-         
+
         </div>
 
         <div class="col-12 col-md-6">
@@ -171,16 +174,7 @@
               }
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="project-category">Project Category</label>
-            <select id="project-category" class="form-select" name="projectCategoryId"
-              [(ngModel)]="formModel.projectCategoryId" required>
-              <option [ngValue]="0">Select category</option>
-              @for (projectCategory of projectCategories; track trackById($index, projectCategory)) {
-              <option [ngValue]="projectCategory.id">{{ projectCategory.name }}</option>
-              }
-            </select>
-          </div>
+
           <div class="form-group">
             <label class="form-label" for="project-product">Product</label>
             <select id="project-product" class="form-select" name="productId" [(ngModel)]="formModel.productId"
@@ -198,8 +192,11 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="project-end-date">End Date</label>
-            <input id="project-end-date" class="form-control" type="date" name="endDate" [(ngModel)]="formModel.endDate"
-              required />
+            <div class="input-group">
+            <input id="project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
+              #e2="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
+            </div>
           </div>
         </div>
       </div>
@@ -212,4 +209,5 @@
       </button>
     </div>
   </form>
+
 </ng-template>

@@ -4,16 +4,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 
 interface ProjectFormModel {
   name: string;
   projectTypeId: number;
-  projectBilleableId: number;
-  projectCategoryId: number;
+  projectBilleableId: number; 
   productId: number;
   clientId: string;
-  startDate: string;
-  endDate: string;
+  startDate: any;
+  endDate: any;
   status: number;
   templateMaster: string;
 }
@@ -21,7 +21,7 @@ interface ProjectFormModel {
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgbDatepickerModule],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.css',
 })
@@ -88,24 +88,22 @@ export class ProjectDetailComponent implements OnInit {
     this.loadingOptions = true;
 
     try {
-      const [clientResponse, projectTypeResponse, projectBilleableResponse, projectCategoryResponse, productResponse] = await Promise.all([
+      const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/project-categories', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/product', { status: 1 })),
       ]);
 
       this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
       this.projectTypes = Array.isArray(projectTypeResponse?.data) ? projectTypeResponse.data : [];
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
-      this.projectCategories = Array.isArray(projectCategoryResponse?.data) ? projectCategoryResponse.data : [];
       this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
+ 
     } catch {
       this.clients = [];
       this.projectTypes = [];
       this.projectBilleables = [];
-      this.projectCategories = [];
       this.products = [];
     } finally {
       this.loadingOptions = false;
@@ -137,8 +135,7 @@ export class ProjectDetailComponent implements OnInit {
     const payload = {
       name: this.project.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
-      projectBilleableId: Number(this.formModel.projectBilleableId),
-      projectCategoryId: Number(this.formModel.projectCategoryId),
+      projectBilleableId: Number(this.formModel.projectBilleableId), 
       productId: Number(this.formModel.productId),
       clientId: String(this.formModel.clientId),
       startDate: this.formModel.startDate,
@@ -199,8 +196,7 @@ export class ProjectDetailComponent implements OnInit {
 
     return {
       projectTypeId: 0,
-      projectBilleableId: 0,
-      projectCategoryId: 0,
+      projectBilleableId: 0, 
       productId: 0,
       clientId: '',
       startDate: this.toDateInputValue(today),
@@ -212,40 +208,35 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   private populateFormFromProject(): void {
+
+    const startDate = this.project?.startDate ? new Date(this.project.startDate) : new Date();
+    const startDateFormatted = {
+      year: startDate.getFullYear(),
+      month: startDate.getMonth() + 1,
+      day: startDate.getDate(),
+    };
+
+    const endDate = this.project?.endDate ? new Date(this.project.endDate) : new Date();
+    const endDateFormatted = {
+      year: endDate.getFullYear(),
+      month: endDate.getMonth() + 1,
+      day: endDate.getDate(),
+    };
+
     this.formModel = {
       name: String(this.project?.name ?? ''),
       projectTypeId: Number(this.project?.projectTypeId ?? 0),
-      projectBilleableId: Number(this.project?.projectBilleableId ?? 0),
-      projectCategoryId: Number(this.project?.projectCategoryId ?? 0),
+      projectBilleableId: Number(this.project?.projectBilleableId ?? 0), 
       productId: Number(this.project?.productId ?? 0),
       clientId: String(this.project?.clientId ?? ''),
-      startDate: this.toIsoDate(this.project?.startDate),
-      endDate: this.toIsoDate(this.project?.endDate),
+      startDate: startDateFormatted,
+      endDate: endDateFormatted,
       status: Number(this.project?.status ?? 1),
       templateMaster: String(this.project?.templateMaster ?? ''),
     };
   }
 
-  private toIsoDate(value: unknown): string {
-    if (!value) {
-      return '';
-    }
-
-    const raw = String(value);
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-      return raw;
-    }
-
-    const date = new Date(raw);
-
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-
-    return date.toISOString().slice(0, 10);
-  }
-
+  
   private toDateInputValue(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

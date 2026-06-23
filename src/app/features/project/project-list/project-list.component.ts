@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerModule, NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -11,11 +11,10 @@ interface ProjectFormModel {
   name : string;
   projectTypeId: number;
   projectBilleableId: number;
-  projectCategoryId: number;
   productId: number;
   clientId: string;
-  startDate: string;
-  endDate: string;
+  startDate: { year: number; month: number; day: number };
+  endDate: { year: number; month: number; day: number };
   status: number;
   templateMaster: string;
 }
@@ -23,7 +22,7 @@ interface ProjectFormModel {
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NgbModalModule],
+  imports: [CommonModule, FormsModule, RouterLink, NgbModalModule, NgbDatepickerModule],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.css',
 })
@@ -40,7 +39,6 @@ export class ProjectListComponent {
   clients: any[] = [];
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
-  projectCategories: any[] = [];
   products: any[] = [];
 
   loading = false;
@@ -110,24 +108,21 @@ export class ProjectListComponent {
     this.loadingOptions = true;
 
     try {
-      const [clientResponse, projectTypeResponse, projectBilleableResponse, projectCategoryResponse, productResponse] = await Promise.all([
+      const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/project-categories', { status: 1 })),
+        firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })), 
         firstValueFrom(this.apiService.get('/master/product', { status: 1 })),
       ]);
 
       this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
       this.projectTypes = Array.isArray(projectTypeResponse?.data) ? projectTypeResponse.data : [];
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
-      this.projectCategories = Array.isArray(projectCategoryResponse?.data) ? projectCategoryResponse.data : [];
       this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
     } catch {
       this.clients = [];
       this.projectTypes = [];
       this.projectBilleables = [];
-      this.projectCategories = [];
       this.products = [];
     } finally {
       this.loadingOptions = false;
@@ -160,11 +155,10 @@ export class ProjectListComponent {
       return;
     }
 
-    const payload: Record<string, string | number> = {
+    const payload: any = {
       name: this.formModel.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
-      projectBilleableId: Number(this.formModel.projectBilleableId),
-      projectCategoryId: Number(this.formModel.projectCategoryId),
+      projectBilleableId: Number(this.formModel.projectBilleableId), 
       productId: Number(this.formModel.productId),
       clientId: String(this.formModel.clientId),
       startDate: this.formModel.startDate,
@@ -247,16 +241,22 @@ export class ProjectListComponent {
   }
 
   private defaultForm(): ProjectFormModel {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    //const formattedToday = `${yyyy}-${mm}-${dd}`;
+    const formattedToday = { year: yyyy, month: Number(mm), day: Number(dd) };
+
     return {
       id: '',
       name: '',
       projectTypeId: 0,
-      projectBilleableId: 0,
-      projectCategoryId: 0,
+      projectBilleableId: 0, 
       productId: 0,
       clientId: '',
-      startDate: '',
-      endDate: '',
+      startDate: formattedToday,
+      endDate: formattedToday,
       status: 1,
       templateMaster: '',
     };

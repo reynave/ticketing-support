@@ -105,6 +105,16 @@ export class MasterManageComponent implements OnInit {
       hasStatusFilter: false,
       updateOnly: true,
     },
+    'ticket-categories': {
+      label: 'Ticket Categories',
+      fields: [
+        { key: 'name', label: 'Name', type: 'text', required: true },
+        { key: 'weight', label: 'Weight', type: 'number', required: true }, 
+         { key: 'status', label: 'Status', type: 'number' },
+      ],
+      hasStatusFilter: false,
+      updateOnly: true,
+    },
   };
 
   masterKey = '';

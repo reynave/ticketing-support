@@ -59,23 +59,25 @@ export class AuthService {
   }
 
   login(payload: LoginForm): Observable<any> {
-    return this.http.post<any>(`${environment.apiBaseUrl}/auth/login`, payload).pipe(
-      tap((response) => {
-        const token = response?.data?.token;
-        const user = response?.data?.user || null;
+    return this.http
+      .post<any>(`${environment.apiBaseUrl}/auth/login`, payload)
+      .pipe(
+        tap((response) => {
+          const token = response?.data?.token;
+          const user = response?.data?.user || null;
 
-        if (!token) {
-          return;
-        }
+          if (!token) {
+            return;
+          }
 
-        localStorage.setItem(this.tokenKey, token);
+          localStorage.setItem(this.tokenKey, token);
 
-        if (user) {
-          localStorage.setItem(this.userKey, JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        }
-      })
-    );
+          if (user) {
+            localStorage.setItem(this.userKey, JSON.stringify(user));
+            this.currentUserSubject.next(user);
+          }
+        }),
+      );
   }
 
   fetchMe(): Observable<any> {
@@ -93,7 +95,7 @@ export class AuthService {
       catchError(() => {
         this.currentUserSubject.next(null);
         return of(null);
-      })
+      }),
     );
   }
 
@@ -152,6 +154,22 @@ export class AuthService {
 
     if (legacyUser) {
       localStorage.removeItem(this.legacyUserKey);
+    }
+  }
+
+  decodeToken(): Record<string, any> | null {
+    const token = this.token; // sudah ada getter-nya
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = token.split('.')[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
     }
   }
 }

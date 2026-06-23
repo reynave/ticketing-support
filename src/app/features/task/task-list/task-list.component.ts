@@ -2,9 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbDatepickerModule,
+  NgbModal,
+  NgbModalModule,
+  NgbModalRef,
+} from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import th from '@angular/common/locales/extra/th';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface TaskFormModel {
   id: string;
@@ -12,22 +19,23 @@ interface TaskFormModel {
   title: string;
   description: string;
   projectId: string;
-  submitBy: number;
-  submitDate: string;
-  targetCompletionDate: string;
-  assignTo: number;
+  submitBy: string;
+  submitDate: any;
+  targetCompletionDate: any;
+  assignTo: string;
   taskSolution: string;
   actualCompletionDate: string;
   ticketStatusId: number;
   rating: number;
   ratesBy: number;
   issueNo: string;
+  category: number;
 }
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbModalModule],
+  imports: [CommonModule, FormsModule, NgbModalModule, NgbDatepickerModule],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css',
 })
@@ -35,27 +43,19 @@ export class TaskListComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
 
   @ViewChild('createTaskModal') createTaskModal?: TemplateRef<unknown>;
 
   private modalRef: NgbModalRef | null = null;
 
   readonly taskTypeId = 1;
-  readonly ticketStatusOptions = [
-    { id: 100, name: 'Open' },
-    { id: 101, name: 'Open - Assigned' },
-    { id: 105, name: 'Open - On Review' },
-    { id: 106, name: 'Open - Submit' },
-    { id: 107, name: 'Open - Approved' },
-    { id: 300, name: 'Complete - Review' },
-    { id: 700, name: 'Tested' },
-    { id: 800, name: 'On Progress' },
-    { id: 900, name: 'Close' },
-    { id: 904, name: 'Cancelled' },
-  ];
+  readonly ticketStatusOptions = [{ id: 100, name: 'Open' }];
 
   rows: any[] = [];
   projects: any[] = [];
+  internalUsers: any[] = [];
+  ticketCategories: any[] = [];
 
   loading = false;
   loadingOptions = false;
@@ -70,8 +70,12 @@ export class TaskListComponent {
   selectedTicketStatusId = '';
 
   formModel: TaskFormModel = this.defaultForm();
-
+  payload: any = null;
   constructor() {
+   this.payload = this.authService.decodeToken();
+ 
+
+    this.formModel = this.defaultForm();
     this.loadTasks();
     this.loadOptions();
   }
@@ -113,10 +117,31 @@ export class TaskListComponent {
     this.loadingOptions = true;
 
     try {
-      const projectResponse = await firstValueFrom(this.apiService.get('/project', { status: 1 }));
-      this.projects = Array.isArray(projectResponse?.data) ? projectResponse.data : [];
+      const [projectResponse, internalUserResponse, ticketCategoriesResponse] =
+        await Promise.all([
+          firstValueFrom(this.apiService.get('/project', { status: 1 })),
+          firstValueFrom(
+            this.apiService.get('/user', { userTypeId: 1, status: 1 }),
+          ),
+          firstValueFrom(
+            this.apiService.get('/master/ticket-categories', { presence: 1 }),
+          ),
+        ]);
+
+      this.projects = Array.isArray(projectResponse?.data)
+        ? projectResponse.data
+        : [];
+
+      this.internalUsers = Array.isArray(internalUserResponse?.data)
+        ? internalUserResponse.data
+        : [];
+      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
+        ? ticketCategoriesResponse.data
+        : [];
     } catch {
       this.projects = [];
+      this.internalUsers = [];
+      this.ticketCategories = [];
     } finally {
       this.loadingOptions = false;
     }
@@ -158,21 +183,23 @@ export class TaskListComponent {
     const payload = {
       id: this.formModel.id.trim() || undefined,
       ticketTypeId: this.taskTypeId,
-      crNoRef: this.formModel.crNoRef.trim(),
+    //  crNoRef: this.formModel.crNoRef.trim(),
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
-      submitBy: Number(this.formModel.submitBy),
-      submitDate: this.toApiDateTime(this.formModel.submitDate),
-      targetCompletionDate: this.formModel.targetCompletionDate,
-      assignTo: Number(this.formModel.assignTo),
+      submitBy: this.payload?.id || '', // Use the decoded token's user ID or default to 1
+     submitDate: this.formModel.submitDate['year']+'-'+String(this.formModel.submitDate['month']).padStart(2, '0')+'-'+String(this.formModel.submitDate['day']).padStart(2, '0'),
+      targetCompletionDate: this.formModel.targetCompletionDate['year']+'-'+String(this.formModel.targetCompletionDate['month']).padStart(2, '0')+'-'+String(this.formModel.targetCompletionDate['day']).padStart(2, '0'),
+      assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
-      actualCompletionDate: this.formModel.actualCompletionDate || this.formModel.targetCompletionDate,
+
       ticketStatusId: Number(this.formModel.ticketStatusId),
-      rating: Number(this.formModel.rating),
-      ratesBy: Number(this.formModel.ratesBy),
-      issueNo: this.formModel.issueNo.trim(),
+    //  rating: Number(this.formModel.rating),
+    //  ratesBy: Number(this.formModel.ratesBy),
+    //  issueNo: this.formModel.issueNo.trim(),
+      category: this.formModel.category,
     };
+    console.log('Payload:', payload);
 
     this.saving = true;
     this.errorMessage = '';
@@ -240,7 +267,9 @@ export class TaskListComponent {
   }
 
   statusNameById(id: number): string {
-    const found = this.ticketStatusOptions.find((option) => option.id === Number(id));
+    const found = this.ticketStatusOptions.find(
+      (option) => option.id === Number(id),
+    );
     return found?.name || String(id || '-');
   }
 
@@ -248,10 +277,17 @@ export class TaskListComponent {
     return row?.id;
   }
 
-  private defaultForm(): TaskFormModel {
+  private defaultForm(): any {
     const now = new Date();
     const plusSevenDays = new Date();
     plusSevenDays.setDate(plusSevenDays.getDate() + 7);
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    //const formattedToday = `${yyyy}-${mm}-${dd}`;
+    const formattedToday = { year: yyyy, month: Number(mm), day: Number(dd) };
 
     return {
       id: '',
@@ -260,15 +296,15 @@ export class TaskListComponent {
       description: '',
       projectId: '',
       submitBy: 1,
-      submitDate: this.toDateTimeInputValue(now),
-      targetCompletionDate: this.toDateInputValue(plusSevenDays),
+      submitDate: formattedToday,
+      targetCompletionDate: formattedToday,
       assignTo: 1,
       taskSolution: '',
-      actualCompletionDate: this.toDateInputValue(plusSevenDays),
       ticketStatusId: 100,
       rating: 0,
       ratesBy: 0,
       issueNo: '',
+      category: 0,
     };
   }
 

@@ -325,3 +325,11 @@ body {
 
 .form-group{  margin-bottom: 0.8rem;
 }
+
+.table-sm td{
+	font-size: 0.85rem;
+}
+thead th{
+	font-size: 0.85rem;
+	text-transform: uppercase;
+}

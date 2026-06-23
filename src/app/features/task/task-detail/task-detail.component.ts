@@ -6,7 +6,11 @@ import { firstValueFrom } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 
 import { ApiService } from '../../../core/services/api.service';
- import { ModalDismissReasons, NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {
+  ModalDismissReasons,
+  NgbDatepickerModule,
+  NgbModal,
+} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-task-detail',
@@ -19,9 +23,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
- 
-    editor1: any = null;
-    editor2: any = null;
+
+  editor1: any = null;
+  editor2: any = null;
   toolbar: Toolbar = [
     ['bold', 'italic'],
     ['underline', 'strike'],
@@ -33,7 +37,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     ['align_left', 'align_center', 'align_right', 'align_justify'],
   ];
   readonly taskTypeId = 1;
- ticketStatusOptions : any = [];
+  ticketStatusOptions: any = [];
 
   taskId = '';
   task: any = null;
@@ -48,7 +52,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   formMode: 'view' | 'edit' = 'view';
   message = '';
   errorMessage = '';
-taskLogs : any = [];
+  taskLogs: any = [];
   formModel: any = this.defaultForm();
 
   ngOnInit(): void {
@@ -105,7 +109,7 @@ taskLogs : any = [];
     this.apiService.get(`/ticket/${this.taskId}/logs`).subscribe({
       next: (response) => {
         this.loading = false;
-        this.taskLogs = response?.data || []  ; 
+        this.taskLogs = response?.data || [];
       },
       error: (error) => {
         this.loading = false;
@@ -115,29 +119,33 @@ taskLogs : any = [];
       },
     });
   }
-	private modalService = inject(NgbModal);
+  private modalService = inject(NgbModal);
   open(content: any): void {
-		this.modalService.open(content, { size: 'md' }).result.then(
-			(result) => {
-				//this.closeResult = `Closed with: ${result}`;
-			},
-			(reason) => {
-				//this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-			},
-		);
-	}
+    this.modalService.open(content, { size: 'md' }).result.then(
+      (result) => {
+        //this.closeResult = `Closed with: ${result}`;
+      },
+      (reason) => {
+        //this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      },
+    );
+  }
 
   async loadOptions(): Promise<void> {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse, ticketStatusResponse] = await Promise.all([
-        firstValueFrom(this.apiService.get('/project', { status: 1 })),
-        firstValueFrom(this.apiService.get('/user', { userTypeId: 1, status: 1 })),
-        firstValueFrom(this.apiService.get('/master/ticketStatus', {  presence: 1 })),
-        
-      ]);
-       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
+      const [projectResponse, internalUserResponse, ticketStatusResponse] =
+        await Promise.all([
+          firstValueFrom(this.apiService.get('/project', { status: 1 })),
+          firstValueFrom(
+            this.apiService.get('/user', { userTypeId: 1, status: 1 }),
+          ),
+          firstValueFrom(
+            this.apiService.get('/master/ticketStatus', { presence: 1 }),
+          ),
+        ]);
+      this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : [];
 
@@ -206,10 +214,10 @@ taskLogs : any = [];
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
-      submitBy: (this.formModel.submitBy),
+      submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
       targetCompletionDate: this.formModel.targetCompletionDate,
-      assignTo: (this.formModel.assignTo),
+      assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
       actualCompletionDate: this.formModel.actualCompletionDate,
       ticketStatusId: Number(this.formModel.ticketStatusId),
@@ -263,12 +271,12 @@ taskLogs : any = [];
     });
   }
 
-  descriptionLog : string = '';
+  descriptionLog: string = '';
   submitActivity() {
-     const payload = {
-      ticketId: this.taskId, 
+    const payload = {
+      ticketId: this.taskId,
       description: this.descriptionLog.trim(),
-      submitBy: this.formModel.submitBy
+      submitBy: this.formModel.submitBy,
     };
     console.log('submitActivity payload', payload);
 
@@ -287,7 +295,8 @@ taskLogs : any = [];
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to submit activity.';
+        this.errorMessage =
+          error?.error?.message || 'Failed to submit activity.';
       },
     });
   }
@@ -320,10 +329,10 @@ taskLogs : any = [];
       title: String(this.task?.title || ''),
       description: String(this.task?.description || ''),
       projectId: String(this.task?.projectId || ''),
-      submitBy: (this.task?.submitBy ),
+      submitBy: this.task?.submitBy,
       submitDate: this.toDateTimeLocalInput(this.task?.submitDate),
       targetCompletionDate: this.toIsoDate(this.task?.targetCompletionDate),
-      assignTo: (this.task?.assignTo ),
+      assignTo: this.task?.assignTo,
       taskSolution: String(this.task?.taskSolution || ''),
       actualCompletionDate: this.toIsoDate(this.task?.actualCompletionDate),
       ticketStatusId: Number(this.task?.ticketStatusId ?? 100),

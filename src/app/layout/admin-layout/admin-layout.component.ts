@@ -46,9 +46,14 @@ export class AdminLayoutComponent implements OnInit {
     { key: 'product', label: 'Product', icon: 'inventory_2' },
     { key: 'project-type', label: 'Project Type', icon: 'schema' },
     { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
+    // {
+    //   key: 'project-categories',
+    //   label: 'Project Categories',
+    //   icon: 'category',
+    // },
     {
-      key: 'project-categories',
-      label: 'Project Categories',
+      key: 'ticket-categories',
+      label: 'Ticket Categories',
       icon: 'category',
     },
     { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },

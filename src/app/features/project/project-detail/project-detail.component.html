@@ -71,7 +71,7 @@
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-name">Project Name</label>
             <input id="detail-project-name" class="form-control form-control-sm" name="name" [(ngModel)]="project.name"
-              [disabled]="formMode === 'view'" /> 
+              [disabled]="formMode === 'view'" />
           </div>
 
           <div class="col-12 col-md-6">
@@ -110,17 +110,7 @@
             </select>
           </div>
 
-          <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-category">Project Category <span
-                class="text-danger">*</span></label>
-            <select id="detail-project-category" class="form-select form-select-sm" name="projectCategoryId"
-              [(ngModel)]="formModel.projectCategoryId" [disabled]="formMode === 'view'" required>
-              <option [ngValue]="0">Select category</option>
-              @for (projectCategory of projectCategories; track projectCategory.id) {
-              <option [ngValue]="projectCategory.id">{{ projectCategory.name }}</option>
-              }
-            </select>
-          </div>
+
 
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-product">Product <span
@@ -143,15 +133,22 @@
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-startDate">Start Date <span
                 class="text-danger">*</span></label>
-            <input id="detail-project-startDate" class="form-control form-control-sm" type="date" name="startDate"
-              [(ngModel)]="formModel.startDate" [readonly]="formMode === 'view'" required />
+            <div class="input-group">
+              <input id="project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
+                #d="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+            </div>
+
           </div>
 
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-endDate">End Date <span
                 class="text-danger">*</span></label>
-            <input id="detail-project-endDate" class="form-control form-control-sm" type="date" name="endDate"
-              [(ngModel)]="formModel.endDate" [readonly]="formMode === 'view'" required />
+           <div class="input-group">
+            <input id="project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
+              #e2="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
+            </div>
           </div>
 
           <div class="col-12 col-md-6">

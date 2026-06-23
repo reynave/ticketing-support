@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-fluid">
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <div class="page-title">Task List</div>
@@ -8,42 +8,39 @@
   </div>
 
   @if (message) {
-    <div class="alert alert-success py-2">{{ message }}</div>
+  <div class="alert alert-success py-2">{{ message }}</div>
   }
 
   @if (errorMessage) {
-    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
   }
 
   <div class="stat-card mb-3">
     <div class="row g-2 align-items-end">
       <div class="col-12 col-md-4">
         <label class="form-label small" for="task-keyword">Keyword</label>
-        <input
-          id="task-keyword"
-          class="form-control form-control-sm"
-          [(ngModel)]="keyword"
-          (keyup.enter)="loadTasks()"
-          placeholder="Cari id / title / CR / issue"
-        />
+        <input id="task-keyword" class="form-control form-control-sm" [(ngModel)]="keyword" (keyup.enter)="loadTasks()"
+          placeholder="Cari id / title / CR / issue" />
       </div>
 
       <div class="col-12 col-md-4">
         <label class="form-label small" for="task-project-filter">Project</label>
-        <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId" (change)="loadTasks()">
+        <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
+          (change)="loadTasks()">
           <option value="">All project</option>
           @for (project of projects; track trackById($index, project)) {
-            <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
+          <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
           }
         </select>
       </div>
 
       <div class="col-12 col-md-2">
         <label class="form-label small" for="task-status-filter">Status</label>
-        <select id="task-status-filter" class="form-select form-select-sm" [(ngModel)]="selectedTicketStatusId" (change)="loadTasks()">
+        <select id="task-status-filter" class="form-select form-select-sm" [(ngModel)]="selectedTicketStatusId"
+          (change)="loadTasks()">
           <option value="">All status</option>
           @for (status of ticketStatusOptions; track status.id) {
-            <option [value]="status.id">{{ status.name }}</option>
+          <option [value]="status.id">{{ status.name }}</option>
           }
         </select>
       </div>
@@ -57,46 +54,46 @@
 
   <div class="stat-card">
     @if (loading) {
-      <div class="text-muted">Loading tasks...</div>
+    <div class="text-muted">Loading tasks...</div>
     } @else if (!rows.length) {
-      <div class="text-muted">No task data.</div>
+    <div class="text-muted">No task data.</div>
     } @else {
-      <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Project</th>
-              <th>Status</th>
-              <th>Submit Date</th>
-              <th>Target</th>
-              <th class="text-end">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of rows; track trackById($index, row)) {
-              <tr>
-                <td>{{ row.id }}</td>
-                <td>
-                  <div class="fw-semibold">{{ row.title }}</div>
-                  <div class="small text-muted">{{ row.crNoRef || '-' }}</div>
-                </td>
-                <td>{{ row.projectId }}</td>
-                <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
-                <td>{{ row.submitDate | date: 'short' }}</td>
-                <td>{{ row.targetCompletionDate | date: 'mediumDate' }}</td>
-                <td class="text-end action-buttons">
-                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
-                  <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id" (click)="deleteTask(row)">
-                    {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Project</th>
+            <th>Status</th>
+            <th>Submit Date</th>
+            <th>Target Date</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track trackById($index, row)) {
+          <tr>
+            <td>{{ row.id }}</td>
+            <td>
+              <div class="fw-semibold">{{ row.title }}</div> 
+            </td>
+            <td>{{ row.projectId }}</td>
+            <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
+            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+            <td>{{ row.targetCompletionDate | date: 'mediumDate' }}</td>
+            <td class="text-end action-buttons">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
+                (click)="deleteTask(row)">
+                {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
     }
   </div>
 </div>
@@ -112,64 +109,101 @@
       <div class="row g-2">
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-id">Task ID (optional)</label>
-          <input id="task-id" class="form-control" name="id" [(ngModel)]="formModel.id" placeholder="Auto generate if empty" />
+          <input id="task-id" class="form-control" name="id" [(ngModel)]="formModel.id"
+            placeholder="Auto generate if empty" />
         </div>
 
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-project">Project <span class="text-danger">*</span></label>
-          <select id="task-project" class="form-select" name="projectId" [(ngModel)]="formModel.projectId" [disabled]="loadingOptions" required>
+          <select id="task-project" class="form-select" name="projectId" [(ngModel)]="formModel.projectId"
+            [disabled]="loadingOptions" required>
             <option value="">Select project</option>
             @for (project of projects; track trackById($index, project)) {
-              <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
+            <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
             }
           </select>
         </div>
 
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-title">Title <span class="text-danger">*</span></label>
-          <input id="task-title" class="form-control" name="title" [(ngModel)]="formModel.title" required placeholder="Task title" />
+          <input id="task-title" class="form-control" name="title" [(ngModel)]="formModel.title" required
+            placeholder="Task title" />
         </div>
 
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-status">Task Status <span class="text-danger">*</span></label>
-          <select id="task-status" class="form-select" name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId" required>
+          <select id="task-status" class="form-select" name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId"
+            required>
             @for (status of ticketStatusOptions; track status.id) {
-              <option [ngValue]="status.id">{{ status.name }}</option>
+            <option [ngValue]="status.id">{{ status.name }}</option>
             }
           </select>
         </div>
 
+         <div class="col-12 col-md-6"> 
+          <label class="form-label" for="task-category">Task Category <span class="text-danger">*</span></label>
+          <select id="task-category" class="form-select" name="category" [(ngModel)]="formModel.category" required>
+          
+            @for (category of ticketCategories; track trackById($index, category)) {
+            <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+
+         <div class="col-12 col-md-6">
+          <label class="form-label" for="task-assign-to">Assign To <span class="text-danger">*</span></label>
+ 
+            <select id="task-assign-to" class="form-select" name="assignTo" [(ngModel)]="formModel.assignTo"
+            required> 
+            @for (user of internalUsers; track trackById($index, user)) {
+            <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            }
+          </select> 
+        </div>
+
         <div class="col-12">
           <label class="form-label" for="task-description">Description <span class="text-danger">*</span></label>
-          <textarea id="task-description" class="form-control" rows="3" name="description" [(ngModel)]="formModel.description" required></textarea>
+          <textarea id="task-description" class="form-control" rows="3" name="description"
+            [(ngModel)]="formModel.description" required></textarea> 
         </div>
 
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-submit-date">Submit Date <span class="text-danger">*</span></label>
-          <input id="task-submit-date" class="form-control" type="datetime-local" name="submitDate" [(ngModel)]="formModel.submitDate" required />
+           
+            <div class="input-group">
+            <input id="project-end-date" class="form-control" type="text" name="submitDate" ngbDatepicker
+              #e1="ngbDatepicker" readonly [(ngModel)]="formModel.submitDate" required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e1.toggle()" type="button"></button>
+          </div>
         </div>
 
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-target-date">Target Completion <span class="text-danger">*</span></label>
-          <input id="task-target-date" class="form-control" type="date" name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" required />
+
+
+          <div class="input-group">
+            <input id="project-end-date" class="form-control" type="text" name="targetCompletionDate" ngbDatepicker
+              #e2="ngbDatepicker" readonly [(ngModel)]="formModel.targetCompletionDate" required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
+          </div>
         </div>
 
-        <div class="col-12 col-md-6">
+        {{payload |json}}
+
+       
+        <!-- <div class="col-12 col-md-6">
           <label class="form-label" for="task-actual-date">Actual Completion Date</label>
           <input id="task-actual-date" class="form-control" type="date" name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate" />
-        </div>
+        </div> -->
 
-        <div class="col-12 col-md-3">
+        <!-- <div class="col-12 col-md-3">
           <label class="form-label" for="task-submit-by">Submit By <span class="text-danger">*</span></label>
           <input id="task-submit-by" class="form-control" type="number" min="0" name="submitBy" [(ngModel)]="formModel.submitBy" required />
-        </div>
+        </div> -->
 
-        <div class="col-12 col-md-3">
-          <label class="form-label" for="task-assign-to">Assign To <span class="text-danger">*</span></label>
-          <input id="task-assign-to" class="form-control" type="number" min="0" name="assignTo" [(ngModel)]="formModel.assignTo" required />
-        </div>
+       
 
-        <div class="col-12 col-md-4">
+        <!-- <div class="col-12 col-md-4">
           <label class="form-label" for="task-cr">CR No Ref</label>
           <input id="task-cr" class="form-control" name="crNoRef" [(ngModel)]="formModel.crNoRef" />
         </div>
@@ -177,14 +211,14 @@
         <div class="col-12 col-md-4">
           <label class="form-label" for="task-issue">Issue No</label>
           <input id="task-issue" class="form-control" name="issueNo" [(ngModel)]="formModel.issueNo" />
-        </div>
+        </div> -->
 
-        <div class="col-12 col-md-4">
+        <!-- <div class="col-12 col-md-4">
           <label class="form-label" for="task-solution">Task Solution</label>
           <input id="task-solution" class="form-control" name="taskSolution" [(ngModel)]="formModel.taskSolution" />
-        </div>
+        </div> -->
 
-        <div class="col-12 col-md-6">
+        <!-- <div class="col-12 col-md-6">
           <label class="form-label" for="task-rating">Rating</label>
           <input id="task-rating" class="form-control" type="number" min="0" name="rating" [(ngModel)]="formModel.rating" />
         </div>
@@ -192,7 +226,7 @@
         <div class="col-12 col-md-6">
           <label class="form-label" for="task-rates-by">Rates By</label>
           <input id="task-rates-by" class="form-control" type="number" min="0" name="ratesBy" [(ngModel)]="formModel.ratesBy" />
-        </div>
+        </div> -->
       </div>
     </div>
 
