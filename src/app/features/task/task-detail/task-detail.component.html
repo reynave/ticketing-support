@@ -299,15 +299,15 @@
 
 
               <div class="bg-light p-2 border shadow-sm rounded mb-2">
-                <em><small>Replay from</small> </em>
+                <em><small>Reply from</small> </em>
                 <div> <em>
-                    <small [innerHTML]="log.replayFrom"></small></em>
+                    <small [innerHTML]="log.replyFrom"></small></em>
                 </div>
 
               </div>
               }
               <div [innerHTML]="log.description"></div>
-              <a href="javascript:void(0)" (click)="open(addActivity, log)">Replay</a>
+              <a href="javascript:void(0)" (click)="open(addActivity, log)">reply</a>
             </td>
             <td class="align-top">{{ log.inputName }}</td>
           </tr>
@@ -330,10 +330,10 @@
     <div class="modal-body">
       <form>
         <div class="mb-3">
-          @if(replayLog.id){
+          @if(replyLog.id){
           <div class="alert alert-light">
-            <div class="mb-2"><small>Replay from</small></div>
-            <div [innerHtml]="replayLog.description">
+            <div class="mb-2"><small>reply from</small></div>
+            <div [innerHtml]="replyLog.description">
             </div>
           </div>
           }

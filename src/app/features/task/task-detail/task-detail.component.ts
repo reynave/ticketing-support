@@ -134,14 +134,14 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   private modalService = inject(NgbModal);
   logId : number = 0;
 
-  replayLog :any ={
+  replyLog :any ={
     id : 0,
     description : '',
   }
   open(content: any, log : any = []): void {
     if(log.id != 0){
-this.replayLog.id = log.id;
-    this.replayLog.description = log.description;
+this.replyLog.id = log.id;
+    this.replyLog.description = log.description;
     }
     
     
@@ -314,7 +314,7 @@ this.replayLog.id = log.id;
       ticketId: this.taskId,
       description: this.descriptionLog.trim(),
       submitBy: this.formModel.submitBy,
-      parentId : this.replayLog.id,
+      parentId : this.replyLog.id,
     };
     console.log('submitActivity payload', payload);
 
