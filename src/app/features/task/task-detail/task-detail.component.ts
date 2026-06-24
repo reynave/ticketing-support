@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -20,12 +20,22 @@ import {
   styleUrl: './task-detail.component.css',
 })
 export class TaskDetailComponent implements OnInit, OnDestroy {
+   // Listens for Ctrl + S globally on the document
+  @HostListener('document:keydown.control.s', ['$event'])
+  onKeydownHandler(event: KeyboardEvent) {
+    event.preventDefault(); // Stops the browser's default Save Page dialog
+    console.log('Ctrl + S pressed');
+    this.saveTask();        // Calls your custom function
+  }
+  
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
 
   editor1: any = null;
   editor2: any = null;
+  editor3: any = null;
+  
   toolbar: Toolbar = [
     ['bold', 'italic'],
     ['underline', 'strike'],
@@ -58,6 +68,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.editor1 = new Editor();
     this.editor2 = new Editor();
+    this.editor3 = new Editor();
     this.taskId = String(this.route.snapshot.paramMap.get('id') || '').trim();
 
     if (!this.taskId) {
@@ -72,6 +83,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.editor1.destroy();
     this.editor2.destroy();
+    this.editor3.destroy();
   }
   goBack(): void {
     history.back();
@@ -120,8 +132,20 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     });
   }
   private modalService = inject(NgbModal);
-  open(content: any): void {
-    this.modalService.open(content, { size: 'md' }).result.then(
+  logId : number = 0;
+
+  replayLog :any ={
+    id : 0,
+    description : '',
+  }
+  open(content: any, log : any = []): void {
+    if(log.id != 0){
+this.replayLog.id = log.id;
+    this.replayLog.description = log.description;
+    }
+    
+    
+    this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
         //this.closeResult = `Closed with: ${result}`;
       },
@@ -203,23 +227,36 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
   }
 
-  saveTask(form: NgForm): void {
-    if (form.invalid || this.saving) {
-      return;
-    }
+  saveTask(): void {
+    
+    // if (form.invalid || this.saving) {
+    //   return;
+    // }
+
+    const targetCompletionDate = this.formModel.targetCompletionDate['year'] +
+      '-' +
+      String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
+      '-' +
+      String(this.formModel.targetCompletionDate['day']+1).padStart(2, '0');
+    
+  
+    const actualCompletionDate = this.formModel.actualCompletionDate['year'] +
+      '-' +
+      String(this.formModel.actualCompletionDate['month']).padStart(2, '0') +
+      '-' +
+      String(this.formModel.actualCompletionDate['day']+1).padStart(2, '0');
 
     const payload = {
-      ticketTypeId: this.taskTypeId,
-      crNoRef: this.formModel.crNoRef.trim(),
+      ticketTypeId: this.taskTypeId, 
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
       submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
-      targetCompletionDate: this.formModel.targetCompletionDate,
+      targetCompletionDate: targetCompletionDate,
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
-      actualCompletionDate: this.formModel.actualCompletionDate,
+      actualCompletionDate: actualCompletionDate,
       ticketStatusId: Number(this.formModel.ticketStatusId),
       rating: Number(this.formModel.rating),
       ratesBy: Number(this.formModel.ratesBy),
@@ -277,6 +314,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       ticketId: this.taskId,
       description: this.descriptionLog.trim(),
       submitBy: this.formModel.submitBy,
+      parentId : this.replayLog.id,
     };
     console.log('submitActivity payload', payload);
 
@@ -291,7 +329,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         this.message = response?.message || 'Activity submitted.';
         this.formMode = 'view';
         this.modalService.dismissAll();
-        this.loadTaskDetail();
+        this.loadTaskDetailLog();
       },
       error: (error) => {
         this.saving = false;
@@ -323,7 +361,14 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     };
   }
 
-  private populateFormFromTask(): void {
+  private populateFormFromTask(): void { 
+    let [yyyy, mm, dd] = this.task?.targetCompletionDate.split('T')[0].split('-') || []; 
+    const targetCompletionDate =  {year: Number(yyyy), month: Number(mm), day: Number(dd)};
+
+    [yyyy, mm, dd] = this.task?.actualCompletionDate.split('T')[0].split('-') || []; 
+    const actualCompletionDate =  {year: Number(yyyy), month: Number(mm), day: Number(dd)};
+
+
     this.formModel = {
       crNoRef: String(this.task?.crNoRef || ''),
       title: String(this.task?.title || ''),
@@ -331,10 +376,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       projectId: String(this.task?.projectId || ''),
       submitBy: this.task?.submitBy,
       submitDate: this.toDateTimeLocalInput(this.task?.submitDate),
-      targetCompletionDate: this.toIsoDate(this.task?.targetCompletionDate),
+      targetCompletionDate: targetCompletionDate,
       assignTo: this.task?.assignTo,
       taskSolution: String(this.task?.taskSolution || ''),
-      actualCompletionDate: this.toIsoDate(this.task?.actualCompletionDate),
+      actualCompletionDate: actualCompletionDate,
       ticketStatusId: Number(this.task?.ticketStatusId ?? 100),
       rating: Number(this.task?.rating ?? 0),
       ratesBy: Number(this.task?.ratesBy ?? 0),
@@ -350,26 +395,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     return input.replace('T', ' ') + ':00';
   }
 
-  private toIsoDate(value: unknown): string {
-    if (!value) {
-      return '';
-    }
-
-    const raw = String(value);
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-      return raw;
-    }
-
-    const date = new Date(raw);
-
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-
-    return date.toISOString().slice(0, 10);
-  }
-
+ 
   private toDateTimeLocalInput(value: unknown): string {
     if (!value) {
       return '';

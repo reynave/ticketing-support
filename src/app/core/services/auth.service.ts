@@ -94,6 +94,11 @@ export class AuthService {
       }),
       catchError(() => {
         this.currentUserSubject.next(null);
+        console.error('Failed to fetch user data. Logging out...');
+        this.logout(true);
+        setTimeout(() => {
+          location.reload();
+        },200);
         return of(null);
       }),
     );
