@@ -34,7 +34,7 @@
         <div
           class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
           <span class="fw-semibold small">Task Form</span>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2" *ngIf="task.ratesBy == '' && task.ticketStatusId <900">
 
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
               Activity</button>
@@ -67,6 +67,7 @@
                   </td>
                 </tr>
 
+                @if(task.crNoRef !== ''){
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-cr">CR No
                       Ref</label></td>
@@ -74,7 +75,8 @@
                     <div class="form-control form-control-sm bg-light"> {{task.crNoRef}}</div>
                   </td>
                 </tr>
-
+                }
+                @if(task.issueNo !== ''){
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-issue">Issue
                       No</label></td>
@@ -82,6 +84,7 @@
                     <div class="form-control form-control-sm bg-light"> {{task.issueNo}}</div>
                   </td>
                 </tr>
+                }
 
 
 
@@ -113,7 +116,14 @@
                   </td>
                 </tr>
 
-
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project-type">Ticket Category</label>
+                  </td>
+                  <td>
+                    <div class="form-control form-control-sm bg-light">{{ task.ticketCategory }}</div>
+                  </td>
+                </tr>
 
               </tbody>
             </table>
@@ -124,12 +134,13 @@
               <tbody>
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Task
-                      Status <span class="text-danger">*</span></label>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Task Status
+                      <span class="text-danger">*</span></label>
                   </td>
                   <td>
-                    <select id="detail-task-status" class="form-select form-select-sm" name="ticketStatusId"
-                      [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'" required>
+                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
+                      name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'"
+                      required>
                       <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id">{{ status.name }}
                       </option>
                     </select>
@@ -195,7 +206,10 @@
                     <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                       [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
                       @for (user of internalUsers; track user.id) {
-                      <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
+                        @if(user.userTypeId == 1){
+                        <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
+                       }
+
                       }
                     </select>
                   </td>
@@ -242,12 +256,14 @@
         <div class="card-body">
 
 
-          <div class="alert alert-warning py-2 mb-3">
-            <strong>Note:</strong> Task Solution is only visible to the submitter and the assigned user.
+          <div class="alert alert-warning py-2 mb-3" *ngIf=" task.ratesBy == '' ">
+            <strong>Note : </strong>Task solution belum di input
+
           </div>
           <div class="mb-3">
             <label class="form-label small fw-semibold" for="detail-task-solution">Task Solution</label>
-            @if (formMode === 'view') {
+            task.ratesBy : {{task.ratesBy}}
+            @if (formMode === 'view' && task.ratesBy != '' ) {
             <div class="form-control" [innerHtml]="formModel.taskSolution" style="min-height: 100px;"></div>
             }
             @else{
@@ -262,13 +278,21 @@
             <div class="col-md-6 col-12 mb-2">
               <label class="form-label small fw-semibold" for="detail-task-rating">Rating</label>
               <input id="detail-task-rating" class="form-control form-control-sm" type="number" min="0" name="rating"
-                [(ngModel)]="formModel.rating" [readonly]="formMode === 'view'" />
+                [(ngModel)]="formModel.rating" [readonly]="formMode === 'view' &&  task.ratesBy != '' " />
             </div>
-            <div class="col-md-6 col-12 mb-2">
+            <div class="col-md-6 col-12 mb-2" *ngIf="task.ratesBy != ''">
               <label class="form-label small fw-semibold" for="detail-task-ratesby">Rates By</label>
-              <input id="detail-task-ratesby" class="form-control form-control-sm" type="number" min="0" name="ratesBy"
-                [(ngModel)]="formModel.ratesBy" [readonly]="formMode === 'view'" />
+
+              <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo" disabled >
+                <option   *ngFor="let user of internalUsers" [selected]='task.ratesBy == user.id'>[{{user.id}}] {{user.firstName}}
+                  {{user.lastName}} </option>
+              </select>
             </div>
+            @if ( task.ratesBy == '' ) {
+            <div class="col-12 mb-2 d-grid">
+              <button type="button" (click)="submitRate();" class="btn btn-sm btn-primary">Submit Rate</button>
+            </div>
+            }
           </div>
         </div>
       </div>
@@ -276,8 +300,7 @@
     </form>
 
     <div class="card border shadow-sm mb-3">
-      <div
-        class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
+      <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
         <span class="fw-semibold small">Logs Activity</span>
       </div>
       @if(taskLogs.length === 0) {
@@ -297,16 +320,20 @@
             <td class="align-top">
               @if(log.parentId != 0){
 
-
+              <small>Reply from</small>
               <div class="bg-light p-2 border shadow-sm rounded mb-2">
-                <em><small>Reply from</small> </em>
-                <div> <em>
-                    <small [innerHTML]="log.replyFrom"></small></em>
-                </div>
+
+                <div> <em> <small [innerHTML]="log.replyFrom"></small></em> </div>
 
               </div>
               }
               <div [innerHTML]="log.description"></div>
+              <div class="row g-1">
+                <div class="col-3" *ngFor="let item of log.attachments" (click)="imgPopup(content,item )">
+                  <img [src]="item.url" class="img-thumbnail">
+                </div>
+              </div>
+
               <a href="javascript:void(0)" (click)="open(addActivity, log)">reply</a>
             </td>
             <td class="align-top">{{ log.inputName }}</td>
@@ -324,34 +351,103 @@
 
   <ng-template #addActivity let-modal>
     <div class="modal-header">
-      <strong class="modal-title" id="modal-basic-title"> Add Activity</strong>
+      <strong class="modal-title" id="modal-basic-title">Add Activity</strong>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="mb-3">
+        @if(replyLog.id){
+        <div class="alert alert-light">
+          <div class="mb-2"><small>reply from</small></div>
+          <div [innerHtml]="replyLog.description"></div>
+        </div>
+        } @else {
+        <label class="mb-3" for="descriptionLog">Description</label>
+        }
+
+        <div class="NgxEditor__Wrapper">
+          <ngx-editor-menu [editor]="editor3" [toolbar]="toolbar"></ngx-editor-menu>
+          <ngx-editor [editor]="editor3" name="descriptionLog" [(ngModel)]="descriptionLog"
+            [placeholder]="'Type here...'"></ngx-editor>
+        </div>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-container">
+        <strong>Upload Images</strong>
+
+        <!-- Rows -->
+        @for (row of rows; track $index; let rowIdx = $index) {
+        <div class="border rounded p-2 mb-2">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="text-muted small">File {{ rowIdx + 1 }}</span>
+            @if (rows.length > 1) {
+            <button class="btn btn-sm btn-outline-danger ms-auto" (click)="removeRow(rowIdx)">
+              Hapus Baris
+            </button>
+            }
+          </div>
+
+          <input class="form-control form-control-sm" type="file" accept="image/*" multiple
+            (change)="onFileSelected($event, rowIdx)" />
+
+          @if (row.previews.length) {
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            @for (preview of row.previews; track $index; let fileIdx = $index) {
+            <div class="position-relative">
+              <img [src]="preview" alt="preview" class="img-thumbnail"
+                style="width: 80px; height: 80px; object-fit: cover;" />
+              <button class="btn btn-warning btn-sm position-absolute top-0 end-0"
+                style="padding: 0 4px; font-size: 10px;" (click)="removeFile(rowIdx, fileIdx)">✕</button>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Tambah Baris -->
+        <div class="mb-2">
+          <button class="btn btn-sm btn-outline-secondary" (click)="addRow()">
+            + Tambah Baris
+          </button>
+        </div>
+
+        <!-- Progress Bar -->
+        @if (isUploading) {
+        <div class="progress mb-2">
+          <div class="progress-bar" role="progressbar" [style.width.%]="progress">
+            {{ progress }}%
+          </div>
+        </div>
+        }
+
+        <!-- Error -->
+        @if (errorMessage) {
+        <p class="text-danger small">{{ errorMessage }}</p>
+        }
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="submitActivity()"
+        [disabled]="saving || isUploading">
+        {{ saving || isUploading ? 'Submitting...' : 'Submit' }}
+      </button>
+    </div>
+  </ng-template>
+
+
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <strong class="modal-title" id="modal-basic-title">Logs images</strong>
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
-      <form>
-        <div class="mb-3">
-          @if(replyLog.id){
-          <div class="alert alert-light">
-            <div class="mb-2"><small>reply from</small></div>
-            <div [innerHtml]="replyLog.description">
-            </div>
-          </div>
-          }
-          @else{
-          <label class="mb-3" for="descriptionLog">Description</label>
-
-          }
-
-
-          <div class="NgxEditor__Wrapper">
-            <ngx-editor-menu [editor]="editor3" [toolbar]="toolbar"> </ngx-editor-menu>
-            <ngx-editor [editor]="editor3" name="descriptionLog" [(ngModel)]="descriptionLog"
-              [placeholder]="'Type here...'"></ngx-editor>
-          </div>
-        </div>
-      </form>
+      <img [src]="imgUrlLog" class="img-fluid">
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="submitActivity()">Submit</button>
-    </div>
+
   </ng-template>

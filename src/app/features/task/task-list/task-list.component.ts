@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   NgbDatepickerModule,
   NgbModal,
@@ -39,19 +39,26 @@ interface TaskFormModel {
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css',
 })
-export class TaskListComponent {
+export class TaskListComponent implements OnInit{
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly authService = inject(AuthService);
+  private readonly activeRouter = inject(ActivatedRoute);
 
   @ViewChild('createTaskModal') createTaskModal?: TemplateRef<unknown>;
 
   private modalRef: NgbModalRef | null = null;
 
   readonly taskTypeId = 1;
-  readonly ticketStatusOptions = [{ id: 100, name: 'Open' }];
-
+  readonly ticketStatusOptions = [
+    { id: 1, name: 'Open' },
+    { id: 900, name: 'Closed' },
+      { id: 990, name: 'Cancelled' },
+    
+    
+  ];
+  closed : boolean = false;
   rows: any[] = [];
   projects: any[] = [];
   internalUsers: any[] = [];
@@ -67,27 +74,31 @@ export class TaskListComponent {
 
   keyword = '';
   selectedProjectId = '';
-  selectedTicketStatusId = '';
+  selectedTicketStatusId = '1';
 
   formModel: TaskFormModel = this.defaultForm();
   payload: any = null;
-  constructor() {
-   this.payload = this.authService.decodeToken();
- 
-
+  constructor() { 
+  }
+  ngOnInit(): void {
+   
+    console.log(this.activeRouter.snapshot.queryParams, this.closed)
+    this.payload = this.authService.decodeToken();
     this.formModel = this.defaultForm();
     this.loadTasks();
     this.loadOptions();
   }
 
   loadTasks(): void {
+    this.closed = Boolean(this.activeRouter.snapshot.queryParams['close']);
     this.loading = true;
     this.errorMessage = '';
 
-    const query: Record<string, string | number> = {
+    const query: any = {
       ticketTypeId: this.taskTypeId,
+      closed : 0,
     };
-
+    query['closed'] =  this.closed;
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
     }
@@ -197,7 +208,7 @@ export class TaskListComponent {
     //  rating: Number(this.formModel.rating),
     //  ratesBy: Number(this.formModel.ratesBy),
     //  issueNo: this.formModel.issueNo.trim(),
-      category: this.formModel.category,
+      ticketCategoryId: this.formModel.category,
     };
     console.log('Payload:', payload);
 

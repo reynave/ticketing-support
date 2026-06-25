@@ -1,17 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, map } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
-
+import { UploadService } from './upload.service';
 import { ApiService } from '../../../core/services/api.service';
 import {
   ModalDismissReasons,
   NgbDatepickerModule,
   NgbModal,
 } from '@ng-bootstrap/ng-bootstrap';
-
+import { UploadedFile, UploadResponse } from './upload.model';
+import { HttpClient, HttpEventType } from '@angular/common/http';
+interface UploadRow {
+  files: File[];
+  previews: string[];
+}
+import {environment } from './../../../../environments/environment';
+import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-task-detail',
   standalone: true,
@@ -20,22 +33,26 @@ import {
   styleUrl: './task-detail.component.css',
 })
 export class TaskDetailComponent implements OnInit, OnDestroy {
-   // Listens for Ctrl + S globally on the document
+  // Listens for Ctrl + S globally on the document
   @HostListener('document:keydown.control.s', ['$event'])
   onKeydownHandler(event: KeyboardEvent) {
     event.preventDefault(); // Stops the browser's default Save Page dialog
     console.log('Ctrl + S pressed');
-    this.saveTask();        // Calls your custom function
+    this.saveTask(); // Calls your custom function
   }
-  
+ 
+   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
 
+  private readonly uploadService = inject(UploadService);
+  private readonly http = inject(HttpClient);
+   private modalService = inject(NgbModal);
   editor1: any = null;
   editor2: any = null;
   editor3: any = null;
-  
+
   toolbar: Toolbar = [
     ['bold', 'italic'],
     ['underline', 'strike'],
@@ -61,11 +78,29 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
   formMode: 'view' | 'edit' = 'view';
   message = '';
-  errorMessage = '';
+
+  errorMessage: string | null = null;
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
+
+  descriptionLog: string = '';
+
+  rows: UploadRow[] = [{ files: [], previews: [] }];
+  uploadedFiles: UploadedFile[] = [];
+  progress = 0;
+  isUploading = false;
+
+   logId: number = 0;
+
+  replyLog: any = {
+    id: 0,
+    description: '',
+  };
+  ticketStatusId : number = 0;
+  me : any = {}
   ngOnInit(): void {
+     this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
     this.editor2 = new Editor();
     this.editor3 = new Editor();
@@ -97,7 +132,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.loading = false;
         this.task = response?.data || null;
-
+        this.ticketStatusId = this.task.ticketStatusId;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan task (ticketTypeId bukan 1).';
@@ -130,21 +165,14 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           error?.error?.message || 'Failed to load task detail.';
       },
     });
-  }
-  private modalService = inject(NgbModal);
-  logId : number = 0;
-
-  replyLog :any ={
-    id : 0,
-    description : '',
-  }
-  open(content: any, log : any = []): void {
-    if(log.id != 0){
-this.replyLog.id = log.id;
-    this.replyLog.description = log.description;
+  } 
+ 
+  open(content: any, log: any = []): void {
+    if (log.id != 0) {
+      this.replyLog.id = log.id;
+      this.replyLog.description = log.description;
     }
-    
-    
+
     this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
         //this.closeResult = `Closed with: ${result}`;
@@ -163,7 +191,7 @@ this.replyLog.id = log.id;
         await Promise.all([
           firstValueFrom(this.apiService.get('/project', { status: 1 })),
           firstValueFrom(
-            this.apiService.get('/user', { userTypeId: 1, status: 1 }),
+            this.apiService.get('/user', { presence: 1, status: 1 }),
           ),
           firstValueFrom(
             this.apiService.get('/master/ticketStatus', { presence: 1 }),
@@ -227,27 +255,49 @@ this.replyLog.id = log.id;
     this.errorMessage = '';
   }
 
-  saveTask(): void {
-    
+
+  onStatusChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    console.log('selected value:', value);
+    console.log('dari ngModel:', this.formModel.ticketStatusId);
+  }
+
+  saveTask(){
+    if(this.formModel.ticketStatusId >= 900){ 
+      const confirmed = confirm(`Are you sure close task ${this.taskId}?`);
+
+      if (!confirmed) {
+        return;
+      }else{
+         this.updateTask();
+      }
+    }else{
+      this.updateTask()
+    }
+  }
+ 
+  updateTask(): void {
     // if (form.invalid || this.saving) {
     //   return;
     // }
+ 
 
-    const targetCompletionDate = this.formModel.targetCompletionDate['year'] +
+    const targetCompletionDate =
+      this.formModel.targetCompletionDate['year'] +
       '-' +
       String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
       '-' +
-      String(this.formModel.targetCompletionDate['day']+1).padStart(2, '0');
-    
-  
-    const actualCompletionDate = this.formModel.actualCompletionDate['year'] +
+      String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
+
+    const actualCompletionDate =
+      this.formModel.actualCompletionDate['year'] +
       '-' +
       String(this.formModel.actualCompletionDate['month']).padStart(2, '0') +
       '-' +
-      String(this.formModel.actualCompletionDate['day']+1).padStart(2, '0');
+      String(this.formModel.actualCompletionDate['day'] + 1).padStart(2, '0');
 
     const payload = {
-      ticketTypeId: this.taskTypeId, 
+      ticketTypeId: this.taskTypeId,
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
@@ -261,6 +311,8 @@ this.replyLog.id = log.id;
       rating: Number(this.formModel.rating),
       ratesBy: Number(this.formModel.ratesBy),
       issueNo: this.formModel.issueNo.trim(),
+      wasTicketStatusId : this.ticketStatusId,
+      updateBy :this.formModel.submitBy
     };
     console.log('saveTask payload', payload);
 
@@ -274,6 +326,7 @@ this.replyLog.id = log.id;
         this.message = response?.message || 'Task updated.';
         this.formMode = 'view';
         this.loadTaskDetail();
+        this.loadTaskDetailLog();
       },
       error: (error) => {
         this.saving = false;
@@ -281,6 +334,35 @@ this.replyLog.id = log.id;
       },
     });
   }
+
+   submitRate(){ 
+    console.log(this.me);
+    const payload = { 
+      taskSolution: this.formModel.taskSolution.trim(), 
+      rating: Number(this.formModel.rating),
+   ratesBy:  this.me.id,  
+      updateBy : this.me.id,  
+    };
+    console.log('submitRate payload', payload);
+
+    this.saving = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    this.apiService.put(`/ticket/${this.taskId}/submitRate`, payload).subscribe({
+      next: (response) => {
+        this.saving = false;
+        this.message = response?.message || 'Task updated.';
+        this.formMode = 'view';
+        this.loadTaskDetail();
+        this.loadTaskDetailLog();
+      },
+      error: (error) => {
+        this.saving = false;
+        this.errorMessage = error?.error?.message || 'Failed to update task.';
+      },
+    });
+   }
 
   deleteTask(): void {
     if (this.deleting || !this.taskId) {
@@ -308,36 +390,6 @@ this.replyLog.id = log.id;
     });
   }
 
-  descriptionLog: string = '';
-  submitActivity() {
-    const payload = {
-      ticketId: this.taskId,
-      description: this.descriptionLog.trim(),
-      submitBy: this.formModel.submitBy,
-      parentId : this.replyLog.id,
-    };
-    console.log('submitActivity payload', payload);
-
-    this.saving = true;
-    this.message = '';
-    this.errorMessage = '';
-
-    this.apiService.post(`/ticket/log/${this.taskId}`, payload).subscribe({
-      next: (response) => {
-        this.saving = false;
-        this.descriptionLog = '';
-        this.message = response?.message || 'Activity submitted.';
-        this.formMode = 'view';
-        this.modalService.dismissAll();
-        this.loadTaskDetailLog();
-      },
-      error: (error) => {
-        this.saving = false;
-        this.errorMessage =
-          error?.error?.message || 'Failed to submit activity.';
-      },
-    });
-  }
   private defaultForm(): any {
     const now = new Date();
     const plusSevenDays = new Date();
@@ -361,13 +413,22 @@ this.replyLog.id = log.id;
     };
   }
 
-  private populateFormFromTask(): void { 
-    let [yyyy, mm, dd] = this.task?.targetCompletionDate.split('T')[0].split('-') || []; 
-    const targetCompletionDate =  {year: Number(yyyy), month: Number(mm), day: Number(dd)};
+  private populateFormFromTask(): void {
+    let [yyyy, mm, dd] =
+      this.task?.targetCompletionDate.split('T')[0].split('-') || [];
+    const targetCompletionDate = {
+      year: Number(yyyy),
+      month: Number(mm),
+      day: Number(dd),
+    };
 
-    [yyyy, mm, dd] = this.task?.actualCompletionDate.split('T')[0].split('-') || []; 
-    const actualCompletionDate =  {year: Number(yyyy), month: Number(mm), day: Number(dd)};
-
+    [yyyy, mm, dd] =
+      this.task?.actualCompletionDate.split('T')[0].split('-') || [];
+    const actualCompletionDate = {
+      year: Number(yyyy),
+      month: Number(mm),
+      day: Number(dd),
+    };
 
     this.formModel = {
       crNoRef: String(this.task?.crNoRef || ''),
@@ -395,7 +456,6 @@ this.replyLog.id = log.id;
     return input.replace('T', ' ') + ':00';
   }
 
- 
   private toDateTimeLocalInput(value: unknown): string {
     if (!value) {
       return '';
@@ -425,5 +485,106 @@ this.replyLog.id = log.id;
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     return `${yyyyMmDd}T${hour}:${minute}`;
+  }
+ 
+  get allFiles(): File[] {
+    return this.rows.flatMap((row) => row.files);
+  }
+
+  addRow(): void {
+    this.rows.push({ files: [], previews: [] });
+  }
+
+  removeRow(rowIndex: number): void {
+    if (this.rows.length === 1) return;
+    this.rows = this.rows.filter((_, i) => i !== rowIndex);
+  }
+
+  onFileSelected(event: Event, rowIndex: number): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const files = Array.from(input.files);
+    this.rows[rowIndex].files = files;
+    this.rows[rowIndex].previews = [];
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.rows[rowIndex].previews.push(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  removeFile(rowIndex: number, fileIndex: number): void {
+    this.rows[rowIndex].files = this.rows[rowIndex].files.filter(
+      (_, i) => i !== fileIndex,
+    );
+    this.rows[rowIndex].previews = this.rows[rowIndex].previews.filter(
+      (_, i) => i !== fileIndex,
+    );
+  }
+
+  submitActivity(): void {
+    this.saving = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    const formData = new FormData();
+    formData.append('ticketId', this.taskId);
+    formData.append('description', this.descriptionLog.trim());
+    formData.append('submitBy', this.formModel.submitBy);
+    formData.append('parentId', this.replyLog.id || '');
+
+    // Append semua file dari semua rows
+    this.allFiles.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    // Kirim sekaligus — text fields + files dalam 1 request
+    this.http
+      .post(`${environment.apiBaseUrl}/ticket/log/${this.taskId}`, formData, {
+        reportProgress: true,
+        observe: 'events',
+      })
+      .pipe(
+        map((event) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            this.progress = Math.round((event.loaded / event.total) * 100);
+            this.isUploading = true;
+          }
+          if (event.type === HttpEventType.Response) {
+            return event.body;
+          }
+          return null;
+        }),
+        filter((result) => result !== null),
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.saving = false;
+          this.isUploading = false;
+          this.progress = 0;
+          this.descriptionLog = '';
+          this.rows = [{ files: [], previews: [] }];
+          this.message = response?.message || 'Activity submitted.';
+          this.formMode = 'view';
+          this.modalService.dismissAll();
+          this.loadTaskDetailLog();
+        },
+        error: (error) => {
+          this.saving = false;
+          this.isUploading = false;
+          this.errorMessage =
+            error?.error?.message || 'Failed to submit activity.';
+        },
+      });
+  }
+
+  imgUrlLog : string = '';
+  imgPopup(content:any, item: any){
+    this.imgUrlLog = item.url;
+    this.modalService.open(content, {size:'lg'});
   }
 }

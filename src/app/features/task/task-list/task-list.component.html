@@ -37,13 +37,13 @@
       <div class="col-12 col-md-2">
         <label class="form-label small" for="task-status-filter">Status</label>
         <select id="task-status-filter" class="form-select form-select-sm" [(ngModel)]="selectedTicketStatusId"
-          (change)="loadTasks()">
-          <option value="">All status</option>
+          (change)="loadTasks()"> 
           @for (status of ticketStatusOptions; track status.id) {
           <option [value]="status.id">{{ status.name }}</option>
           }
         </select>
       </div>
+      
 
       <div class="col-12 col-md-2 d-flex gap-2">
         <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadTasks()">Search</button>
