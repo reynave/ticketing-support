@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -36,6 +36,8 @@ export class MasterManageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly apiService = inject(ApiService);
   private readonly modalService = inject(NgbModal);
+   private readonly router = inject(Router);
+  
 
   @ViewChild('masterFormModal') masterFormModal?: TemplateRef<unknown>;
   private modalRef: NgbModalRef | null = null;
@@ -82,11 +84,8 @@ export class MasterManageComponent implements OnInit {
     'user-auth-level': {
       label: 'User Auth Level',
       fields: [
-        { key: 'name', label: 'Name', type: 'text', required: true },
-        { key: 'c', label: 'Create (c)', type: 'number' },
-        { key: 'r', label: 'Read (r)', type: 'number' },
-        { key: 'u', label: 'Update (u)', type: 'number' },
-        { key: 'd', label: 'Delete (d)', type: 'number' },
+        { key: 'name', label: 'Name', type: 'text', required: true }, 
+        
       ],
       hasStatusFilter: false,
     },
@@ -302,15 +301,16 @@ export class MasterManageComponent implements OnInit {
     return row?.id;
   }
 
+  goToAccessRight(row : any){
+    console.log(row);
+    this.router.navigate(['user-access-right'],{ queryParams : {id:row.id}});
+  }
   getColumnLabel(column: string): string {
     const key = String(column || '').toLowerCase();
 
     const labelMap: Record<string, string> = {
       id: 'ID',
-      c: 'Create',
-      r: 'Read',
-      u: 'Update',
-      d: 'Delete',
+  
       ticketbased: 'Ticket Based',
       inputdate: 'Input Date',
       updatedate: 'Update Date',
