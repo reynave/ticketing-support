@@ -2,8 +2,10 @@
   <div class="d-flex  mb-1 flex-wrap gap-2 mb-3">
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
     <div>
-      <h5 class="fw-bold mb-0">Task {{ taskId }}</h5>
-
+      <h5 class="fw-bold mb-0">Case {{ taskId }}</h5> 
+    </div>
+    <div class="ms-auto">
+      <h5 class="fw-semibold mb-0 font-monospace text-danger"> Remaining Time : <span>{{remainingTime}}</span></h5> 
     </div>
 
   </div>
@@ -21,19 +23,19 @@
 
     @if (loading) {
     <div class="card border shadow-sm">
-      <div class="card-body text-muted">Loading task detail...</div>
+      <div class="card-body text-muted">Loading case detail...</div>
     </div>
     } @else if (!task) {
     <div class="card border shadow-sm">
-      <div class="card-body text-muted">Task not found.</div>
+      <div class="card-body text-muted">Case not found.</div>
     </div>
     } @else {
 
-    <form #taskFormNg="ngForm" (ngSubmit)="saveTask()">
+    <form #taskFormNg="ngForm" (ngSubmit)="saveCase()">
       <div class="card border shadow-sm mb-3">
         <div
           class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
-          <span class="fw-semibold small">Task Form</span>
+          <span class="fw-semibold small">Case Form</span>
           <div class="d-flex gap-2" *ngIf="task.ratesBy == '' && task.ticketStatusId <900">
 
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
@@ -60,28 +62,43 @@
             <table class="table table-sm align-middle task-form-table mb-0">
               <tbody>
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Task ID</label>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Case ID</label>
                   </td>
                   <td>
                     <div class="form-control form-control-sm bg-light">{{ task.id }}</div>
                   </td>
                 </tr>
 
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity </label>
+                  </td>
+                  <td>
+     
+                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
+                      name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
+                      required>
+                      <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{ severity.duration }} hours)
+                      </option>
+                    </select>
+                  </td>
+                </tr>
+
                 @if(task.crNoRef !== ''){
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold " for="detail-task-cr">CR No
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-cr">CR No
                       Ref</label></td>
                   <td>
-                    <div class="form-control form-control-sm bg-light "> {{task.crNoRef}}</div>
+                    <div class="form-control form-control-sm bg-light"> {{task.crNoRef}}</div>
                   </td>
                 </tr>
                 }
                 @if(task.issueNo !== ''){
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold text-danger" for="detail-task-issue">Issue
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-issue">Issue
                       No</label></td>
                   <td>
-                    <div class="form-control form-control-sm bg-light text-danger fw-semibold"> {{task.issueNo}}</div>
+                    <div class="form-control form-control-sm bg-light"> {{task.issueNo}}</div>
                   </td>
                 </tr>
                 }
@@ -134,7 +151,7 @@
               <tbody>
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Task Status
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
@@ -257,11 +274,11 @@
 
 
           <div class="alert alert-warning py-2 mb-3" *ngIf=" task.ratesBy == '' ">
-            <strong>Note : </strong>Task solution belum di input
+            <strong>Note : </strong>Case Solution belum di input
 
           </div>
           <div class="mb-3">
-            <label class="form-label small fw-semibold" for="detail-task-solution">Task Solution</label>
+            <label class="form-label small fw-semibold" for="detail-task-solution">Case Solution</label>
             task.ratesBy : {{task.ratesBy}}
             @if (formMode === 'view' && task.ratesBy != '' ) {
             <div class="form-control" [innerHtml]="formModel.taskSolution" style="min-height: 100px;"></div>
@@ -298,6 +315,49 @@
       </div>
 
     </form>
+
+
+    
+    <div class="card border shadow-sm mb-3">
+      <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
+        <span class="fw-semibold small">Task</span>
+        <button type="button" class="btn btn-sm btn-primary" (click)="openCreateTask(createTaskModal)">Create Task</button>
+      </div>
+
+      @if (loadingRelatedTasks) {
+      <div class="card-body text-muted">Loading task list...</div>
+      } @else if (relatedTasks.length === 0) {
+      <div class="card-body text-muted">No task in this Case.</div>
+      } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th width="140">Task ID</th>
+              <th>Title</th>
+              <th width="140">Status</th>
+              <th width="160">Target Date</th>
+              <th width="120" class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of relatedTasks">
+              <td>{{ row.id }}</td>
+              <td>{{ row.title }}</td>
+              <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>
+              <td>{{ row.targetCompletionDate | date:'mediumDate' }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToTaskDetail(row)">Detail</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
+
+
+
 
     <div class="card border shadow-sm mb-3">
       <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
@@ -450,4 +510,79 @@
       <img [src]="imgUrlLog" class="img-fluid">
     </div>
 
+  </ng-template>
+
+  <ng-template #createTaskModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Create Task From Case {{ taskId }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+
+    <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)">
+      <div class="modal-body">
+        <div class="row g-2">
+           
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-title">Title <span class="text-danger">*</span></label>
+            <input id="related-task-title" class="form-control" name="title" [(ngModel)]="relatedTaskForm.title" required>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-status">Task Status <span class="text-danger">*</span></label>
+            <select id="related-task-status" class="form-select" name="ticketStatusId" [(ngModel)]="relatedTaskForm.ticketStatusId" required>
+              <option [ngValue]="100">Open</option>
+              <option [ngValue]="900">Closed</option>
+              <option [ngValue]="990">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-category">Task Category <span class="text-danger">*</span></label>
+            <select id="related-task-category" class="form-select" name="ticketCategoryId" [(ngModel)]="relatedTaskForm.ticketCategoryId" required>
+              <option [ngValue]="0" disabled>Select category</option>
+              <option *ngFor="let category of ticketCategories" [ngValue]="category.id">{{ category.name }}</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-assign">Assign To <span class="text-danger">*</span></label>
+            <select id="related-task-assign" class="form-select" name="assignTo" [(ngModel)]="relatedTaskForm.assignTo" required>
+              <option [ngValue]="0" disabled>Select user</option>
+              <option *ngFor="let user of internalUsers" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-submit-date">Submit Date <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input id="related-task-submit-date" class="form-control" type="text" name="submitDate" ngbDatepicker
+                #relSubmitDate="ngbDatepicker" readonly [(ngModel)]="relatedTaskForm.submitDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="relSubmitDate.toggle()" type="button"></button>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="related-task-target-date">Target Completion <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input id="related-task-target-date" class="form-control" type="text" name="targetCompletionDate" ngbDatepicker
+                #relTargetDate="ngbDatepicker" readonly [(ngModel)]="relatedTaskForm.targetCompletionDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="relTargetDate.toggle()" type="button"></button>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label" for="related-task-description">Description <span class="text-danger">*</span></label>
+            <textarea id="related-task-description" class="form-control" rows="3" name="description"
+              [(ngModel)]="relatedTaskForm.description" required></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="relatedTaskFormNg.invalid || savingRelatedTask || loadingOptions">
+          {{ savingRelatedTask ? 'Saving...' : 'Save Task' }}
+        </button>
+      </div>
+    </form>
   </ng-template>

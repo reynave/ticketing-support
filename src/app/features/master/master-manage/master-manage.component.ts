@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
+import { firstValueFrom } from 'rxjs';
 
 interface MasterFieldConfig {
   key: string;
@@ -94,6 +95,18 @@ export class MasterManageComponent implements OnInit {
       fields: [{ key: 'name', label: 'Name', type: 'text', required: true }],
       hasStatusFilter: false,
     },
+    'user-access-right': {
+      label: 'User Access Right',
+      fields: [
+        { key: 'authLevelId', label: 'Auth Level Id', type: 'number', required: true },
+        { key: 'moduleId', label: 'Module Id', type: 'number', required: true },
+        { key: 'c', label: 'Create', type: 'number' },
+        { key: 'r', label: 'Read', type: 'number' },
+        { key: 'u', label: 'Update', type: 'number' },
+        { key: 'd', label: 'Delete', type: 'number' },
+      ],
+      hasStatusFilter: false,
+    },
     'global-setting': {
       label: 'Global Setting',
       fields: [
@@ -128,6 +141,9 @@ export class MasterManageComponent implements OnInit {
   errorMessage = '';
 
   selectedStatus = '';
+  selectedAuthLevelId: number | null = null;
+  accessRightRows: any[] = [];
+  savingAccessRight = false;
   isEditMode = false;
   editingId: number | null = null;
   formModel: any = {};
@@ -141,6 +157,10 @@ export class MasterManageComponent implements OnInit {
 
   get isUpdateOnly(): boolean {
     return !!this.config?.updateOnly;
+  }
+
+  get isAccessRightPage(): boolean {
+    return this.masterKey === 'user-access-right';
   }
 
   configureByKey(key: string): void {
@@ -159,6 +179,13 @@ export class MasterManageComponent implements OnInit {
     this.dismissModal();
     this.resetFormState();
     this.selectedStatus = '';
+    this.selectedAuthLevelId = this.parseSelectedAuthLevelId();
+
+    if (this.isAccessRightPage) {
+      this.loadAccessRightMatrix();
+      return;
+    }
+
     this.loadList();
   }
 
@@ -183,7 +210,14 @@ export class MasterManageComponent implements OnInit {
     this.apiService.get(`/master/${this.masterKey}`, query).subscribe({
       next: (response) => {
         this.loading = false;
-        this.rows = Array.isArray(response?.data) ? response.data : [];
+        const dataRows = Array.isArray(response?.data) ? response.data : [];
+
+        if (this.masterKey === 'user-access-right' && this.selectedAuthLevelId !== null) {
+          this.rows = dataRows.filter((row: any) => Number(row?.authLevelId) === this.selectedAuthLevelId);
+        } else {
+          this.rows = dataRows;
+        }
+
         this.columns = this.pickColumns(this.rows);
       },
       error: (error) => {
@@ -196,6 +230,11 @@ export class MasterManageComponent implements OnInit {
   }
 
   onFilterStatusChange(): void {
+    if (this.isAccessRightPage) {
+      this.loadAccessRightMatrix();
+      return;
+    }
+
     this.loadList();
   }
 
@@ -209,6 +248,11 @@ export class MasterManageComponent implements OnInit {
     this.message = '';
     this.errorMessage = '';
     this.formModel = this.buildDefaultFormModel();
+
+    if (this.masterKey === 'user-access-right' && this.selectedAuthLevelId !== null) {
+      this.formModel.authLevelId = this.selectedAuthLevelId;
+    }
+
     this.openFormModal();
   }
 
@@ -302,8 +346,95 @@ export class MasterManageComponent implements OnInit {
   }
 
   goToAccessRight(row : any){
-    console.log(row);
-    this.router.navigate(['user-access-right'],{ queryParams : {id:row.id}});
+    if (this.masterKey !== 'user-auth-level') {
+      return;
+    }
+
+    this.router.navigate(['/master/user-access-right'], { queryParams: { authLevelId: row.id } });
+  }
+
+  canShowCreateButton(): boolean {
+    return !this.isUpdateOnly && !this.isAccessRightPage;
+  }
+
+  showAccessRightButton(): boolean {
+    return this.masterKey === 'user-auth-level';
+  }
+
+  toChecked(value: any): boolean {
+    return this.isTruthyValue(value);
+  }
+
+  onAccessRightToggle(row: any, key: 'c' | 'r' | 'u' | 'd', checked: boolean): void {
+    row[key] = checked ? 1 : 0;
+    row.__dirty = true;
+  }
+
+  isAccessRightAllChecked(key: 'c' | 'r' | 'u' | 'd'): boolean {
+    if (!this.accessRightRows.length) {
+      return false;
+    }
+
+    return this.accessRightRows.every((row) => this.toChecked(row[key]));
+  }
+
+  onAccessRightToggleAll(key: 'c' | 'r' | 'u' | 'd', checked: boolean): void {
+    this.accessRightRows.forEach((row) => {
+      const nextValue = checked ? 1 : 0;
+
+      if (Number(row[key]) !== nextValue) {
+        row[key] = nextValue;
+        row.__dirty = true;
+      }
+    });
+  }
+
+  hasAccessRightChanges(): boolean {
+    return this.accessRightRows.some((row) => row.__dirty === true);
+  }
+
+  async saveAccessRightChanges(): Promise<void> {
+    if (!this.selectedAuthLevelId || this.savingAccessRight) {
+      return;
+    }
+
+    const changedRows = this.accessRightRows.filter((row) => row.__dirty === true);
+
+    if (!changedRows.length) {
+      this.message = 'No changes to save.';
+      this.errorMessage = '';
+      return;
+    }
+
+    this.savingAccessRight = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    try {
+      for (const row of changedRows) {
+        const payload = {
+          authLevelId: Number(this.selectedAuthLevelId),
+          moduleId: Number(row.moduleId),
+          c: Number(row.c),
+          r: Number(row.r),
+          u: Number(row.u),
+          d: Number(row.d),
+        };
+
+        if (row.id) {
+          await firstValueFrom(this.apiService.put(`/master/user-access-right/${row.id}`, payload));
+        } else {
+          await firstValueFrom(this.apiService.post('/master/user-access-right', payload));
+        }
+      }
+
+      this.message = 'Access right updated successfully.';
+      this.loadAccessRightMatrix();
+    } catch (error: any) {
+      this.errorMessage = error?.error?.message || 'Failed to update access right.';
+    } finally {
+      this.savingAccessRight = false;
+    }
   }
   getColumnLabel(column: string): string {
     const key = String(column || '').toLowerCase();
@@ -382,6 +513,10 @@ export class MasterManageComponent implements OnInit {
       }
     });
 
+    if (this.masterKey === 'user-access-right' && this.selectedAuthLevelId !== null) {
+      model.authLevelId = this.selectedAuthLevelId;
+    }
+
     return model;
   }
 
@@ -457,5 +592,82 @@ export class MasterManageComponent implements OnInit {
     this.formModel = {};
     this.isEditMode = false;
     this.editingId = null;
+  }
+
+  private loadAccessRightMatrix(): void {
+    if (!this.selectedAuthLevelId) {
+      this.rows = [];
+      this.columns = [];
+      this.accessRightRows = [];
+      this.errorMessage = 'authLevelId is required. Please open from User Auth Level page.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.apiService.get('/master/module').subscribe({
+      next: (moduleResponse) => {
+        const modules = Array.isArray(moduleResponse?.data) ? moduleResponse.data : [];
+        const query: any = { authLevelId: this.selectedAuthLevelId };
+
+        this.apiService.get('/master/user-access-right', query).subscribe({
+          next: (rightResponse) => {
+            this.loading = false;
+            const rights = Array.isArray(rightResponse?.data) ? rightResponse.data : [];
+            const rightMap = new Map<number, any>();
+
+            rights.forEach((row: any) => {
+              const moduleId = Number(row?.moduleId);
+
+              if (!rightMap.has(moduleId)) {
+                rightMap.set(moduleId, row);
+              }
+            });
+
+            this.accessRightRows = modules.map((moduleRow: any) => {
+              const moduleId = Number(moduleRow?.id);
+              const right = rightMap.get(moduleId);
+
+              return {
+                id: Number(right?.id || 0),
+                moduleId,
+                moduleName: String(moduleRow?.name || `Module ${moduleId}`),
+                c: Number(right?.c ?? 0),
+                r: Number(right?.r ?? 0),
+                u: Number(right?.u ?? 0),
+                d: Number(right?.d ?? 0),
+                __dirty: false,
+              };
+            });
+          },
+          error: (error) => {
+            this.loading = false;
+            this.accessRightRows = [];
+            this.errorMessage = error?.error?.message || 'Failed to load access right data.';
+          },
+        });
+      },
+      error: (error) => {
+        this.loading = false;
+        this.accessRightRows = [];
+        this.errorMessage = error?.error?.message || 'Failed to load module data.';
+      },
+    });
+  }
+
+  private parseSelectedAuthLevelId(): number | null {
+    if (this.masterKey !== 'user-access-right') {
+      return null;
+    }
+
+    const rawValue = this.route.snapshot.queryParamMap.get('authLevelId');
+    const authLevelId = Number(rawValue);
+
+    if (!rawValue || !Number.isInteger(authLevelId) || authLevelId <= 0) {
+      return null;
+    }
+
+    return authLevelId;
   }
 }

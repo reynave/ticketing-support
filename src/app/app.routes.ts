@@ -11,6 +11,8 @@ import { ProjectListComponent } from './features/project/project-list/project-li
 import { ProjectDetailComponent } from './features/project/project-detail/project-detail.component';
 import { TaskListComponent } from './features/task/task-list/task-list.component';
 import { TaskDetailComponent } from './features/task/task-detail/task-detail.component';
+import { CaseListComponent } from './features/cases/case-list/case-list.component';
+import { CaseDetailComponent } from './features/cases/case-detail/case-detail.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { NotFoundComponent } from './layout/not-found/not-found.component';
 import { ReloginComponent } from './features/auth/relogin/relogin.component';
@@ -66,6 +68,15 @@ export const routes: Routes = [
 				path: 'tasks/:id',
 				component: TaskDetailComponent,
 			},
+			{
+				path: 'cases',
+				component: CaseListComponent,
+			},
+			{
+				path: 'cases/:id',
+				component: CaseDetailComponent,
+			},
+
 			{
 				path: 'master',
 				component: MasterHomeComponent,

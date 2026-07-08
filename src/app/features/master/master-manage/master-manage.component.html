@@ -6,7 +6,7 @@
     </div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to Master Menu</a>
-      @if (!isUpdateOnly) {
+      @if (canShowCreateButton()) {
       <button class="btn btn-primary-sm" type="button" (click)="openCreate()">
         <i class="bi bi-plus-lg me-1"></i>Add Data
       </button>
@@ -45,6 +45,93 @@
   }
 
   <div class="table-card mb-3">
+    @if (isAccessRightPage) {
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <div class="fw-semibold">Access Right Matrix</div>
+        <div class="small text-muted">Auth Level Id: {{ selectedAuthLevelId || '-' }}</div>
+      </div>
+      <button class="btn btn-primary btn-sm" type="button" (click)="saveAccessRightChanges()"
+        [disabled]="savingAccessRight || !hasAccessRightChanges()">
+        {{ savingAccessRight ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th class="text-center">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span>Create</span>
+                <input type="checkbox" class="form-check-input" [ngModel]="isAccessRightAllChecked('c')"
+                  [ngModelOptions]="{ standalone: true }" [disabled]="loading || !accessRightRows.length"
+                  (ngModelChange)="onAccessRightToggleAll('c', $event)">
+              </div>
+            </th>
+            <th class="text-center">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span>Read</span>
+                <input type="checkbox" class="form-check-input" [ngModel]="isAccessRightAllChecked('r')"
+                  [ngModelOptions]="{ standalone: true }" [disabled]="loading || !accessRightRows.length"
+                  (ngModelChange)="onAccessRightToggleAll('r', $event)">
+              </div>
+            </th>
+            <th class="text-center">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span>Update</span>
+                <input type="checkbox" class="form-check-input" [ngModel]="isAccessRightAllChecked('u')"
+                  [ngModelOptions]="{ standalone: true }" [disabled]="loading || !accessRightRows.length"
+                  (ngModelChange)="onAccessRightToggleAll('u', $event)">
+              </div>
+            </th>
+            <th class="text-center">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span>Delete</span>
+                <input type="checkbox" class="form-check-input" [ngModel]="isAccessRightAllChecked('d')"
+                  [ngModelOptions]="{ standalone: true }" [disabled]="loading || !accessRightRows.length"
+                  (ngModelChange)="onAccessRightToggleAll('d', $event)">
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading) {
+          <tr>
+            <td colspan="5" class="text-center py-4">Loading access right...</td>
+          </tr>
+          } @else if (!accessRightRows.length) {
+          <tr>
+            <td colspan="5" class="text-center py-4 text-muted">No module data available.</td>
+          </tr>
+          } @else {
+          @for (row of accessRightRows; track row.moduleId) {
+          <tr>
+            <td>{{ row.moduleName }}</td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" [ngModel]="toChecked(row.c)"
+                [ngModelOptions]="{ standalone: true }" (ngModelChange)="onAccessRightToggle(row, 'c', $event)">
+            </td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" [ngModel]="toChecked(row.r)"
+                [ngModelOptions]="{ standalone: true }" (ngModelChange)="onAccessRightToggle(row, 'r', $event)">
+            </td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" [ngModel]="toChecked(row.u)"
+                [ngModelOptions]="{ standalone: true }" (ngModelChange)="onAccessRightToggle(row, 'u', $event)">
+            </td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" [ngModel]="toChecked(row.d)"
+                [ngModelOptions]="{ standalone: true }" (ngModelChange)="onAccessRightToggle(row, 'd', $event)">
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead>
@@ -91,16 +178,16 @@
             }
             <td>
               <div class="d-flex gap-2">
-         
+                @if (showAccessRightButton()) {
                 <button class="btn btn-sm btn-outline-primary" type="button" (click)="goToAccessRight(row)">
                  <i class="bi bi-key"></i>
                 </button>
-              
+                }
+
                 <button class="btn btn-sm btn-outline-primary" type="button" (click)="openEdit(row)">
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                
-
+                 
 
                 @if (!isUpdateOnly) {
                 <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteRow(row)"
@@ -116,6 +203,7 @@
         </tbody>
       </table>
     </div>
+    }
   </div>
 
   }

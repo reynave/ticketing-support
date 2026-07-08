@@ -18,7 +18,7 @@ export class AdminLayoutComponent implements OnInit {
 
   readonly moduleMenus = [ 
     { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '' },
-    { path: '/issues', label: 'Issues', icon: 'report_problem', badge: '' },
+    { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '' },
     {
       path: '/change-requests',
       label: 'Change Requests',
