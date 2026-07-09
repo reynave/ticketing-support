@@ -25,10 +25,11 @@ interface UploadRow {
 }
 import { environment } from './../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
+import { CountdownComponent } from './countdown.component';
 @Component({
   selector: 'app-case-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule],
+  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule, CountdownComponent],
   templateUrl: './case-detail.component.html',
   styleUrl: './case-detail.component.css',
 })
@@ -128,6 +129,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   }
   goBack(): void {
     history.back();
+  }
+   onFinished() {
+    console.log('Countdown selesai!');
   }
 
   loadTaskDetail(): void {
