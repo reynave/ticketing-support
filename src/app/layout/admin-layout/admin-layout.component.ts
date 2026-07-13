@@ -44,6 +44,7 @@ export class AdminLayoutComponent implements OnInit {
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain' },
     { key: 'product', label: 'Product', icon: 'inventory_2' },
+    { key: 'project-master', path: '/master-project', label: 'Project Master', icon: 'folder_managed' },
     { key: 'project-type', label: 'Project Type', icon: 'schema' },
     { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
     // {

@@ -3,6 +3,8 @@ import { authGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { MasterHomeComponent } from './features/master/master-home/master-home.component';
 import { MasterManageComponent } from './features/master/master-manage/master-manage.component';
+import { MasterProjectComponent } from './features/master/master-project/master-project.component';
+import { MasterProjectDetailComponent } from './features/master/master-project/master-project-detail/master-project-detail.component';
 import { ClientListComponent } from './features/client/client-list/client-list.component';
 import { ClientDetailComponent } from './features/client/client-detail/client-detail.component';
 import { UserListComponent } from './features/user/user-list/user-list.component';
@@ -80,6 +82,14 @@ export const routes: Routes = [
 			{
 				path: 'master',
 				component: MasterHomeComponent,
+			},
+			{
+				path: 'master-project',
+				component: MasterProjectComponent,
+			},
+			{
+				path: 'master-project/:id',
+				component: MasterProjectDetailComponent,
 			},
 			{
 				path: 'master/:masterKey',

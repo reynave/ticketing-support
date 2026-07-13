@@ -316,7 +316,15 @@
         </thead>
         <tbody>
           <tr *ngFor="let log of taskLogs">
-            <td class="align-top">{{ log.inputDate | date:'medium' }}</td>
+            <td class="align-top">
+              <div>{{ log.inputDate | date:'medium' }}</div>
+              @if (log.starDateTime) {
+              <div class="text-muted small">Start: {{ log.starDateTime | date:'medium' }}</div>
+              }
+              @if (log.clsoeDateTime) {
+              <div class="text-muted small">Close: {{ log.clsoeDateTime | date:'medium' }}</div>
+              }
+            </td>
             <td class="align-top">
               @if(log.parentId != 0){
 
@@ -356,6 +364,48 @@
     </div>
 
     <div class="modal-body">
+
+      <form #activityForm="ngForm" (ngSubmit)="submitActivity()">
+        <div class="row g-2 mb-3">
+          <div class="col-md-6 col-12">
+            <label class="form-label small fw-semibold" for="activity-start-datetime">
+              Start Date <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input id="activity-start-datetime" class="form-control form-control-sm" type="text" readonly
+                name="starDateTime" [(ngModel)]="starDateTime" ngbDatepicker #startDatePicker="ngbDatepicker"
+                required />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
+                (click)="startDatePicker.toggle()"></button>
+            </div>
+          </div>
+          <div class="col-md-6 col-12">
+            <label class="form-label small fw-semibold" for="activity-start-time">
+              Start HH:II <span class="text-danger">*</span>
+            </label>
+            <input id="activity-start-time" class="form-control form-control-sm" type="time" step="60"
+              name="starTime" [(ngModel)]="starTime" required />
+          </div>
+          <div class="col-md-6 col-12">
+            <label class="form-label small fw-semibold" for="activity-close-datetime">
+              Close Date <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input id="activity-close-datetime" class="form-control form-control-sm" type="text" readonly
+                name="closeDateTime" [(ngModel)]="closeDateTime" ngbDatepicker #closeDatePicker="ngbDatepicker"
+                required />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
+                (click)="closeDatePicker.toggle()"></button>
+            </div>
+          </div>
+          <div class="col-md-6 col-12">
+            <label class="form-label small fw-semibold" for="activity-close-time">
+              Close HH:II <span class="text-danger">*</span>
+            </label>
+            <input id="activity-close-time" class="form-control form-control-sm" type="time" step="60"
+              name="closeTime" [(ngModel)]="closeTime" required />
+          </div>
+        </div>
 
       <div class="mb-3">
         @if(replyLog.id){
@@ -430,13 +480,12 @@
         }
       </div>
 
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="submitActivity()"
-        [disabled]="saving || isUploading">
-        {{ saving || isUploading ? 'Submitting...' : 'Submit' }}
-      </button>
+        <div class="modal-footer px-0 pb-0">
+          <button type="submit" class="btn btn-outline-secondary" [disabled]="saving || isUploading || activityForm.invalid">
+            {{ saving || isUploading ? 'Submitting...' : 'Submit' }}
+          </button>
+        </div>
+      </form>
     </div>
   </ng-template>
 

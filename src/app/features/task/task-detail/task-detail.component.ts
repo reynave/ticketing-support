@@ -14,6 +14,7 @@ import { UploadService } from './upload.service';
 import { ApiService } from '../../../core/services/api.service';
 import {
   ModalDismissReasons,
+  NgbDateStruct,
   NgbDatepickerModule,
   NgbModal,
 } from '@ng-bootstrap/ng-bootstrap';
@@ -85,6 +86,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
 
   descriptionLog: string = '';
+  starDateTime: NgbDateStruct | null = null;
+  closeDateTime: NgbDateStruct | null = null;
+  starTime: string = '';
+  closeTime: string = '';
 
   rows: UploadRow[] = [{ files: [], previews: [] }];
   uploadedFiles: UploadedFile[] = [];
@@ -171,7 +176,17 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     if (log.id != 0) {
       this.replyLog.id = log.id;
       this.replyLog.description = log.description;
+    } else {
+      this.replyLog = {
+        id: 0,
+        description: '',
+      };
     }
+
+    this.starDateTime = null;
+    this.closeDateTime = null;
+    this.starTime = '';
+    this.closeTime = '';
 
     this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
@@ -526,6 +541,28 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  private toSqlDateTime(value: NgbDateStruct | null, timeValue: string): string {
+    if (!value?.year || !value?.month || !value?.day) {
+      return '';
+    }
+
+    const normalizedTime = String(timeValue || '').trim();
+
+    if (!normalizedTime) {
+      return '';
+    }
+
+    const year = String(value.year).padStart(4, '0');
+    const month = String(value.month).padStart(2, '0');
+    const day = String(value.day).padStart(2, '0');
+
+    const [hour = '00', minute = '00'] = normalizedTime.split(':');
+    const safeHour = String(hour).padStart(2, '0');
+    const safeMinute = String(minute).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${safeHour}:${safeMinute}:00`;
+  }
+
   submitActivity(): void {
     this.saving = true;
     this.message = '';
@@ -536,6 +573,18 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     formData.append('description', this.descriptionLog.trim());
     formData.append('submitBy', this.formModel.submitBy);
     formData.append('parentId', this.replyLog.id || '');
+
+    const starDateTime = this.toSqlDateTime(this.starDateTime, this.starTime);
+    const closeDateTime = this.toSqlDateTime(this.closeDateTime, this.closeTime);
+
+    if (!starDateTime || !closeDateTime) {
+      this.saving = false;
+      this.errorMessage = 'Start Date Time dan Close Date Time wajib diisi.';
+      return;
+    }
+
+    formData.append('starDateTime', starDateTime);
+    formData.append('closeDateTime', closeDateTime);
 
     // Append semua file dari semua rows
     this.allFiles.forEach((file) => {
