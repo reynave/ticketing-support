@@ -1,213 +1,315 @@
 <div class="container">
-  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <div class="page-title">Project List</div>
-      <div class="page-subtitle">Manage active projects and maintain project metadata.</div>
-    </div>
-    <button type="button" class="btn btn-primary-sm" (click)="openCreateModal()">Create New Project</button>
-  </div>
-
-  @if (message) {
-  <div class="alert alert-success py-2">{{ message }}</div>
-  }
-
-  @if (errorMessage) {
-  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
-  }
-
-  <div class="stat-card mb-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-3">
-        <label class="form-label small" for="project-keyword">Keyword</label>
-        <input id="project-keyword" class="form-control form-control-sm" [(ngModel)]="keyword"
-          (keyup.enter)="loadProjects()" placeholder="Search by project id or client" />
+   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+         <div class="page-title">Project List</div>
+         <div class="page-subtitle">Manage project data from the project table independently.</div>
       </div>
-
-      <div class="col-12 col-md-2">
-        <label class="form-label small" for="project-filter-status">Status</label>
-        <select id="project-filter-status" class="form-select form-select-sm" [(ngModel)]="selectedStatus"
-          (change)="loadProjects()">
-          <option value="">All</option>
-          <option value="1">Active</option>
-          <option value="0">Inactive</option>
-        </select>
+      <div class="d-flex gap-2">
+         <button type="button" class="btn btn-primary-sm" (click)="openCreateModal()">Add Project</button>
       </div>
+   </div>
 
-      <div class="col-12 col-md-3">
-        <label class="form-label small" for="project-filter-client">Client</label>
-        <select id="project-filter-client" class="form-select form-select-sm" [(ngModel)]="selectedClientId"
-          (change)="loadProjects()">
-          <option value="">All client</option>
-          @for (client of clients; track trackById($index, client)) {
-          <option [value]="client.id">{{ client.name }}</option>
-          }
-        </select>
+   @if (message) {
+   <div class="alert alert-success py-2">{{ message }}</div>
+   }
+
+   @if (errorMessage) {
+   <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+   }
+
+   <div class="stat-card mb-3">
+      <div class="row g-2 align-items-end">
+         <div class="col-12 col-md-3">
+            <label class="form-label" for="project-master-keyword">Keyword</label>
+            <input id="project-master-keyword" class="form-control form-control-sm" [(ngModel)]="keyword"
+               (keyup.enter)="loadProjects()" placeholder="Search by id, project name, or client" />
+         </div>
+
+         <div class="col-12 col-md-2">
+            <label class="form-label" for="project-master-filter-status">Status</label>
+            <select id="project-master-filter-status" class="form-select form-select-sm" [(ngModel)]="selectedStatus"
+               (change)="loadProjects()">
+               <option value="">All</option>
+               <option value="1">Active</option>
+               <option value="0">Inactive</option>
+            </select>
+         </div>
+
+         <div class="col-12 col-md-3">
+            <label class="form-label" for="project-master-filter-client">Client</label>
+            <select id="project-master-filter-client" class="form-select form-select-sm" [(ngModel)]="selectedClientId"
+               (change)="loadProjects()">
+               <option value="">All clients</option>
+               @for (client of clients; track trackById($index, client)) {
+               <option [value]="client.id">{{ client.name }}</option>
+               }
+            </select>
+         </div>
+
+         <div class="col-12 col-md-2">
+            <label class="form-label" for="project-master-filter-type">Project Type</label>
+            <select id="project-master-filter-type" class="form-select form-select-sm"
+               [(ngModel)]="selectedProjectTypeId" (change)="loadProjects()">
+               <option value="">All types</option>
+               @for (projectType of projectTypes; track trackById($index, projectType)) {
+               <option [value]="projectType.id">{{ projectType.name }}</option>
+               }
+            </select>
+         </div>
+
+         <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadProjects()">Search</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
+         </div>
       </div>
+   </div>
 
-      <div class="col-12 col-md-2">
-        <label class="form-label small" for="project-filter-type">Project Type</label>
-        <select id="project-filter-type" class="form-select form-select-sm" [(ngModel)]="selectedProjectTypeId"
-          (change)="loadProjects()">
-          <option value="">All type</option>
-          @for (projectType of projectTypes; track trackById($index, projectType)) {
-          <option [value]="projectType.id">{{ projectType.name }}</option>
-          }
-        </select>
+   <div class="stat-card">
+      @if (loading) {
+      <div class="text-muted">Loading project data...</div>
+      } @else if (!rows.length) {
+      <div class="text-muted">No project data available.</div>
+      } @else {
+      <div class="table-responsive">
+         <table class="table table-sm table-hover align-middle">
+            <thead>
+               <tr>
+                  <th>ID</th>
+                  <th> Project name</th>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Billeable</th>
+                  <th>Product</th>
+                  <th>Period</th>
+                  <th>Status</th>
+                  <th class="text-end">Action</th>
+               </tr>
+            </thead>
+            <tbody>
+               @for (row of rows; track trackById($index, row)) {
+               <tr [class]="row.status === 1 ? '' : 'disabled'">
+                  <td>{{ row.id }}</td>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.clientName || row.clientId }}</td>
+                  <td>{{ row.projectTypeName || row.projectTypeId }}</td>
+                  <td>{{ row.projectBilleableName || row.projectBilleableId }}</td>
+                  <td>{{ row.productName || row.productId }}</td>
+                  <td>{{ row.startDate | date: 'dd MMM yyyy' }} - {{ row.endDate | date: 'dd MMM yyyy' }}</td>
+                  <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
+                  <td class="text-end action-buttons">
+                     <button type="button" class="btn btn-sm btn-outline-primary"
+                        (click)="goToDetail(row)">Detail</button>
+
+                  </td>
+               </tr>
+               }
+            </tbody>
+         </table>
       </div>
-
-      <div class="col-12 col-md-2 d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadProjects()">Search</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    @if (loading) {
-    <div class="text-muted">Loading projects...</div>
-    } @else if (!rows.length) {
-    <div class="text-muted">No project data.</div>
-    } @else {
-    <div class="table-responsive">
-      <table class="table table-sm table-hover align-middle">
-        <thead>
-          <tr>
-            <th>ID</th>
-
-            <th>Name</th>
-            <th>Product</th>
-            <th>Start Date</th>
-            <th>Client</th>
-            <th>Status</th>
-            <th class="text-end">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows; track trackById($index, row)) {
-          <tr>
-            <td>{{ row.id }}</td>
-            <td>{{ row.name }}</td>
-            <td>{{ row.productName || row.productId }} - {{ row.projectTypeName || row.projectTypeId }}</td>
-            <td>{{ row.startDate | date: 'mediumDate' }}</td>
-            <td>{{ row.clientName || row.clientId }}</td>
-            <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <td class="text-end action-buttons">
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
-              <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
-                (click)="deleteProject(row)">
-                {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
-              </button>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    }
-  </div>
+      }
+   </div>
 </div>
 
-<ng-template #createProjectModal>
-  <div class="modal-header">
-    <h5 class="modal-title">Create New Project</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
-  </div>
+<ng-template #projectFormModal>
+   <div class="modal-header">
+      <h5 class="modal-title">New Project</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+   </div>
 
-  <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
-    <div class="modal-body">
-      @if (loadingOptions) {
-      <div class="text-muted small mb-2">Loading options...</div>
-      }
+   <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
+      <div class="modal-body">
+         @if (loadingOptions) {
+         <div class="text-muted small mb-2">Loading reference data...</div>
+         }
 
-      <div class="row ">
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label class="form-label" for="project-id">Project ID (optional)</label>
-            <input id="project-id" class="form-control" name="id" [(ngModel)]="formModel.id"
-              placeholder="Auto generated if empty" />
-          </div>
+         <div class="table-responsive">
 
-          <div class="form-group">
-            <label class="form-label" for="project-name">Name</label>
-            <input id="project-name" class="form-control" name="name" [(ngModel)]="formModel.name"
-              placeholder="Enter project name" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="project-client">Client</label>
-            <select id="project-client" class="form-select" name="clientId" [(ngModel)]="formModel.clientId" required>
-              <option value="">Select client</option>
-              @for (client of clients; track trackById($index, client)) {
-              <option [value]="client.id">{{ client.name }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="project-type">Project Type</label>
-            <select id="project-type" class="form-select" name="projectTypeId" [(ngModel)]="formModel.projectTypeId"
-              required>
-              <option [ngValue]="0">Select project type</option>
-              @for (projectType of projectTypes; track trackById($index, projectType)) {
-              <option [ngValue]="projectType.id">{{ projectType.name }}</option>
-              }
-            </select>
-          </div>
+            <table class="table table-borderless table-sm mb-0">
+               <tbody>
+                  <tr>
+                     <td class="align-middle" style="width:30%"><label class="form-label  mb-0">Project Name
+                           <span class="text-danger">*</span></label></td>
+                     <td>
+                        <input id="master-project-name" class="form-control form-control-sm" name="name"
+                           [(ngModel)]="formModel.name" placeholder="Enter project name" required />
+                     </td>
+                  </tr>
 
-          <div class="form-group">
-            <label class="form-label" for="project-start-date">Start Date</label>
-            <div class="input-group">
-              <input id="project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
-                #d="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
-              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
-            </div>
-          </div>
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Client <span
+                              class="text-danger">*</span></label></td>
+                     <td>
+                        <select id="master-project-client" class="form-select form-select-sm" name="clientId"
+                           [(ngModel)]="formModel.clientId" required>
+                           @for (client of clients; track trackById($index, client)) {
+                           <option [value]="client.id">{{ client.name }}</option>
+                           }
+                        </select>
+                     </td>
+                  </tr>
 
-        </div>
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Project Type <span
+                              class="text-danger">*</span></label></td>
+                     <td>
+                        <select id="master-project-type" class="form-select form-select-sm" name="projectTypeId"
+                           [(ngModel)]="formModel.projectTypeId" required>
+                           @for (projectType of projectTypes; track trackById($index, projectType)) {
+                           <option [ngValue]="projectType.id">{{ projectType.name }}</option>
+                           }
+                        </select>
+                     </td>
+                  </tr>
 
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label class="form-label" for="project-billeable">Project Billeable</label>
-            <select id="project-billeable" class="form-select" name="projectBilleableId"
-              [(ngModel)]="formModel.projectBilleableId" required>
-              <option [ngValue]="0">Select billeable type</option>
-              @for (projectBilleable of projectBilleables; track trackById($index, projectBilleable)) {
-              <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
-              }
-            </select>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label" for="project-product">Product</label>
-            <select id="project-product" class="form-select" name="productId" [(ngModel)]="formModel.productId"
-              required>
-              <option [ngValue]="0">Select product</option>
-              @for (product of products; track trackById($index, product)) {
-              <option [ngValue]="product.id">{{ product.name }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="project-template-master">Template Master</label>
-            <input id="project-template-master" class="form-control" name="templateMaster"
-              [(ngModel)]="formModel.templateMaster" placeholder="Example: TB-001" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="project-end-date">End Date</label>
-            <div class="input-group">
-            <input id="project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
-              #e2="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
-            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
-            </div>
-          </div>
-        </div>
+                  <tr>
+                     <td class="align-middle">
+                        <label class="form-label mb-0">Group Phase <span class="text-danger">*</span></label>
+                        <div> <small><em>Ticket Parent categories </em></small></div>
+                     </td>
+                     <td>
+                        <select id="master-project-type" class="form-select form-select-sm"
+                           name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" required>
+                           @for (ticketCategory of ticketCategories; track trackById($index, ticketCategory)) {
+                           <option [ngValue]="ticketCategory.id">{{ ticketCategory.name }}</option>
+                           }
+                        </select>
+
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Billeable <span
+                              class="text-danger">*</span></label></td>
+                     <td>
+                        <select id="master-project-billeable" class="form-select form-select-sm"
+                           name="projectBilleableId" [(ngModel)]="formModel.projectBilleableId" required>
+                           @for (projectBilleable of projectBilleables; track trackById($index,
+                           projectBilleable)) {
+                           <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
+                           }
+                        </select>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Product <span
+                              class="text-danger">*</span></label></td>
+                     <td>
+                        <select id="master-project-product" class="form-select form-select-sm" name="productId"
+                           [(ngModel)]="formModel.productId" required>
+                           @for (product of products; track trackById($index, product)) {
+                           <option [ngValue]="product.id">{{ product.name }}</option>
+                           }
+                        </select>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Template Master</label></td>
+                     <td>
+                        <input id="master-project-template" class="form-control form-control-sm" name="templateMaster"
+                           [(ngModel)]="formModel.templateMaster" placeholder="Contoh: TMP-001" />
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Start Date</label></td>
+                     <td>
+                        <div class="input-group">
+                           <input id="master-project-start-date" class="form-control form-control-sm" type="text"
+                              name="startDate" ngbDatepicker #startDatePicker="ngbDatepicker" readonly
+                              [(ngModel)]="formModel.startDate" required />
+                           <button class="btn btn-outline-secondary btn-sm bi bi-calendar3"
+                              (click)="startDatePicker.toggle()" type="button"></button>
+                        </div>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">End Date</label></td>
+                     <td>
+                        <div class="input-group">
+                           <input id="master-project-end-date" class="form-control form-control-sm" type="text"
+                              name="endDate" ngbDatepicker #endDatePicker="ngbDatepicker" readonly
+                              [(ngModel)]="formModel.endDate" required />
+                           <button class="btn btn-outline-secondary btn-sm bi bi-calendar3"
+                              (click)="endDatePicker.toggle()" type="button"></button>
+                        </div>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Status</label></td>
+                     <td>
+                        <select id="master-project-status" class="form-select form-select-sm" name="status"
+                           [(ngModel)]="formModel.status" required disabled>
+                           <option [ngValue]="1">Active</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td class="align-middle"><label class="form-label mb-0">Project Manager <span
+                              class="text-danger">*</span></label></td>
+                     <td>
+                        <input id="master-project-user-manager" class="form-control form-control-sm bg-light"
+                           type="text" name="userManager" readonly [(ngModel)]="formModel.userManager" required />
+
+                     </td>
+                  </tr>
+                  <tr>
+                     <td class="align-top"><label class="form-label mb-0"> Users as Project's Team</label></td>
+                     <td>
+                        <table class="table table-sm table-hover align-middle">
+                           <thead>
+                              <tr>
+                                 <th class="text-center"></th>
+                                 <th>Name [ID]</th>
+                                 <th>Auth Level</th>
+
+                                 <th class="text-center">Manager</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @for (user of users; track user.id ; let i = $index) {
+                              <tr>
+                                 <td class="text-center" (click)="user.checked = !user.checked">
+                                    @if(user.checked !== true) {
+                                    <i class="bi bi-square"></i>
+                                    } @else {
+                                    <i class="bi bi-check-square-fill"></i>
+                                    }
+                                 </td>
+
+                                 <td> {{ user.name }} [{{ user.id }}] </td>
+                                 <td> {{ user.userAuthLevel }} </td>
+
+
+                                 <td class="text-center" (click)="toggleManager(i)">
+
+                                    @if(user.asManager !== true) {
+                                    <i class="bi bi-circle"></i>
+                                    } @else {
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    }
+                                 </td>
+                              </tr>
+                              }
+                           </tbody>
+                        </table>
+
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
       </div>
-    </div>
 
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary" [disabled]="projectFormNg.invalid || saving || loadingOptions">
-        {{ saving ? 'Saving...' : 'Save Project' }}
-      </button>
-    </div>
-  </form>
-
+      <div class="modal-footer">
+         <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
+         <button type="submit" class="btn btn-primary" [disabled]="projectFormNg.invalid || saving || loadingOptions">
+            {{ saving ? 'Saving...' : 'Save Project' }}
+         </button>
+      </div>
+   </form>
 </ng-template>

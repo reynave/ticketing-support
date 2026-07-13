@@ -1,0 +1,87 @@
+<div class="container">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Ticket Category Detail</div>
+      <div class="page-subtitle">Update category name, hierarchy, weight, and status.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back To List</a>
+    </div>
+  </div>
+
+  @if (message) {
+  <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    @if (loading) {
+    <div class="text-muted">Loading ticket category detail...</div>
+    } @else if (!category) {
+    <div class="text-muted">Ticket category not found.</div>
+    } @else {
+    <div class="row g-2">
+      <div class="col-12 col-md-3"><strong>ID:</strong> {{ category.id }}</div>
+      <div class="col-12 col-md-5"><strong>Name:</strong> {{ category.name }}</div>
+      <div class="col-12 col-md-2"><strong>Weight:</strong> {{ category.weight }}</div>
+      <div class="col-12 col-md-2"><strong>Status:</strong> {{ category.status === 1 ? 'Active' : 'Inactive' }}</div>
+      <div class="col-12"><strong>Parent:</strong> {{ getParentName(category.parentId) }}</div>
+    </div>
+    }
+  </div>
+
+  <div class="stat-card">
+    <form #ticketCategoryForm="ngForm" (ngSubmit)="save(ticketCategoryForm)">
+      <div class="table-responsive">
+        <table class="table table-borderless table-sm mb-0">
+          <tbody>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Name <span class="text-danger">*</span></label></td>
+              <td>
+                <input class="form-control form-control-sm" name="name" [(ngModel)]="formModel.name" required />
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Parent</label></td>
+              <td>
+                <select class="form-select form-select-sm" name="parentId" [(ngModel)]="formModel.parentId" [disabled]="loadingParents">
+                  <option [ngValue]="0">Root</option>
+                  @for (parent of parentOptions; track parent.id) {
+                  @if (parent.id !== categoryId) {
+                  <option [ngValue]="parent.id">{{ parent.name }}</option>
+                  }
+                  }
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Weight <span class="text-danger">*</span></label></td>
+              <td>
+                <input class="form-control form-control-sm" type="number" name="weight" [(ngModel)]="formModel.weight" required />
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Status</label></td>
+              <td>
+                <select class="form-select form-select-sm" name="status" [(ngModel)]="formModel.status">
+                  <option [ngValue]="1">Active</option>
+                  <option [ngValue]="0">Inactive</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving || ticketCategoryForm.invalid">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

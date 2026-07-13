@@ -135,7 +135,7 @@ export class TaskListComponent implements OnInit{
             this.apiService.get('/user', { userTypeId: 1, status: 1 }),
           ),
           firstValueFrom(
-            this.apiService.get('/master/ticket-categories', { presence: 1 }),
+            this.apiService.get('/ticket-categories', { presence: 1 }),
           ),
         ]);
 

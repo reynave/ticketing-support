@@ -54,7 +54,7 @@
   <div class="sidebar-section">
     <div class="sidebar-label">Master Data</div>
     @for (menu of masterMenus; track menu.key) {
-    <a [routerLink]="menu.path ? [menu.path] : ['/master', menu.key]" routerLinkActive="active" class="sidebar-link">
+    <a [routerLink]="menu.route ? [menu.route] : ['/master', menu.key]" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
       {{ menu.label }}
     </a>

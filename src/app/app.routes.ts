@@ -3,8 +3,8 @@ import { authGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { MasterHomeComponent } from './features/master/master-home/master-home.component';
 import { MasterManageComponent } from './features/master/master-manage/master-manage.component';
-import { MasterProjectComponent } from './features/master/master-project/master-project.component';
-import { MasterProjectDetailComponent } from './features/master/master-project/master-project-detail/master-project-detail.component';
+import { MasterTicketCategoriesComponent } from './features/master/master-ticket-categories/master-ticket-categories.component';
+import { MasterTicketCategoryDetailComponent } from './features/master/master-ticket-categories/master-ticket-category-detail/master-ticket-category-detail.component';
 import { ClientListComponent } from './features/client/client-list/client-list.component';
 import { ClientDetailComponent } from './features/client/client-detail/client-detail.component';
 import { UserListComponent } from './features/user/user-list/user-list.component';
@@ -59,7 +59,7 @@ export const routes: Routes = [
 				component: ProjectListComponent,
 			},
 			{
-				path: 'projects/:id',
+				path: 'project/:id',
 				component: ProjectDetailComponent,
 			},
 			{
@@ -84,13 +84,14 @@ export const routes: Routes = [
 				component: MasterHomeComponent,
 			},
 			{
-				path: 'master-project',
-				component: MasterProjectComponent,
+				path: 'master-ticket-categories',
+				component: MasterTicketCategoriesComponent,
 			},
 			{
-				path: 'master-project/:id',
-				component: MasterProjectDetailComponent,
+				path: 'master-ticket-categories/:id',
+				component: MasterTicketCategoryDetailComponent,
 			},
+			 
 			{
 				path: 'master/:masterKey',
 				component: MasterManageComponent,

@@ -13,9 +13,10 @@ export class MasterHomeComponent {
   readonly masterMenus = [
     { key: 'industry', label: 'Industry' },
     { key: 'product', label: 'Product' },
-    { key: 'project-master', label: 'Project Master', route: '/master-project' },
+    { key: 'project', label: 'Project', route: '/projects' },
     { key: 'project-type', label: 'Project Type' },
     { key: 'project-billeable', label: 'Project Billeable' },
+    { key: 'ticket-categories', label: 'Ticket Categories', route: '/master-ticket-categories' },
     { key: 'project-categories', label: 'Project Categories' },
     { key: 'user-auth-level', label: 'User Auth Level' },
     { key: 'user-type', label: 'User Type' },

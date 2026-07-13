@@ -1,10 +1,10 @@
 <div class="container py-3 project-detail-page">
   <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <div>
-      <h5 class="fw-bold mb-0">Project Detail</h5>
-      <p class="text-muted small mb-0">View and update project information in one place.</p>
+      <h5 class="fw-bold mb-0"> Project Detail</h5>
+      <p class="text-muted small mb-0">Detail dan edit project dari endpoint standalone project master.</p>
     </div>
-    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
+    <a class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</a>
   </div>
 
   @if (message) {
@@ -40,12 +40,9 @@
           } @else {
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
           }
-          <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteProject()">
-            {{ deleting ? 'Deleting...' : 'Delete' }}
-          </button>
+
         </div>
       </div>
-
 
       <div class="card-body p-3">
         @if (loadingOptions) {
@@ -58,28 +55,41 @@
             <input id="detail-project-id" class="form-control form-control-sm" [value]="project.id" disabled />
           </div>
 
-
-
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-status">Status</label>
             <select id="detail-project-status" class="form-select form-select-sm" name="status"
               [(ngModel)]="formModel.status" [disabled]="formMode === 'view'">
               <option [ngValue]="1">Active</option>
-              <option [ngValue]="0">Inactive</option>
+              <option [ngValue]="0">Closed Project </option>
             </select>
           </div>
+
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-name">Project Name</label>
-            <input id="detail-project-name" class="form-control form-control-sm" name="name" [(ngModel)]="project.name"
-              [disabled]="formMode === 'view'" />
+            <input id="detail-project-name" class="form-control form-control-sm" name="name"
+              [(ngModel)]="formModel.name" [disabled]="formMode === 'view'" required />
           </div>
+
+            <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold" for="detail-project-ticket-categories">Ticket Categories <span
+                class="text-danger">*</span></label>
+ 
+            <select id="detail-project-ticket-categories" class="form-select form-select-sm" name="ticketCategoriesParentId"
+              [(ngModel)]="formModel.ticketCategoriesParentId" [disabled]="formMode === 'view'" required>
+              
+              @for (ticketCategory of ticketCategories; track ticketCategory.id) {
+              <option [ngValue]="ticketCategory.id">{{ ticketCategory.name }}</option>
+              }
+            </select>
+          </div>
+
 
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-client">Client <span
                 class="text-danger">*</span></label>
             <select id="detail-project-client" class="form-select form-select-sm" name="clientId"
               [(ngModel)]="formModel.clientId" [disabled]="formMode === 'view'" required>
-              <option value="">Select client</option>
+
               @for (client of clients; track client.id) {
               <option [value]="client.id">{{ client.name }}</option>
               }
@@ -103,21 +113,19 @@
                 class="text-danger">*</span></label>
             <select id="detail-project-billeable" class="form-select form-select-sm" name="projectBilleableId"
               [(ngModel)]="formModel.projectBilleableId" [disabled]="formMode === 'view'" required>
-              <option [ngValue]="0">Select billeable type</option>
+
               @for (projectBilleable of projectBilleables; track projectBilleable.id) {
               <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
               }
             </select>
           </div>
 
-
-
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-product">Product <span
                 class="text-danger">*</span></label>
             <select id="detail-project-product" class="form-select form-select-sm" name="productId"
               [(ngModel)]="formModel.productId" [disabled]="formMode === 'view'" required>
-              <option [ngValue]="0">Select product</option>
+
               @for (product of products; track product.id) {
               <option [ngValue]="product.id">{{ product.name }}</option>
               }
@@ -127,46 +135,196 @@
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-template">Template Master</label>
             <input id="detail-project-template" class="form-control form-control-sm" name="templateMaster"
-              [(ngModel)]="formModel.templateMaster" [readonly]="formMode === 'view'" placeholder="Example: TB-001" />
+              [(ngModel)]="formModel.templateMaster" [readonly]="formMode === 'view'" placeholder="Example: TMP-001" />
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-startDate">Start Date <span
+            <label class="form-label small fw-semibold" for="detail-project-start-date">Start Date <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
-                #d="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
-              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+              <input id="detail-project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
+                #startDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()" type="button"
+                [disabled]="formMode === 'view'"></button>
             </div>
-
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-endDate">End Date <span
+            <label class="form-label small fw-semibold" for="detail-project-end-date">End Date <span
                 class="text-danger">*</span></label>
-           <div class="input-group">
-            <input id="project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
-              #e2="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
-            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
+            <div class="input-group">
+              <input id="detail-project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
+                #endDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()" type="button"
+                [disabled]="formMode === 'view'"></button>
             </div>
           </div>
 
-          <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-inputDate">Input Date</label>
-            <input id="detail-project-inputDate" class="form-control form-control-sm"
-              [value]="project.inputDate ? (project.inputDate | date:'short') : '-'" disabled />
-          </div>
+          <div class="col-12 col-md-12 mt-3">
 
-          <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-updateDate">Update Date</label>
-            <input id="detail-project-updateDate" class="form-control form-control-sm"
-              [value]="project.updateDate ? (project.updateDate | date:'short') : '-'" disabled />
+            <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span
+                class="text-danger">*</span></label>
+
+            @if(formMode === 'view') {
+            <div class="small text-muted mb-2">List of users assigned to this project </div>
+            @for (user of users; track user.id ; let i = $index) {
+
+            @if(user.checked === true) {
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-check-square-fill text-success"></i>
+              <span>{{ user.name }} [{{ user.id }}] - {{ user.userAuthLevel }}</span>
+              @if(user.asManager === true) {
+              <span class="badge bg-primary badge-sm">Manager</span>
+              }
+            </div>
+            }
+            }
+
+            } @else {
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th class="text-center"></th>
+                  <th>Name [ID]</th>
+                  <th>Auth Level</th>
+                  <th class="text-center">Manager</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of users; track user.id ; let i = $index) {
+
+                <tr>
+
+                  <td class="text-center" (click)="user.checked = !user.checked">
+                    @if(user.checked !== true) {
+                    <i class="bi bi-square"></i>
+                    } @else {
+                    <i class="bi bi-check-square-fill"></i>
+                    }
+                  </td>
+
+
+                  <td> {{ user.name }} [{{ user.id }}] </td>
+                  <td> {{ user.userAuthLevel }} </td>
+
+
+
+                  <td class="text-center" (click)="toggleManager(i)">
+
+                    @if(user.asManager !== true) {
+                    <i class="bi bi-circle"></i>
+                    } @else {
+                    <i class="bi bi-check-circle-fill"></i>
+                    }
+                  </td>
+
+                </tr>
+                }
+              </tbody>
+            </table>
+            }
           </div>
         </div>
       </div>
-
-
     </form>
   </div>
   }
+
+
+
+  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+	<li [ngbNavItem]="1">
+		<button ngbNavLink>TASKS</button>
+		<ng-template ngbNavContent>
+			  <table class="table table-sm table-hover ">
+        <thead>
+          <tr>
+            <th >ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of task; track t.id) {
+          <tr>
+            <td >{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.ticketTypeName }}</td>
+            <td>{{ t.ticketStatusName }}</td>
+            <td>{{ t.ticketPriorityName }}</td>
+            <td>{{ t.createdAt | date: 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+		</ng-template>
+	</li>
+	<li [ngbNavItem]="2">
+		<button ngbNavLink>CASES</button>
+		<ng-template ngbNavContent>
+		<table class="table table-sm table-hover ">
+        <thead>
+          <tr>
+            <th >ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of cases; track t.id) {
+          <tr>
+            <td >{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.ticketTypeName }}</td>
+            <td>{{ t.ticketStatusName }}</td>
+            <td>{{ t.ticketPriorityName }}</td>
+            <td>{{ t.createdAt | date: 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+		</ng-template>
+	</li>
+	<li [ngbNavItem]="3">
+		<button ngbNavLink>CHANGES REQUESTS</button>
+		<ng-template ngbNavContent>
+			  <table class="table table-sm table-hover ">
+        <thead>
+          <tr>
+            <th >ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of cr; track t.id) {
+          <tr>
+            <td >{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.ticketTypeName }}</td>
+            <td>{{ t.ticketStatusName }}</td>
+            <td>{{ t.ticketPriorityName }}</td>
+            <td>{{ t.createdAt | date: 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+		</ng-template>
+	</li>
+</ul>
+
+
+<div [ngbNavOutlet]="nav" class="p-3 bg-white border border-top-0"></div>
+
+ 
+
 </div>

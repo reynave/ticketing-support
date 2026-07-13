@@ -215,7 +215,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           this.apiService.get('/master/ticketSeverity', { presence: 1 }),
         ),
         firstValueFrom(
-          this.apiService.get('/master/ticket-categories', { presence: 1 }),
+          this.apiService.get('/ticket-categories', { presence: 1 }),
         ),
       ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)

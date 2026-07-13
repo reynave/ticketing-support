@@ -44,8 +44,7 @@ export class AdminLayoutComponent implements OnInit {
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain' },
     { key: 'product', label: 'Product', icon: 'inventory_2' },
-    { key: 'project-master', path: '/master-project', label: 'Project Master', icon: 'folder_managed' },
-    { key: 'project-type', label: 'Project Type', icon: 'schema' },
+     { key: 'project-type', label: 'Project Type', icon: 'schema' },
     { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
     // {
     //   key: 'project-categories',
@@ -56,6 +55,7 @@ export class AdminLayoutComponent implements OnInit {
       key: 'ticket-categories',
       label: 'Ticket Categories',
       icon: 'category',
+      route: '/master-ticket-categories',
     },
     { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },
     { key: 'user-type', label: 'User Type', icon: 'groups' },

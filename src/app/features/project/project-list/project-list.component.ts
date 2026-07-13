@@ -8,7 +8,7 @@ import { ApiService } from '../../../core/services/api.service';
 
 interface ProjectFormModel {
   id: string;
-  name : string;
+  name: string;
   projectTypeId: number;
   projectBilleableId: number;
   productId: number;
@@ -17,13 +17,15 @@ interface ProjectFormModel {
   endDate: { year: number; month: number; day: number };
   status: number;
   templateMaster: string;
+  userManager : string;
+  ticketCategoriesParentId : number;
 }
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, NgbModalModule, NgbDatepickerModule],
-  templateUrl: './project-list.component.html',
+   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.css',
 })
 export class ProjectListComponent {
@@ -31,7 +33,7 @@ export class ProjectListComponent {
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
 
-  @ViewChild('createProjectModal') createProjectModal?: TemplateRef<unknown>;
+  @ViewChild('projectFormModal') projectFormModal?: TemplateRef<unknown>;
 
   private modalRef: NgbModalRef | null = null;
 
@@ -40,7 +42,7 @@ export class ProjectListComponent {
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
   products: any[] = [];
-
+  ticketCategories: any[] = [];
   loading = false;
   loadingOptions = false;
   saving = false;
@@ -53,12 +55,12 @@ export class ProjectListComponent {
   selectedStatus = '';
   selectedClientId = '';
   selectedProjectTypeId = '';
-
+  
   formModel: ProjectFormModel = this.defaultForm();
-
+    users : any = [];
   constructor() {
     this.loadProjects();
-    this.loadOptions();
+    void this.loadOptions();
   }
 
   loadProjects(): void {
@@ -91,7 +93,7 @@ export class ProjectListComponent {
       error: (error) => {
         this.loading = false;
         this.rows = [];
-        this.errorMessage = error?.error?.message || 'Failed to load projects.';
+        this.errorMessage = error?.error?.message || 'Failed to load project master data.';
       },
     });
   }
@@ -108,29 +110,58 @@ export class ProjectListComponent {
     this.loadingOptions = true;
 
     try {
-      const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse] = await Promise.all([
+      const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse, userResponse, ticketCategoriesResponse] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })), 
+        firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/product', { status: 1 })),
+        firstValueFrom(this.apiService.get('/user', { status: 1 })),
+        firstValueFrom(this.apiService.get('/ticket-categories', { status: 1 ,parentId :0})),
       ]);
+ 
 
       this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
       this.projectTypes = Array.isArray(projectTypeResponse?.data) ? projectTypeResponse.data : [];
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
       this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
+     const users = Array.isArray(userResponse?.data) ? userResponse.data : [];
+      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
+
+      for (const user of users) {
+        const arr = {
+            id: user.id,
+            name : `${user.firstName} ${user.lastName}`,
+            userAuthLevel : user.userAuthLevel || '',
+            checkbox : false,
+            asManager : false,
+        }
+        this.users.push(arr); 
+      }
+
     } catch {
       this.clients = [];
       this.projectTypes = [];
       this.projectBilleables = [];
       this.products = [];
+      this.users = [];
+      this.ticketCategories = [];
     } finally {
       this.loadingOptions = false;
     }
   }
+ 
+  toggleManager(index: number): void {
+    for (let i = 0; i < this.users.length; i++) { 
+        this.users[i].asManager = false;
+    }
+    this.users[index].asManager = true;
+    this.users[index].checked = true;
+    
+    this.formModel.userManager = this.users[index].name;
 
+  }
   openCreateModal(): void {
-    if (!this.createProjectModal) {
+    if (!this.projectFormModal) {
       return;
     }
 
@@ -138,11 +169,21 @@ export class ProjectListComponent {
     this.errorMessage = '';
     this.message = '';
 
-    this.modalRef = this.modalService.open(this.createProjectModal, {
+    this.modalRef = this.modalService.open(this.projectFormModal, {
       size: 'lg',
       centered: true,
       backdrop: 'static',
     });
+  }
+
+  goToDetail(row: any): void {
+    const id = String(row?.id || '').trim();
+
+    if (!id) {
+      return;
+    }
+
+    void this.router.navigate(['/project', id]);
   }
 
   closeModal(): void {
@@ -158,13 +199,15 @@ export class ProjectListComponent {
     const payload: any = {
       name: this.formModel.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
-      projectBilleableId: Number(this.formModel.projectBilleableId), 
+      projectBilleableId: Number(this.formModel.projectBilleableId),
       productId: Number(this.formModel.productId),
       clientId: String(this.formModel.clientId),
       startDate: this.formModel.startDate,
       endDate: this.formModel.endDate,
       status: Number(this.formModel.status),
       templateMaster: this.formModel.templateMaster.trim() || '0',
+      projectUsers  : this.users,
+      ticketCategoriesParentId : Number(this.formModel.ticketCategoriesParentId),
     };
 
     if (this.formModel.id.trim()) {
@@ -175,36 +218,27 @@ export class ProjectListComponent {
     this.errorMessage = '';
     this.message = '';
 
-    this.apiService.post('/project', payload).subscribe({
+    const request$ = this.apiService.post('/project', payload);
+
+    request$.subscribe({
       next: (response) => {
         this.saving = false;
         this.closeModal();
-
         const id = String(response?.data?.id || '').trim();
 
         if (id) {
-          void this.router.navigate(['/projects', id]);
+          void this.router.navigate(['/project', id]);
           return;
         }
 
-        this.message = response?.message || 'Project created.';
+        this.message = response?.message || 'Project master saved.';
         this.loadProjects();
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to create project.';
+        this.errorMessage = error?.error?.message || 'Failed to save project master data.';
       },
     });
-  }
-
-  goToDetail(row: any): void {
-    const id = String(row?.id || '').trim();
-
-    if (!id) {
-      return;
-    }
-
-    void this.router.navigate(['/projects', id]);
   }
 
   deleteProject(row: any): void {
@@ -226,12 +260,12 @@ export class ProjectListComponent {
     this.apiService.delete(`/project/${id}`).subscribe({
       next: (response) => {
         this.deletingId = null;
-        this.message = response?.message || 'Project deleted.';
+        this.message = response?.message || 'Project master deleted.';
         this.loadProjects();
       },
       error: (error) => {
         this.deletingId = null;
-        this.errorMessage = error?.error?.message || 'Failed to delete project.';
+        this.errorMessage = error?.error?.message || 'Failed to delete project master data.';
       },
     });
   }
@@ -240,25 +274,32 @@ export class ProjectListComponent {
     return row?.id;
   }
 
-  private defaultForm(): ProjectFormModel {
+  private defaultDateStruct(): { year: number; month: number; day: number } {
     const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    //const formattedToday = `${yyyy}-${mm}-${dd}`;
-    const formattedToday = { year: yyyy, month: Number(mm), day: Number(dd) };
+
+    return {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate(),
+    };
+  }
+
+  private defaultForm(): ProjectFormModel {
+    const today = this.defaultDateStruct();
 
     return {
       id: '',
       name: '',
       projectTypeId: 0,
-      projectBilleableId: 0, 
+      projectBilleableId: 0,
       productId: 0,
       clientId: '',
-      startDate: formattedToday,
-      endDate: formattedToday,
+      startDate: today,
+      endDate: today,
       status: 1,
-      templateMaster: '',
+      templateMaster: '0',
+        userManager : '',
+        ticketCategoriesParentId : 0,
     };
   }
 }
