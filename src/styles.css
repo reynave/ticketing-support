@@ -337,3 +337,7 @@ thead th{
 tr.disabled td{
 	color: var(--color-text-faint);
 }
+
+.form-label{
+	margin-bottom: 0.3rem;
+}

@@ -84,9 +84,13 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
-
+  
   descriptionLog: string = '';
-  starDateTime: NgbDateStruct | null = null;
+  starDateTime = {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+      day: new Date().getDate(),
+    };
   closeDateTime: NgbDateStruct | null = null;
   starTime: string = '';
   closeTime: string = '';
@@ -103,6 +107,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     description: '',
   };
   ticketStatusId : number = 0;
+  assignTo : string = '';
   me : any = {}
   ngOnInit(): void {
      this.me = this.authService.decodeToken();
@@ -138,6 +143,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
+        this.assignTo = this.task.assignTo;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan task (ticketTypeId bukan 1).';
@@ -173,6 +179,24 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   } 
  
   open(content: any, log: any = []): void {
+    console.log('open modal for log:', log);
+    const today = new Date();
+
+    this.starDateTime = {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate(),
+    };
+
+    this.closeDateTime = {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate(),
+    };
+
+    this.starTime = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+    this.closeTime = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes() + 1).padStart(2, '0')}`;
+
     if (log.id != 0) {
       this.replyLog.id = log.id;
       this.replyLog.description = log.description;
@@ -182,11 +206,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         description: '',
       };
     }
-
-    this.starDateTime = null;
-    this.closeDateTime = null;
-    this.starTime = '';
-    this.closeTime = '';
+ 
 
     this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
@@ -209,7 +229,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
             this.apiService.get('/user', { presence: 1, status: 1 }),
           ),
           firstValueFrom(
-            this.apiService.get('/master/ticketStatus', { presence: 1 }),
+            this.apiService.get('/master/status/task', { presence: 1 }),
           ),
         ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
@@ -327,6 +347,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       ratesBy: Number(this.formModel.ratesBy),
       issueNo: this.formModel.issueNo.trim(),
       wasTicketStatusId : this.ticketStatusId,
+      wasAssignTo : this.assignTo,
       updateBy :this.formModel.submitBy
     };
     console.log('saveTask payload', payload);

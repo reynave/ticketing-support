@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -39,7 +45,7 @@ interface TaskFormModel {
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css',
 })
-export class TaskListComponent implements OnInit{
+export class TaskListComponent implements OnInit {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
@@ -51,14 +57,8 @@ export class TaskListComponent implements OnInit{
   private modalRef: NgbModalRef | null = null;
 
   readonly taskTypeId = 1;
-  readonly ticketStatusOptions = [
-    { id: 1, name: 'Open' },
-    { id: 900, name: 'Closed' },
-      { id: 990, name: 'Cancelled' },
-    
-    
-  ];
-  closed : boolean = false;
+  ticketStatusOptions: any[] = [];
+  closed: boolean = false;
   rows: any[] = [];
   projects: any[] = [];
   internalUsers: any[] = [];
@@ -69,6 +69,7 @@ export class TaskListComponent implements OnInit{
   saving = false;
   deletingId: string | null = null;
 
+  selectChildCategory : any = [];
   message = '';
   errorMessage = '';
 
@@ -78,11 +79,9 @@ export class TaskListComponent implements OnInit{
 
   formModel: TaskFormModel = this.defaultForm();
   payload: any = null;
-  constructor() { 
-  }
+  constructor() {}
   ngOnInit(): void {
-   
-    console.log(this.activeRouter.snapshot.queryParams, this.closed)
+    console.log(this.activeRouter.snapshot.queryParams, this.closed);
     this.payload = this.authService.decodeToken();
     this.formModel = this.defaultForm();
     this.loadTasks();
@@ -96,9 +95,9 @@ export class TaskListComponent implements OnInit{
 
     const query: any = {
       ticketTypeId: this.taskTypeId,
-      closed : 0,
+      closed: 0,
     };
-    query['closed'] =  this.closed;
+    query['closed'] = this.closed;
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
     }
@@ -128,7 +127,7 @@ export class TaskListComponent implements OnInit{
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse, ticketCategoriesResponse] =
+      const [projectResponse, internalUserResponse, ticketCategoriesResponse, ticketStatusResponse] =
         await Promise.all([
           firstValueFrom(this.apiService.get('/project', { status: 1 })),
           firstValueFrom(
@@ -136,6 +135,9 @@ export class TaskListComponent implements OnInit{
           ),
           firstValueFrom(
             this.apiService.get('/ticket-categories', { presence: 1 }),
+          ),
+          firstValueFrom(
+            this.apiService.get('/master/status/task', { presence: 1 }),
           ),
         ]);
 
@@ -149,13 +151,39 @@ export class TaskListComponent implements OnInit{
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
         : [];
+      this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
+        ? ticketStatusResponse.data
+        : [];
     } catch {
       this.projects = [];
       this.internalUsers = [];
       this.ticketCategories = [];
+      this.ticketStatusOptions = [];
     } finally {
       this.loadingOptions = false;
     }
+  }
+
+  selectTaskCategory(): void {
+    console.log(
+      'Selected Project ID:',
+      this.formModel.projectId,
+      this.projects,
+    );
+
+    //  saya mau mendapatkan array this.projects yang memiliki id sama dengan this.formModel.projectId
+    const selectedProject = this.projects.find(
+      (project) => project.id === this.formModel.projectId,
+    );
+    console.log('Selected Project:', selectedProject, selectedProject?.ticketCategoriesParentId);
+    
+    console.log('All Ticket Categories:', this.ticketCategories);
+    // saya mau mendapatkan array berdsarkan id dari selectedProject?.ticketCategoriesParentId
+    const selectedTicketCategories = this.ticketCategories.filter(
+      (category) => category.id === selectedProject?.ticketCategoriesParentId,
+    );
+    this.selectChildCategory = selectedTicketCategories[0]?.children || []; 
+    console.log('Selected Child Categories:', this.selectChildCategory);
   }
 
   resetFilter(): void {
@@ -194,20 +222,30 @@ export class TaskListComponent implements OnInit{
     const payload = {
       id: this.formModel.id.trim() || undefined,
       ticketTypeId: this.taskTypeId,
-    //  crNoRef: this.formModel.crNoRef.trim(),
+      //  crNoRef: this.formModel.crNoRef.trim(),
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
       submitBy: this.payload?.id || '', // Use the decoded token's user ID or default to 1
-     submitDate: this.formModel.submitDate['year']+'-'+String(this.formModel.submitDate['month']).padStart(2, '0')+'-'+String(this.formModel.submitDate['day']).padStart(2, '0'),
-      targetCompletionDate: this.formModel.targetCompletionDate['year']+'-'+String(this.formModel.targetCompletionDate['month']).padStart(2, '0')+'-'+String(this.formModel.targetCompletionDate['day']).padStart(2, '0'),
+      submitDate:
+        this.formModel.submitDate['year'] +
+        '-' +
+        String(this.formModel.submitDate['month']).padStart(2, '0') +
+        '-' +
+        String(this.formModel.submitDate['day']).padStart(2, '0'),
+      targetCompletionDate:
+        this.formModel.targetCompletionDate['year'] +
+        '-' +
+        String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
+        '-' +
+        String(this.formModel.targetCompletionDate['day']).padStart(2, '0'),
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
 
       ticketStatusId: Number(this.formModel.ticketStatusId),
-    //  rating: Number(this.formModel.rating),
-    //  ratesBy: Number(this.formModel.ratesBy),
-    //  issueNo: this.formModel.issueNo.trim(),
+      //  rating: Number(this.formModel.rating),
+      //  ratesBy: Number(this.formModel.ratesBy),
+      //  issueNo: this.formModel.issueNo.trim(),
       ticketCategoryId: this.formModel.category,
     };
     console.log('Payload:', payload);
