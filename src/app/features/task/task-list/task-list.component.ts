@@ -127,12 +127,10 @@ export class TaskListComponent implements OnInit {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse, ticketCategoriesResponse, ticketStatusResponse] =
+      const [projectResponse, ticketCategoriesResponse, ticketStatusResponse] =
         await Promise.all([
           firstValueFrom(this.apiService.get('/project', { status: 1 })),
-          firstValueFrom(
-            this.apiService.get('/user', { userTypeId: 1, status: 1 }),
-          ),
+         
           firstValueFrom(
             this.apiService.get('/ticket-categories', { presence: 1 }),
           ),
@@ -145,9 +143,7 @@ export class TaskListComponent implements OnInit {
         ? projectResponse.data
         : [];
 
-      this.internalUsers = Array.isArray(internalUserResponse?.data)
-        ? internalUserResponse.data
-        : [];
+      
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
         : [];
@@ -165,25 +161,22 @@ export class TaskListComponent implements OnInit {
   }
 
   selectTaskCategory(): void {
-    console.log(
-      'Selected Project ID:',
-      this.formModel.projectId,
-      this.projects,
-    );
+    
 
     //  saya mau mendapatkan array this.projects yang memiliki id sama dengan this.formModel.projectId
     const selectedProject = this.projects.find(
       (project) => project.id === this.formModel.projectId,
     );
     console.log('Selected Project:', selectedProject, selectedProject?.ticketCategoriesParentId);
-    
-    console.log('All Ticket Categories:', this.ticketCategories);
+     
     // saya mau mendapatkan array berdsarkan id dari selectedProject?.ticketCategoriesParentId
     const selectedTicketCategories = this.ticketCategories.filter(
       (category) => category.id === selectedProject?.ticketCategoriesParentId,
     );
-    this.selectChildCategory = selectedTicketCategories[0]?.children || []; 
-    console.log('Selected Child Categories:', this.selectChildCategory);
+    this.selectChildCategory = selectedTicketCategories[0]?.children || [];  
+
+    this.internalUsers = selectedProject?.users || [];
+   
   }
 
   resetFilter(): void {

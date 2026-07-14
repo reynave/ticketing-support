@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -9,7 +15,7 @@ import {
   NgbModalRef,
 } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
-import { ApiService } from '../../../core/services/api.service'; 
+import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 interface CaseFormModel {
@@ -29,7 +35,7 @@ interface CaseFormModel {
   ratesBy: number;
   issueNo: string;
   category: number;
-  severityId : number;
+  severityId: number;
 }
 
 @Component({
@@ -39,7 +45,7 @@ interface CaseFormModel {
   templateUrl: './case-list.component.html',
   styleUrl: './case-list.component.css',
 })
-export class CaseListComponent implements OnInit{
+export class CaseListComponent implements OnInit {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
@@ -54,16 +60,15 @@ export class CaseListComponent implements OnInit{
   readonly ticketStatusOptions = [
     { id: 1, name: 'Open' },
     { id: 900, name: 'Closed' },
-      { id: 990, name: 'Cancelled' },
-    
-    
+    { id: 990, name: 'Cancelled' },
   ];
-  closed : boolean = false;
+  closed: boolean = false;
   rows: any[] = [];
   projects: any[] = [];
   internalUsers: any[] = [];
   ticketCategories: any[] = [];
   ticketSeverities: any[] = [];
+  selectChildCategory: any[] = [];
 
   loading = false;
   loadingOptions = false;
@@ -76,14 +81,12 @@ export class CaseListComponent implements OnInit{
   keyword = '';
   selectedProjectId = '';
   selectedTicketStatusId = '1';
-  
+
   formModel: CaseFormModel = this.defaultForm();
   payload: any = null;
-  constructor() { 
-  }
+  constructor() {}
   ngOnInit(): void {
-   
-    console.log(this.activeRouter.snapshot.queryParams, this.closed)
+    console.log(this.activeRouter.snapshot.queryParams, this.closed);
     this.payload = this.authService.decodeToken();
     this.formModel = this.defaultForm();
     this.loadCases();
@@ -97,9 +100,9 @@ export class CaseListComponent implements OnInit{
 
     const query: any = {
       ticketTypeId: this.taskTypeId,
-      closed : 0,
+      closed: 0,
     };
-    query['closed'] =  this.closed;
+    query['closed'] = this.closed;
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
     }
@@ -129,35 +132,32 @@ export class CaseListComponent implements OnInit{
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse, ticketCategoriesResponse, ticketSeveritiesResponse] =
-        await Promise.all([
-          firstValueFrom(this.apiService.get('/project', { status: 1 })),
-          firstValueFrom(
-            this.apiService.get('/user', { userTypeId: 1, status: 1 }),
-          ),
-          firstValueFrom(
-            this.apiService.get('/ticket-categories', { presence: 1 }),
-          ),  
-          firstValueFrom(
-            this.apiService.get('/master/ticket-severities', { presence: 1 }),
-          ),
-        ]);
+      const [
+        projectResponse,
+        ticketCategoriesResponse,
+        ticketSeveritiesResponse,
+      ] = await Promise.all([
+        firstValueFrom(this.apiService.get('/project', { status: 1 })),
+
+        firstValueFrom(
+          this.apiService.get('/ticket-categories', { presence: 1 }),
+        ),
+        firstValueFrom(
+          this.apiService.get('/master/ticket-severities', { presence: 1 }),
+        ),
+      ]);
 
       this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
         : [];
 
-      this.internalUsers = Array.isArray(internalUserResponse?.data)
-        ? internalUserResponse.data
-        : [];
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
         : [];
 
-        this.ticketSeverities = Array.isArray(ticketSeveritiesResponse?.data)
+      this.ticketSeverities = Array.isArray(ticketSeveritiesResponse?.data)
         ? ticketSeveritiesResponse.data
         : [];
-
     } catch {
       this.projects = [];
       this.internalUsers = [];
@@ -180,6 +180,7 @@ export class CaseListComponent implements OnInit{
     }
 
     this.formModel = this.defaultForm();
+    this.selectChildCategory = [];
     this.errorMessage = '';
     this.message = '';
 
@@ -190,34 +191,84 @@ export class CaseListComponent implements OnInit{
     });
   }
 
+  selectCaseCategory(): void {
+    const selectedProject = this.projects.find(
+      (project) => project.id === this.formModel.projectId,
+    );
+
+    const selectedTicketCategories = this.ticketCategories.filter(
+      (category) => category.id === selectedProject?.ticketCategoriesParentId,
+    );
+
+    this.selectChildCategory = selectedTicketCategories[0]?.children || [];
+
+    const hasSelectedCategory = this.selectChildCategory.some(
+      (category) => String(category.id) === String(this.formModel.category),
+    );
+
+    if (!hasSelectedCategory) {
+      this.formModel.category = 0;
+    }
+
+    this.internalUsers = selectedProject?.users || [];
+  }
+
   closeModal(): void {
     this.modalRef?.close();
     this.modalRef = null;
   }
+  addHour: number = 0; // Add 3 hours to the current time
 
+  getHours() {
+ 
+    // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
+    const severity = this.ticketSeverities.find(
+      (s : any) => s.id === this.formModel.severityId,
+    );
+    if (severity) {
+      this.addHour = severity.duration || 0;
+    } else {
+      this.addHour = 0;
+    }
+  }
   saveCase(form: NgForm): void {
     if (form.invalid || this.saving) {
       return;
     }
+    const today = new Date();
+
+    // saya mau hhiiss ditambah 3 jam
+    const addHour = this.addHour;
+    const threeHoursLater = new Date(
+      today.getTime() + addHour * 60 * 60 * 1000,
+    );
+    const hhiissPlus = threeHoursLater.toTimeString().split(' ')[0];
+    const deadlineDateTime =
+      `${this.formModel.submitDate['year']}-${this.formModel.submitDate['month']}-${this.formModel.submitDate['day']}` +
+      ' ' +
+      hhiissPlus;
 
     const payload = {
       id: this.formModel.id.trim() || undefined,
       ticketTypeId: this.taskTypeId,
-    //  crNoRef: this.formModel.crNoRef.trim(),
+      //  crNoRef: this.formModel.crNoRef.trim(),
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
       submitBy: this.payload?.id || '', // Use the decoded token's user ID or default to 1
       submitDate: this.toApiDateTimeNow(this.formModel.submitDate),
-      targetCompletionDate: this.toApiDateTimeNow(this.formModel.targetCompletionDate),
+      targetCompletionDate: this.toApiDateTimeNow(
+        this.formModel.targetCompletionDate,
+      ),
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
 
       ticketStatusId: Number(this.formModel.ticketStatusId),
-    //  rating: Number(this.formModel.rating),
-    //  ratesBy: Number(this.formModel.ratesBy),
+      //  rating: Number(this.formModel.rating),
+      //  ratesBy: Number(this.formModel.ratesBy),
       severityId: this.formModel.severityId,
       ticketCategoryId: this.formModel.category,
+      deadlineDateTime: deadlineDateTime,
     };
     console.log('Payload:', payload);
 
@@ -325,6 +376,7 @@ export class CaseListComponent implements OnInit{
       ratesBy: 0,
       issueNo: '',
       category: 0,
+      severityId: 0,
     };
   }
 
@@ -367,4 +419,3 @@ export class CaseListComponent implements OnInit{
     return `${yyyyMmDd}T${hour}:${minute}`;
   }
 }
-

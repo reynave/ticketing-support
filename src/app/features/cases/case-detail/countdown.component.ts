@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <span class="countdown" *ngIf="isValid; else invalidTpl">
-      <span>{{ days }}</span>d
+      <span *ngIf="days !== '00'">{{ days }} day{{ days !== '01' ? 's' : '' }}</span>
       <span>{{ hours }}</span>:<span>{{ minutes }}</span>:<span>{{ seconds }}</span>
     </span>
     <ng-template #invalidTpl>

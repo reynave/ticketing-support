@@ -15,6 +15,7 @@ import { ApiService } from '../../../core/services/api.service';
 import {
   ModalDismissReasons,
   NgbDatepickerModule,
+  NgbDateStruct,
   NgbModal,
 } from '@ng-bootstrap/ng-bootstrap';
 import { UploadedFile, UploadResponse } from './upload.model';
@@ -26,10 +27,18 @@ interface UploadRow {
 import { environment } from './../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { CountdownComponent } from './countdown.component';
+import { CaseCreateTaskModalComponent } from '../../../core/components/case-create-task-modal/case-create-task-modal.component';
 @Component({
   selector: 'app-case-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule, CountdownComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgxEditorModule,
+    NgbDatepickerModule,
+    CountdownComponent,
+    CaseCreateTaskModalComponent,
+  ],
   templateUrl: './case-detail.component.html',
   styleUrl: './case-detail.component.css',
 })
@@ -79,7 +88,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   saving = false;
   deleting = false;
   loadingRelatedTasks = false;
-  savingRelatedTask = false;
 
   formMode: 'view' | 'edit' = 'view';
   message = '';
@@ -87,9 +95,17 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   taskLogs: any = [];
   formModel: any = this.defaultForm();
-  relatedTaskForm: any = this.defaultRelatedTaskForm();
 
   descriptionLog: string = '';
+
+  starDateTime = {
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
+  };
+  closeDateTime: NgbDateStruct | null = null;
+  starTime: string = '';
+  closeTime: string = '';
 
   rows: UploadRow[] = [{ files: [], previews: [] }];
   uploadedFiles: UploadedFile[] = [];
@@ -105,6 +121,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   ticketStatusId: number = 0;
   remainingTime: any = 'test';
   me: any = {};
+  deadlineDateTime: string = '';
+  assignTo: string = '';
+  inputDate: string = '';
   ngOnInit(): void {
     this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
@@ -130,7 +149,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   goBack(): void {
     history.back();
   }
-   onFinished() {
+  onFinished() {
     console.log('Countdown selesai!');
   }
 
@@ -143,6 +162,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
+        this.deadlineDateTime = this.task.deadlineDateTime;
+        this.inputDate = this.task.inputDate;
+        this.assignTo = this.task.assignTo;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan case (ticketTypeId bukan 2).';
@@ -178,6 +200,23 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   }
 
   open(content: any, log: any = []): void {
+    const today = new Date();
+
+    this.starDateTime = {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate(),
+    };
+
+    this.closeDateTime = {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate(),
+    };
+
+    this.starTime = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+    this.closeTime = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes() + 1).padStart(2, '0')}`;
+
     if (log.id != 0) {
       this.replyLog.id = log.id;
       this.replyLog.description = log.description;
@@ -209,7 +248,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           this.apiService.get('/user', { presence: 1, status: 1 }),
         ),
         firstValueFrom(
-          this.apiService.get('/master/ticketStatus', { presence: 1 }),
+          this.apiService.get('/master/status/cases', { presence: 1 }),
         ),
         firstValueFrom(
           this.apiService.get('/master/ticketSeverity', { presence: 1 }),
@@ -251,65 +290,24 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   loadRelatedTasks(): void {
     this.loadingRelatedTasks = true;
 
-    this.apiService
-      .get(`/cases/${this.taskId}/tasks`)
-      .subscribe({
-        next: (response) => {
-          this.loadingRelatedTasks = false;
-          this.relatedTasks = Array.isArray(response?.data) ? response.data : [];
-        },
-        error: () => {
-          this.loadingRelatedTasks = false;
-          this.relatedTasks = [];
-        },
-      });
-  }
-
-  openCreateTask(content: any): void {
-    this.relatedTaskForm = this.defaultRelatedTaskForm();
-    this.relatedTaskForm.projectId = String(this.task?.projectId || '');
-    this.relatedTaskForm.assignTo = Number(this.task?.assignTo || 0);
-    this.relatedTaskForm.title = `Task of ${this.taskId}`;
-    this.relatedTaskForm.description = `Follow up from case ${this.taskId}`;
-    this.modalService.open(content, { size: 'lg', centered: true });
-  }
-
-  saveRelatedTask(form: NgForm): void {
-    if (form.invalid || this.savingRelatedTask) {
-      return;
-    }
-
-    const payload = {
-      ticketTypeId: 1,
-      title: String(this.relatedTaskForm.title || '').trim(),
-      description: String(this.relatedTaskForm.description || '').trim(),
-      projectId: this.relatedTaskForm.projectId,
-      submitBy: this.me?.id,
-      submitDate: this.toApiDate(this.relatedTaskForm.submitDate),
-      targetCompletionDate: this.toApiDate(
-        this.relatedTaskForm.targetCompletionDate,
-      ),
-      assignTo: this.relatedTaskForm.assignTo,
-      taskSolution: '',
-      ticketStatusId: Number(this.relatedTaskForm.ticketStatusId || 100),
-      ticketCategoryId: Number(this.relatedTaskForm.ticketCategoryId || 0),
-    };
-
-    this.savingRelatedTask = true;
-    this.errorMessage = '';
-
-    this.apiService.post(`/cases/${this.taskId}/tasks`, payload).subscribe({
-      next: () => {
-        this.savingRelatedTask = false;
-        this.modalService.dismissAll();
-        this.loadRelatedTasks();
+    this.apiService.get(`/cases/${this.taskId}/tasks`).subscribe({
+      next: (response) => {
+        this.loadingRelatedTasks = false;
+        this.relatedTasks = Array.isArray(response?.data) ? response.data : [];
       },
-      error: (error) => {
-        this.savingRelatedTask = false;
-        this.errorMessage =
-          error?.error?.message || 'Failed to create related task.';
+      error: () => {
+        this.loadingRelatedTasks = false;
+        this.relatedTasks = [];
       },
     });
+  }
+
+  onRelatedTaskCreated(): void {
+    this.loadRelatedTasks();
+  }
+
+  onRelatedTaskFailed(message: string): void {
+    this.errorMessage = message;
   }
 
   goToTaskDetail(row: any): void {
@@ -364,6 +362,16 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     const value = (event.target as HTMLSelectElement).value;
     console.log('selected value:', value);
     console.log('dari ngModel:', this.formModel.ticketStatusId);
+
+    // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
+    const severity = this.ticketSeverities.find(
+      (s: any) => Number(s.id) === Number(this.formModel.ticketSeverityId),
+    );
+    if (severity) {
+      this.addHour = Number(severity.duration || 0);
+    } else {
+      this.addHour = 0;
+    }
   }
 
   saveCase() {
@@ -379,7 +387,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       this.updateTask();
     }
   }
-
+  addHour: number = 0; // Add 3 hours to the current time
   updateTask(): void {
     // if (form.invalid || this.saving) {
     //   return;
@@ -399,6 +407,34 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       '-' +
       String(this.formModel.actualCompletionDate['day'] + 1).padStart(2, '0');
 
+    const today = new Date(this.inputDate);
+    console.log('this.inputDate', this.inputDate, today);
+
+    const severity = this.ticketSeverities.find(
+      (s: any) => Number(s.id) === Number(this.formModel.ticketSeverityId),
+    );
+    this.addHour = Number(severity?.duration || 0);
+
+    console.log('addHour', this.addHour);
+
+    // saya mau this.inputDate + this.addHour jam, lalu jadikan deadlineDateTime
+    const deadlineDate = new Date(
+      today.getTime() + this.addHour * 60 * 60 * 1000,
+    );
+
+    const deadlineDateTime =
+      deadlineDate.getFullYear() +
+      '-' +
+      String(deadlineDate.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(deadlineDate.getDate()).padStart(2, '0') +
+      ' ' +
+      String(deadlineDate.getHours()).padStart(2, '0') +
+      ':' +
+      String(deadlineDate.getMinutes()).padStart(2, '0') +
+      ':' +
+      String(deadlineDate.getSeconds()).padStart(2, '0');
+
     const payload = {
       ticketTypeId: this.taskTypeId,
       title: this.formModel.title.trim(),
@@ -415,8 +451,10 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       ratesBy: Number(this.formModel.ratesBy),
       issueNo: this.formModel.issueNo.trim(),
       wasTicketStatusId: this.ticketStatusId,
+      wasAssignTo: this.assignTo,
       updateBy: this.formModel.submitBy,
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
+      deadlineDateTime: deadlineDateTime,
     };
     console.log('saveTask payload', payload);
 
@@ -518,55 +556,20 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     };
   }
 
-  private defaultRelatedTaskForm(): any {
-    const today = new Date();
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    return {
-      title: '',
-      description: '',
-      projectId: '',
-      submitDate: {
-        year: today.getFullYear(),
-        month: today.getMonth() + 1,
-        day: today.getDate(),
-      },
-      targetCompletionDate: {
-        year: nextWeek.getFullYear(),
-        month: nextWeek.getMonth() + 1,
-        day: nextWeek.getDate(),
-      },
-      assignTo: 0,
-      ticketStatusId: 100,
-      ticketCategoryId: 0,
-    };
-  }
-
-  private toApiDate(dateModel: any): string {
-    if (!dateModel || !dateModel.year || !dateModel.month || !dateModel.day) {
-      return '';
-    }
-
-    return `${dateModel.year}-${String(dateModel.month).padStart(2, '0')}-${String(dateModel.day).padStart(2, '0')}`;
-  }
-
   private populateFormFromTask(): void {
-    let [yyyy, mm, dd] =
-      this.task?.targetCompletionDate.split('T')[0].split('-') || [];
-    const targetCompletionDate = {
-      year: Number(yyyy),
-      month: Number(mm),
-      day: Number(dd),
-    };
+    const now = new Date();
+    const plusSevenDays = new Date();
+    plusSevenDays.setDate(plusSevenDays.getDate() + 7);
 
-    [yyyy, mm, dd] =
-      this.task?.actualCompletionDate.split('T')[0].split('-') || [];
-    const actualCompletionDate = {
-      year: Number(yyyy),
-      month: Number(mm),
-      day: Number(dd),
-    };
+    const targetCompletionDate = this.toDateStruct(
+      this.task?.targetCompletionDate,
+      plusSevenDays,
+    );
+
+    const actualCompletionDate = this.toDateStruct(
+      this.task?.actualCompletionDate,
+      plusSevenDays,
+    );
 
     this.formModel = {
       crNoRef: String(this.task?.crNoRef || ''),
@@ -584,6 +587,24 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       ratesBy: Number(this.task?.ratesBy ?? 0),
       issueNo: String(this.task?.issueNo || ''),
       ticketSeverityId: Number(this.task?.ticketSeverityId ?? 0),
+    };
+  }
+
+  private toDateStruct(value: unknown, fallbackDate: Date): {
+    year: number;
+    month: number;
+    day: number;
+  } {
+    const parsed = value ? new Date(String(value)) : new Date(fallbackDate);
+
+    const safeDate = Number.isNaN(parsed.getTime())
+      ? new Date(fallbackDate)
+      : parsed;
+
+    return {
+      year: safeDate.getFullYear(),
+      month: safeDate.getMonth() + 1,
+      day: safeDate.getDate(),
     };
   }
 
@@ -665,6 +686,31 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  private toSqlDateTime(
+    value: NgbDateStruct | null,
+    timeValue: string,
+  ): string {
+    if (!value?.year || !value?.month || !value?.day) {
+      return '';
+    }
+
+    const normalizedTime = String(timeValue || '').trim();
+
+    if (!normalizedTime) {
+      return '';
+    }
+
+    const year = String(value.year).padStart(4, '0');
+    const month = String(value.month).padStart(2, '0');
+    const day = String(value.day).padStart(2, '0');
+
+    const [hour = '00', minute = '00'] = normalizedTime.split(':');
+    const safeHour = String(hour).padStart(2, '0');
+    const safeMinute = String(minute).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${safeHour}:${safeMinute}:00`;
+  }
+
   submitActivity(): void {
     this.saving = true;
     this.message = '';
@@ -675,7 +721,20 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     formData.append('description', this.descriptionLog.trim());
     formData.append('submitBy', this.formModel.submitBy);
     formData.append('parentId', this.replyLog.id || '');
+    const starDateTime = this.toSqlDateTime(this.starDateTime, this.starTime);
+    const closeDateTime = this.toSqlDateTime(
+      this.closeDateTime,
+      this.closeTime,
+    );
 
+    if (!starDateTime || !closeDateTime) {
+      this.saving = false;
+      this.errorMessage = 'Start Date Time dan Close Date Time wajib diisi.';
+      return;
+    }
+
+    formData.append('starDateTime', starDateTime);
+    formData.append('closeDateTime', closeDateTime);
     // Append semua file dari semua rows
     this.allFiles.forEach((file) => {
       formData.append('files', file);

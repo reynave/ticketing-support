@@ -100,7 +100,7 @@
 
 <ng-template #createTaskModal>
   <div class="modal-header">
-    <h5 class="modal-title">Create New Task</h5>
+    <h5 class="modal-title">New Task</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
   </div>
 
@@ -111,8 +111,8 @@
         <div class="col-12 col-md-6">
           <div class="mb-2">
             <label class="form-label" for="task-project">Project <span class="text-danger">*</span></label>
-            <select id="task-project" class="form-select" (change)="selectTaskCategory()" name="projectId" [(ngModel)]="formModel.projectId"
-              [disabled]="loadingOptions" required> 
+            <select id="task-project" class="form-select" (change)="selectTaskCategory()" name="projectId"
+              [(ngModel)]="formModel.projectId" [disabled]="loadingOptions" required>
               @for (project of projects; track trackById($index, project)) {
               <option [value]="project.id">{{ project.name }} - {{ project.clientName }}</option>
               }
@@ -122,7 +122,7 @@
           <div class="mb-2">
             <label class="form-label" for="task-category">Task Category <span class="text-danger">*</span></label>
             @if(formModel.projectId == '') {
-            <div class="form-control bg-light" ><small><em>Please select a project first</em></small></div>
+            <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
             } @else {
             <select id="task-category" class="form-select" name="category" [(ngModel)]="formModel.category" required>
 
@@ -130,7 +130,7 @@
               <option [value]="category.id">{{ category.name }}</option>
               }
             </select>
-          }
+            }
           </div>
 
           <div class="mb-2">
@@ -152,12 +152,15 @@
 
           <div class="mb-2">
             <label class="form-label" for="task-assign-to">Assign To <span class="text-danger">*</span></label>
-
+            @if(formModel.projectId == '') {
+            <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
+            } @else {
             <select id="task-assign-to" class="form-select" name="assignTo" [(ngModel)]="formModel.assignTo" required>
               @for (user of internalUsers; track trackById($index, user)) {
-              <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+              <option [value]="user.id">{{ user.name }} {{ user.asManager ? '(Manager)' : '' }}</option>
               }
             </select>
+            }
           </div>
 
           <div class="mb-2">
@@ -185,7 +188,7 @@
             [(ngModel)]="formModel.description" required></textarea>
         </div>
 
- 
+
       </div>
     </div>
 

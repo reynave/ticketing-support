@@ -1,0 +1,145 @@
+<button type="button" class="btn btn-sm btn-primary" (click)="openCreateTaskModal()">
+  {{ buttonLabel }}
+</button>
+
+<ng-template #createTaskModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Create Task From Case {{ caseId }}</h5>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+
+  <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)">
+    <div class="modal-body">
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-title"
+            >Title <span class="text-danger">*</span></label
+          >
+          <input
+            id="related-task-title"
+            class="form-control"
+            name="title"
+            [(ngModel)]="relatedTaskForm.title"
+            required
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-category"
+            >Task Category <span class="text-danger">*</span></label
+          >
+          <select
+            id="related-task-category"
+            class="form-select"
+            name="ticketCategoryId"
+            [(ngModel)]="relatedTaskForm.ticketCategoryId"
+            required
+          >
+            <option [ngValue]="0" disabled>Select category</option>
+            <option *ngFor="let category of ticketCategories" [ngValue]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-assign"
+            >Assign To <span class="text-danger">*</span></label
+          >
+          <select
+            id="related-task-assign"
+            class="form-select"
+            name="assignTo"
+            [(ngModel)]="relatedTaskForm.assignTo"
+            required
+          >
+            <option [ngValue]="0" disabled>Select user</option>
+            <option *ngFor="let user of internalUsers" [ngValue]="user.id">
+              {{ user.firstName }} {{ user.lastName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-submit-date"
+            >Submit Date <span class="text-danger">*</span></label
+          >
+          <div class="input-group">
+            <input
+              id="related-task-submit-date"
+              class="form-control"
+              type="text"
+              name="submitDate"
+              ngbDatepicker
+              #relSubmitDate="ngbDatepicker"
+              readonly
+              [(ngModel)]="relatedTaskForm.submitDate"
+              required
+            />
+            <button
+              class="btn btn-outline-secondary bi bi-calendar3"
+              (click)="relSubmitDate.toggle()"
+              type="button"
+            ></button>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-target-date"
+            >Target Completion <span class="text-danger">*</span></label
+          >
+          <div class="input-group">
+            <input
+              id="related-task-target-date"
+              class="form-control"
+              type="text"
+              name="targetCompletionDate"
+              ngbDatepicker
+              #relTargetDate="ngbDatepicker"
+              readonly
+              [(ngModel)]="relatedTaskForm.targetCompletionDate"
+              required
+            />
+            <button
+              class="btn btn-outline-secondary bi bi-calendar3"
+              (click)="relTargetDate.toggle()"
+              type="button"
+            ></button>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="related-task-description"
+            >Description <span class="text-danger">*</span></label
+          >
+          <textarea
+            id="related-task-description"
+            class="form-control"
+            rows="3"
+            name="description"
+            [(ngModel)]="relatedTaskForm.description"
+            required
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="relatedTaskFormNg.invalid || savingRelatedTask || loadingOptions"
+      >
+        {{ savingRelatedTask ? 'Saving...' : 'Save Task' }}
+      </button>
+    </div>
+  </form>
+</ng-template>

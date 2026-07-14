@@ -204,12 +204,11 @@
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
+                   
                     <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                       [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
-                      @for (user of internalUsers; track user.id) {
-                      @if(user.userTypeId == 1){
-                      <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
-                      }
+                      @for (user of internalUsers; track user.id) { 
+                      <option [ngValue]="user.id">{{ user.name }} {{user.asManager ? '(Manager)' : ''}}</option> 
 
                       }
                     </select>

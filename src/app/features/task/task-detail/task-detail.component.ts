@@ -24,7 +24,7 @@ interface UploadRow {
   files: File[];
   previews: string[];
 }
-import {environment } from './../../../../environments/environment';
+import { environment } from './../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-task-detail',
@@ -41,15 +41,15 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     console.log('Ctrl + S pressed');
     this.saveTask(); // Calls your custom function
   }
- 
-   private readonly authService = inject(AuthService);
+
+  private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
 
   private readonly uploadService = inject(UploadService);
   private readonly http = inject(HttpClient);
-   private modalService = inject(NgbModal);
+  private modalService = inject(NgbModal);
   editor1: any = null;
   editor2: any = null;
   editor3: any = null;
@@ -84,13 +84,12 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
-  
   descriptionLog: string = '';
   starDateTime = {
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-      day: new Date().getDate(),
-    };
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
+  };
   closeDateTime: NgbDateStruct | null = null;
   starTime: string = '';
   closeTime: string = '';
@@ -100,17 +99,18 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   progress = 0;
   isUploading = false;
 
-   logId: number = 0;
+  logId: number = 0;
 
   replyLog: any = {
     id: 0,
     description: '',
   };
-  ticketStatusId : number = 0;
-  assignTo : string = '';
-  me : any = {}
+  ticketStatusId: number = 0;
+  assignTo: string = '';
+  me: any = {};
+  projectId : string = '';
   ngOnInit(): void {
-     this.me = this.authService.decodeToken();
+    this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
     this.editor2 = new Editor();
     this.editor3 = new Editor();
@@ -121,9 +121,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadOptions();
     this.loadTaskDetail();
-    this.loadTaskDetailLog();
+    this.loadTaskDetailLog(); 
   }
   ngOnDestroy(): void {
     this.editor1.destroy();
@@ -144,6 +143,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
         this.assignTo = this.task.assignTo;
+        this.projectId = this.task.projectId;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan task (ticketTypeId bukan 1).';
@@ -151,6 +151,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         }
 
         this.populateFormFromTask();
+
+        
+    this.loadOptions();
       },
       error: (error) => {
         this.loading = false;
@@ -176,10 +179,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           error?.error?.message || 'Failed to load task detail.';
       },
     });
-  } 
- 
+  }
+
   open(content: any, log: any = []): void {
-    console.log('open modal for log:', log);
     const today = new Date();
 
     this.starDateTime = {
@@ -206,7 +208,6 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         description: '',
       };
     }
- 
 
     this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
@@ -222,12 +223,12 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, internalUserResponse, ticketStatusResponse] =
+      const [projectResponse,   ticketStatusResponse] =
         await Promise.all([
-          firstValueFrom(this.apiService.get('/project', { status: 1 })),
-          firstValueFrom(
-            this.apiService.get('/user', { presence: 1, status: 1 }),
-          ),
+          firstValueFrom(this.apiService.get('/project', { status: 1 , id: this.projectId})),
+          // firstValueFrom(
+          //   this.apiService.get('/user', { presence: 1, status: 1 }),
+          // ),
           firstValueFrom(
             this.apiService.get('/master/status/task', { presence: 1 }),
           ),
@@ -240,8 +241,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         ? projectResponse.data
         : [];
 
-      this.internalUsers = Array.isArray(internalUserResponse?.data)
-        ? internalUserResponse.data
+      this.internalUsers = Array.isArray(projectResponse?.data[0]?.users)
+        ? projectResponse.data[0].users
         : [];
     } catch {
       this.projects = [];
@@ -290,32 +291,30 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
   }
 
-
   onStatusChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     console.log('selected value:', value);
     console.log('dari ngModel:', this.formModel.ticketStatusId);
   }
 
-  saveTask(){
-    if(this.formModel.ticketStatusId >= 900){ 
+  saveTask() {
+    if (this.formModel.ticketStatusId >= 900) {
       const confirmed = confirm(`Are you sure close task ${this.taskId}?`);
 
       if (!confirmed) {
         return;
-      }else{
-         this.updateTask();
+      } else {
+        this.updateTask();
       }
-    }else{
-      this.updateTask()
+    } else {
+      this.updateTask();
     }
   }
- 
+
   updateTask(): void {
     // if (form.invalid || this.saving) {
     //   return;
     // }
- 
 
     const targetCompletionDate =
       this.formModel.targetCompletionDate['year'] +
@@ -346,9 +345,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       rating: Number(this.formModel.rating),
       ratesBy: Number(this.formModel.ratesBy),
       issueNo: this.formModel.issueNo.trim(),
-      wasTicketStatusId : this.ticketStatusId,
-      wasAssignTo : this.assignTo,
-      updateBy :this.formModel.submitBy
+      wasTicketStatusId: this.ticketStatusId,
+      wasAssignTo: this.assignTo,
+      updateBy: this.formModel.submitBy,
     };
     console.log('saveTask payload', payload);
 
@@ -371,13 +370,13 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-   submitRate(){ 
+  submitRate() {
     console.log(this.me);
-    const payload = { 
-      taskSolution: this.formModel.taskSolution.trim(), 
+    const payload = {
+      taskSolution: this.formModel.taskSolution.trim(),
       rating: Number(this.formModel.rating),
-   ratesBy:  this.me.id,  
-      updateBy : this.me.id,  
+      ratesBy: this.me.id,
+      updateBy: this.me.id,
     };
     console.log('submitRate payload', payload);
 
@@ -385,20 +384,22 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.message = '';
     this.errorMessage = '';
 
-    this.apiService.put(`/ticket/${this.taskId}/submitRate`, payload).subscribe({
-      next: (response) => {
-        this.saving = false;
-        this.message = response?.message || 'Task updated.';
-        this.formMode = 'view';
-        this.loadTaskDetail();
-        this.loadTaskDetailLog();
-      },
-      error: (error) => {
-        this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to update task.';
-      },
-    });
-   }
+    this.apiService
+      .put(`/ticket/${this.taskId}/submitRate`, payload)
+      .subscribe({
+        next: (response) => {
+          this.saving = false;
+          this.message = response?.message || 'Task updated.';
+          this.formMode = 'view';
+          this.loadTaskDetail();
+          this.loadTaskDetailLog();
+        },
+        error: (error) => {
+          this.saving = false;
+          this.errorMessage = error?.error?.message || 'Failed to update task.';
+        },
+      });
+  }
 
   deleteTask(): void {
     if (this.deleting || !this.taskId) {
@@ -522,7 +523,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     const minute = String(date.getMinutes()).padStart(2, '0');
     return `${yyyyMmDd}T${hour}:${minute}`;
   }
- 
+
   get allFiles(): File[] {
     return this.rows.flatMap((row) => row.files);
   }
@@ -562,7 +563,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  private toSqlDateTime(value: NgbDateStruct | null, timeValue: string): string {
+  private toSqlDateTime(
+    value: NgbDateStruct | null,
+    timeValue: string,
+  ): string {
     if (!value?.year || !value?.month || !value?.day) {
       return '';
     }
@@ -596,7 +600,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     formData.append('parentId', this.replyLog.id || '');
 
     const starDateTime = this.toSqlDateTime(this.starDateTime, this.starTime);
-    const closeDateTime = this.toSqlDateTime(this.closeDateTime, this.closeTime);
+    const closeDateTime = this.toSqlDateTime(
+      this.closeDateTime,
+      this.closeTime,
+    );
 
     if (!starDateTime || !closeDateTime) {
       this.saving = false;
@@ -652,9 +659,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  imgUrlLog : string = '';
-  imgPopup(content:any, item: any){
+  imgUrlLog: string = '';
+  imgPopup(content: any, item: any) {
     this.imgUrlLog = item.url;
-    this.modalService.open(content, {size:'lg'});
+    this.modalService.open(content, { size: 'lg' });
   }
 }
