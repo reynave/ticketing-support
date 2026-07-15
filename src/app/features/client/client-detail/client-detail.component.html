@@ -32,9 +32,7 @@
     } @else if (!client) {
     <div class="text-muted">Client not found.</div>
     } @else {
-    <div class="row g-2">
-      
- 
+    <div class="row g-2">  
       <div class="col-12 col-md-6"><strong>ID:</strong> {{ client.id }}</div>
       <div class="col-12 col-md-6"><strong>Code:</strong> {{ client.code }}</div>
       <div class="col-12 col-md-6"><strong>Name:</strong> {{ client.name }}</div>
@@ -70,18 +68,15 @@
         </thead>
         <tbody>
           @for (row of projects; track trackById($index, row)) {
-          <tr>
+          <tr [class]="{  'disabled': row.status !== 1 }">
             <td>{{ row.id }}</td> 
             <td>{{ row.name  }}</td> 
             <td>{{ row.productName || row.productId }} - {{ row.projectTypeName || row.projectTypeId }}</td>
             <td>{{ row.startDate | date: 'mediumDate' }}</td>  
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <td class="text-end action-buttons">
-               <button type="button" class="btn btn-sm btn-outline-primary" [routerLink]="['/projects', row.id]" routerLinkActive="router-link-active" >Detail</button>
-                <button type="button" class="btn btn-sm btn-outline-danger" 
-                (click)="removeProject(row)">
-           Remove this project
-              </button>   
+               <button type="button" class="btn btn-sm btn-outline-primary" [routerLink]="['/project', row.id]" routerLinkActive="router-link-active" >Detail</button>
+               
             </td>
           </tr>
           }

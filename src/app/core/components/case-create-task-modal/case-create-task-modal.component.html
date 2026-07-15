@@ -13,7 +13,7 @@
     ></button>
   </div>
 
-  <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)">
+  <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)" novalidate>
     <div class="modal-body">
       <div class="row g-2">
         <div class="col-12 col-md-6">
@@ -25,8 +25,28 @@
             class="form-control"
             name="title"
             [(ngModel)]="relatedTaskForm.title"
+            #titleNgModel="ngModel"
+            [class.is-invalid]="titleNgModel.invalid && (titleNgModel.touched || relatedTaskFormNg.submitted)"
             required
           />
+          <div class="invalid-feedback">Title is required.</div>
+        </div>
+
+         <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-case-id"
+            >Case Id <span class="text-danger">*</span></label
+          >
+          <input
+            readonly
+            id="related-task-case-id"
+            class="form-control"
+            name="caseId"
+            [(ngModel)]="relatedTaskForm.caseId"
+            #caseIdNgModel="ngModel"
+            [class.is-invalid]="caseIdNgModel.invalid && (caseIdNgModel.touched || relatedTaskFormNg.submitted)"
+            required
+          />
+          <div class="invalid-feedback">Case Id is required.</div>
         </div>
 
         <div class="col-12 col-md-6">
@@ -38,13 +58,16 @@
             class="form-select"
             name="ticketCategoryId"
             [(ngModel)]="relatedTaskForm.ticketCategoryId"
+            #ticketCategoryIdNgModel="ngModel"
+            [class.is-invalid]="ticketCategoryIdNgModel.invalid && (ticketCategoryIdNgModel.touched || relatedTaskFormNg.submitted)"
             required
           >
-            <option [ngValue]="0" disabled>Select category</option>
+            <option [ngValue]="null" disabled>Select category</option>
             <option *ngFor="let category of ticketCategories" [ngValue]="category.id">
               {{ category.name }}
             </option>
           </select>
+          <div class="invalid-feedback">Task Category is required.</div>
         </div>
 
         <div class="col-12 col-md-6">
@@ -56,13 +79,16 @@
             class="form-select"
             name="assignTo"
             [(ngModel)]="relatedTaskForm.assignTo"
+            #assignToNgModel="ngModel"
+            [class.is-invalid]="assignToNgModel.invalid && (assignToNgModel.touched || relatedTaskFormNg.submitted)"
             required
           >
-            <option [ngValue]="0" disabled>Select user</option>
-            <option *ngFor="let user of internalUsers" [ngValue]="user.id">
-              {{ user.firstName }} {{ user.lastName }}
+            <option [ngValue]="null" disabled>Select user</option>
+            <option *ngFor="let user of internalUsers" [ngValue]="user.userId">
+              {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
             </option>
           </select>
+          <div class="invalid-feedback">Assign To is required.</div>
         </div>
 
         <div class="col-12 col-md-6">
@@ -79,6 +105,8 @@
               #relSubmitDate="ngbDatepicker"
               readonly
               [(ngModel)]="relatedTaskForm.submitDate"
+              #submitDateNgModel="ngModel"
+              [class.is-invalid]="submitDateNgModel.invalid && (submitDateNgModel.touched || relatedTaskFormNg.submitted)"
               required
             />
             <button
@@ -86,6 +114,9 @@
               (click)="relSubmitDate.toggle()"
               type="button"
             ></button>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="submitDateNgModel.invalid && (submitDateNgModel.touched || relatedTaskFormNg.submitted)">
+            Submit Date is required.
           </div>
         </div>
 
@@ -103,6 +134,8 @@
               #relTargetDate="ngbDatepicker"
               readonly
               [(ngModel)]="relatedTaskForm.targetCompletionDate"
+              #targetCompletionDateNgModel="ngModel"
+              [class.is-invalid]="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)"
               required
             />
             <button
@@ -110,6 +143,9 @@
               (click)="relTargetDate.toggle()"
               type="button"
             ></button>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)">
+            Target Completion is required.
           </div>
         </div>
 
@@ -123,8 +159,11 @@
             rows="3"
             name="description"
             [(ngModel)]="relatedTaskForm.description"
+            #descriptionNgModel="ngModel"
+            [class.is-invalid]="descriptionNgModel.invalid && (descriptionNgModel.touched || relatedTaskFormNg.submitted)"
             required
           ></textarea>
+          <div class="invalid-feedback">Description is required.</div>
         </div>
       </div>
     </div>
@@ -136,7 +175,7 @@
       <button
         type="submit"
         class="btn btn-primary"
-        [disabled]="relatedTaskFormNg.invalid || savingRelatedTask || loadingOptions"
+        [disabled]="relatedTaskFormNg.invalid || savingRelatedTask"
       >
         {{ savingRelatedTask ? 'Saving...' : 'Save Task' }}
       </button>

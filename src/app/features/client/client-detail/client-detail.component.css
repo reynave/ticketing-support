@@ -7,3 +7,7 @@
 .small-title {
   font-size: 1.05rem;
 }
+
+.disabled td{
+  opacity: 0.7;
+}

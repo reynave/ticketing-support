@@ -4,9 +4,10 @@
     <div>
       <h5 class="fw-bold mb-0">Case {{ taskId }}</h5>
     </div>
-    <div class="ms-auto">
-      <h5 class="fw-semibold mb-0 font-monospace text-danger"> Remaining Time :  
-     
+   
+    <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
+      <h5 class="fw-semibold mb-0 font-monospace text-danger"> Remaining Time :
+
         <app-countdown [targetDate]="deadlineDateTime" (finished)="onFinished()"> </app-countdown>
 
       </h5>
@@ -34,6 +35,13 @@
       <div class="card-body text-muted">Case not found.</div>
     </div>
     } @else {
+
+    <div class="alert alert-warning" *ngIf="taskCount > 0">
+      <strong>Note:</strong> This case has {{ taskCount }} related task(s). You cannot close this case until all related
+      tasks are completed.
+    </div>
+
+
 
     <form #taskFormNg="ngForm" (ngSubmit)="saveCase()">
       <div class="card border shadow-sm mb-3">
@@ -159,21 +167,25 @@
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
                       <span class="text-danger">*</span></label>
+
+
                   </td>
                   <td>
                     <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
                       name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'"
                       required>
-                      <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id">{{ status.name }}
+                      <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id"
+                        [disabled]="status.id >= 900 && taskCount > 0">{{ status.name }}
                       </option>
                     </select>
                   </td>
                 </tr>
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit Date</label></td>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
+                      Date</label></td>
                   <td>
-                  
+
                     <div class="form-control form-control-sm bg-light">{{ formModel.submitDate | date:'medium' }}
                     </div>
                   </td>
@@ -226,14 +238,14 @@
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
+
                     <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                       [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
-                      @for (user of internalUsers; track user.id) {
-                      @if(user.userTypeId == 1){
-                      <option [ngValue]="user.id">{{ userOptionLabel(user) }}</option>
-                      }
 
-                      }
+                      <option *ngFor="let item of internalUsers" [ngValue]="item.userId">{{ item.name }} {{
+                        item.asManager == 1 ? '(Manager)' : '' }}</option>
+
+
                     </select>
                   </td>
                 </tr>
@@ -246,6 +258,21 @@
           </div>
 
           <div class="col-12">
+            <div class="px-2 mb-3" *ngIf="ticketBased == 1">
+              <div class="alert alert-warning">
+                <div class="mb-2"><strong>Note:</strong> Please fill in the ticket estimation cost, title and description before saving the
+                case.
+               <div>
+                 <b> {{ticketBalance}}</b> remaining balance for this project.
+               </div>
+              </div>
+              
+                 <label  class="form-label   fw-semibold">Ticket Estimation Cost <span class="text-danger">*</span></label>
+              <input  type="number"   id="detail-task-ticket" class="form-control form-control-sm" name="ticketEstimationCost"
+                [(ngModel)]="formModel.ticketEstimationCost" [readonly]="formMode === 'view'" required  style="width: 200px;"/>
+              </div>
+             
+            </div>
             <div class="px-2 mb-3">
               <label class="form-label small fw-semibold" for="detail-task-title">Title <span
                   class="text-danger">*</span></label>
@@ -275,13 +302,13 @@
 
       </div>
 
-      <div class="card border shadow-sm mb-3"  >
+      <div class="card border shadow-sm mb-3">
         <div class="card-body">
- 
+
           <div class="mb-3">
             <label class="form-label small fw-semibold" for="detail-task-solution">Case Solution</label>
-         
-            @if (formMode === 'view'  ) {
+
+            @if (formMode === 'view' ) {
             <div class="form-control" [innerHtml]="formModel.taskSolution" style="min-height: 100px;"></div>
             }
             @else{
@@ -290,9 +317,9 @@
               <ngx-editor [editor]="editor2" name="taskSolution" [(ngModel)]="formModel.taskSolution"
                 [placeholder]="'Type here...'"></ngx-editor>
             </div>
-            } 
-          
-           
+            }
+
+
           </div>
         </div>
       </div>
@@ -304,17 +331,10 @@
     <div class="card border shadow-sm mb-3">
       <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
         <span class="fw-semibold small">Task</span>
-        <app-case-create-task-modal
-          [caseId]="taskId"
-          [projectId]="task?.projectId || ''"
-          [assignTo]="task?.assignTo || 0"
-          [submitBy]="me?.id || 0"
-          [ticketCategories]="ticketCategories"
-          [internalUsers]="internalUsers"
-          [loadingOptions]="loadingOptions"
-          (created)="onRelatedTaskCreated()"
-          (failed)="onRelatedTaskFailed($event)"
-        ></app-case-create-task-modal>
+        <app-case-create-task-modal [caseId]="taskId" [projectId]="task?.projectId || ''"
+          [assignTo]="task?.assignTo || 0" [submitBy]="me?.id || 0" [ticketCategories]="ticketCategories"
+          [internalUsers]="internalUsers" [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()"
+          (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
       </div>
 
       @if (loadingRelatedTasks) {
@@ -412,48 +432,47 @@
     <div class="modal-body">
 
       <div class="row g-2 mb-3">
-          <div class="col-md-6 col-12">
-            <label class="form-label small fw-semibold" for="activity-start-datetime">
-              Start Date <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <input id="activity-start-datetime" class="form-control form-control-sm" type="text" readonly
-                name="starDateTime" [(ngModel)]="starDateTime" ngbDatepicker #startDatePicker="ngbDatepicker"
-                required />
-              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
-                (click)="startDatePicker.toggle()"></button>
-            </div>
+        <div class="col-md-6 col-12">
+          <label class="form-label small fw-semibold" for="activity-start-datetime">
+            Start Date <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <input id="activity-start-datetime" class="form-control form-control-sm" type="text" readonly
+              name="starDateTime" [(ngModel)]="starDateTime" ngbDatepicker #startDatePicker="ngbDatepicker" required />
+            <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
+              (click)="startDatePicker.toggle()"></button>
           </div>
-          <div class="col-md-6 col-12">
-            <label class="form-label small fw-semibold" for="activity-start-time">
-              Start HH:II <span class="text-danger">*</span>
-            </label>
-            <input id="activity-start-time" class="form-control form-control-sm" type="time" step="60" name="starTime"
-              [(ngModel)]="starTime" required />
-          </div>
-
-
-          <div class="col-md-6 col-12">
-            <label class="form-label small fw-semibold" for="activity-close-datetime">
-              Close Date <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <input id="activity-close-datetime" class="form-control form-control-sm" type="text" readonly
-                name="closeDateTime" [minDate]="starDateTime" [(ngModel)]="closeDateTime" ngbDatepicker #closeDatePicker="ngbDatepicker"
-                required  />
-              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
-                (click)="closeDatePicker.toggle()"></button>
-            </div>
-          </div>
-          <div class="col-md-6 col-12">
-            <label class="form-label small fw-semibold" for="activity-close-time">
-              Close HH:II <span class="text-danger">*</span>
-            </label>
-            <input id="activity-close-time" class="form-control form-control-sm" type="time" step="60" name="closeTime"
-              [(ngModel)]="closeTime" required />
-          </div>
-      
         </div>
+        <div class="col-md-6 col-12">
+          <label class="form-label small fw-semibold" for="activity-start-time">
+            Start HH:II <span class="text-danger">*</span>
+          </label>
+          <input id="activity-start-time" class="form-control form-control-sm" type="time" step="60" name="starTime"
+            [(ngModel)]="starTime" required />
+        </div>
+
+
+        <div class="col-md-6 col-12">
+          <label class="form-label small fw-semibold" for="activity-close-datetime">
+            Close Date <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <input id="activity-close-datetime" class="form-control form-control-sm" type="text" readonly
+              name="closeDateTime" [minDate]="starDateTime" [(ngModel)]="closeDateTime" ngbDatepicker
+              #closeDatePicker="ngbDatepicker" required />
+            <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" type="button"
+              (click)="closeDatePicker.toggle()"></button>
+          </div>
+        </div>
+        <div class="col-md-6 col-12">
+          <label class="form-label small fw-semibold" for="activity-close-time">
+            Close HH:II <span class="text-danger">*</span>
+          </label>
+          <input id="activity-close-time" class="form-control form-control-sm" type="time" step="60" name="closeTime"
+            [(ngModel)]="closeTime" required />
+        </div>
+
+      </div>
 
 
       <div class="mb-3">

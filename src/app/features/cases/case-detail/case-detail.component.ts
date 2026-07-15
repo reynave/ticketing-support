@@ -136,7 +136,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadOptions();
     this.loadTaskDetail();
     this.loadTaskDetailLog();
     this.loadRelatedTasks();
@@ -152,7 +151,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   onFinished() {
     console.log('Countdown selesai!');
   }
-
+  projectId: string = '';
+  taskCount: number = 100;
+  ticketBased: number = 0;
   loadTaskDetail(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -165,6 +166,8 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.deadlineDateTime = this.task.deadlineDateTime;
         this.inputDate = this.task.inputDate;
         this.assignTo = this.task.assignTo;
+        this.projectId = this.task.projectId;
+        this.ticketBased = this.task.ticketBased;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan case (ticketTypeId bukan 2).';
@@ -172,6 +175,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         }
         this.remainingTime = this.task.submitDate;
         this.populateFormFromTask();
+
+        this.loadOptions();
+        this.taskCount = Number(this.task?.taskCount || 0);
       },
       error: (error) => {
         this.loading = false;
@@ -231,32 +237,22 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       },
     );
   }
-
+ticketBalance : number = 0;
   async loadOptions(): Promise<void> {
     this.loadingOptions = true;
 
     try {
-      const [
-        projectResponse,
-        internalUserResponse,
-        ticketStatusResponse,
-        ticketSeverityResponse,
-        ticketCategoriesResponse,
-      ] = await Promise.all([
-        firstValueFrom(this.apiService.get('/project', { status: 1 })),
-        firstValueFrom(
-          this.apiService.get('/user', { presence: 1, status: 1 }),
-        ),
-        firstValueFrom(
-          this.apiService.get('/master/status/cases', { presence: 1 }),
-        ),
-        firstValueFrom(
-          this.apiService.get('/master/ticketSeverity', { presence: 1 }),
-        ),
-        firstValueFrom(
-          this.apiService.get('/ticket-categories', { presence: 1 }),
-        ),
-      ]);
+      const [projectResponse, ticketStatusResponse, ticketSeverityResponse] =
+        await Promise.all([
+          firstValueFrom(this.apiService.get(`/project/${this.projectId}`)),
+
+          firstValueFrom(
+            this.apiService.get('/master/status/cases', { presence: 1 }),
+          ),
+          firstValueFrom(
+            this.apiService.get('/master/ticketSeverity', { presence: 1 }),
+          ),
+        ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : [];
@@ -265,17 +261,21 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         ? projectResponse.data
         : [];
 
-      this.internalUsers = Array.isArray(internalUserResponse?.data)
-        ? internalUserResponse.data
-        : [];
+        this.ticketBalance = Number(projectResponse.data?.ticketBalance?.balance || 0);
+
+      this.internalUsers = projectResponse.data?.users || [];
 
       this.ticketSeverities = Array.isArray(ticketSeverityResponse?.data)
         ? ticketSeverityResponse.data
         : [];
 
-      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
-        ? ticketCategoriesResponse.data
-        : [];
+      this.ticketCategories = projectResponse.data?.ticketCategories || [];
+
+      console.log(
+        'this.ticketCategories',
+        this.ticketCategories,
+        this.internalUsers,
+      );
     } catch {
       this.projects = [];
       this.internalUsers = [];
@@ -318,27 +318,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     }
 
     void this.router.navigate(['/tasks', id]);
-  }
-
-  userOptionLabel(row: any): string {
-    const firstName = String(row?.firstName || '').trim();
-    const lastName = String(row?.lastName || '').trim();
-    const fullName = `${firstName} ${lastName}`.trim();
-    const email = String(row?.email || '').trim();
-
-    if (fullName && email) {
-      return `${fullName} (${email})`;
-    }
-
-    if (fullName) {
-      return fullName;
-    }
-
-    if (email) {
-      return email;
-    }
-
-    return String(row?.id || '-');
   }
 
   startEdit(): void {
@@ -455,6 +434,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       updateBy: this.formModel.submitBy,
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
       deadlineDateTime: deadlineDateTime,
+      ticketEstimationCost : this.formModel.ticketEstimationCost,
     };
     console.log('saveTask payload', payload);
 
@@ -553,6 +533,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       ratesBy: 0,
       issueNo: '',
       ticketSeverityId: 0,
+      ticketEstimationCost: 0,
     };
   }
 
@@ -587,10 +568,14 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       ratesBy: Number(this.task?.ratesBy ?? 0),
       issueNo: String(this.task?.issueNo || ''),
       ticketSeverityId: Number(this.task?.ticketSeverityId ?? 0),
+      ticketEstimationCost : Number(this.task?.ticketEstimationCost ?? 0),
     };
   }
 
-  private toDateStruct(value: unknown, fallbackDate: Date): {
+  private toDateStruct(
+    value: unknown,
+    fallbackDate: Date,
+  ): {
     year: number;
     month: number;
     day: number;

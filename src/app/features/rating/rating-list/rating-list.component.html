@@ -1,0 +1,82 @@
+<div class="container-fluid">
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <div class="page-title">Rating List</div>
+            <div class="page-subtitle">Daftar ticket dengan status selesai atau di atasnya dari tabel ticket.</div>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+    }
+
+    <div class="stat-card mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-9">
+                <label class="form-label small" for="rating-keyword">Keyword</label>
+                <input id="rating-keyword" class="form-control form-control-sm" [(ngModel)]="keyword"
+                    (keyup.enter)="loadRatings()" placeholder="Cari id / title / CR / issue" />
+            </div>
+
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary w-100"
+                    (click)="loadRatings()">Search</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+                    (click)="resetFilter()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        @if (loading) {
+        <div class="text-muted">Loading rating data...</div>
+        } @else if (!rows.length) {
+        <div class="text-muted">No rating data.</div>
+        } @else {
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Project</th>
+                        <th>Closed Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of rows; track trackById($index, row)) {
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td><strong>{{ row.ticketTypeName | uppercase }}</strong></td>
+                        <td>
+                            <div class="fw-semibold">{{ row.title }}</div>
+
+                        <td>{{ row.projectName || '-' }}</td>
+                        <td>{{ (row.actualCompletionDate || row.updateDate || row.submitDate) | date: 'mediumDate' }}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary py-0" (click)="open(content)">Rate</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>
+
+<ng-template #content let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Rate</h4>
+		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+	<div class="modal-body">
+		Rate content goes here...
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Save</button>
+	</div>
+</ng-template>

@@ -28,15 +28,16 @@ export class AdminLayoutComponent implements OnInit {
 
     { path: '/projects', label: 'Projects', icon: 'workspaces' },
     { path: '/clients', label: 'Clients', icon: 'apartment' },
-    { path: '/contact', label: 'Contact', icon: 'group' },
-     { path: '/users', label: 'Users', icon: 'account_circle' },
+  //  { path: '/contact', label: 'Contact', icon: 'group' },
+    { path: '/users', label: 'Users', icon: 'account_circle' },
+
+    { path: '/rating', label: 'Rating', icon: 'star', badge: '' },
     
   ];
 
    readonly auditMenus = [ 
     { path: '/userLogin', label: 'Log In', icon: 'search_activity' },
     { path: '/ticketBalance', label: 'Ticket Balance', icon: 'fact_check'  },
-    { path: '/audit', label: 'Activity Audit', icon: 'history_toggle_off' },
     
   ];
 
@@ -44,7 +45,7 @@ export class AdminLayoutComponent implements OnInit {
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain' },
     { key: 'product', label: 'Product', icon: 'inventory_2' },
-     { key: 'project-type', label: 'Project Type', icon: 'schema' },
+    { key: 'project-type', label: 'Project Type', icon: 'schema' },
     { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
     // {
     //   key: 'project-categories',

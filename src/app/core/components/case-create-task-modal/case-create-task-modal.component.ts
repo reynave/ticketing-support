@@ -29,6 +29,7 @@ export class CaseCreateTaskModalComponent {
 
   @ViewChild('createTaskModal') createTaskModal?: TemplateRef<unknown>;
 
+  @Input() crId = '';
   @Input() caseId = '';
   @Input() projectId = '';
   @Input() assignTo: number | string = 0;
@@ -53,7 +54,9 @@ export class CaseCreateTaskModalComponent {
 
     this.relatedTaskForm = this.defaultRelatedTaskForm();
     this.relatedTaskForm.projectId = String(this.projectId || '');
-    this.relatedTaskForm.assignTo = Number(this.assignTo || 0);
+    this.relatedTaskForm.assignTo =
+      Number(this.assignTo || 0) > 0 ? Number(this.assignTo) : null;
+    this.relatedTaskForm.caseId = String(this.caseId || '');
     this.relatedTaskForm.title = `Task of ${this.caseId}`;
     this.relatedTaskForm.description = `Follow up from case ${this.caseId}`;
 
@@ -70,6 +73,7 @@ export class CaseCreateTaskModalComponent {
 
     const payload = {
       ticketTypeId: 1,
+      caseId: this.relatedTaskForm.caseId,
       title: String(this.relatedTaskForm.title || '').trim(),
       description: String(this.relatedTaskForm.description || '').trim(),
       projectId: this.relatedTaskForm.projectId,
@@ -121,9 +125,9 @@ export class CaseCreateTaskModalComponent {
         month: nextWeek.getMonth() + 1,
         day: nextWeek.getDate(),
       },
-      assignTo: 0,
+      assignTo: null,
       ticketStatusId: 100,
-      ticketCategoryId: 0,
+      ticketCategoryId: null,
     };
   }
 
