@@ -160,6 +160,13 @@
             </div>
           </div>
 
+           <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold" for="detail-project-description">Ticket Balance</label>
+           
+              <div class="form-control " [ngClass]="{'bg-danger': project.ticketBalance.balance < 0, 'bg-light': project.ticketBalance.balance >= 0}">{{ project.ticketBalance.balance }}</div>
+        
+           </div>
+
           <div class="col-12 col-md-12 mt-3">
 
             <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span
@@ -239,23 +246,27 @@
 			  <table class="table table-sm table-hover ">
         <thead>
           <tr>
-            <th >ID</th>
+            <th>ID</th>
+            <th>Submit date</th>
             <th>Title</th>
-            <th>Type</th>
             <th>Status</th>
-            <th>Priority</th>
-            <th>Created At</th>
+            <th>rating</th> 
+    
           </tr>
         </thead>
         <tbody>
           @for (t of task; track t.id) {
           <tr>
-            <td >{{ t.id }}</td>
+            <td>
+              <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
+        
+
+            </td>
+            <td>{{ t.submitDate | date: 'yyyy-MM-dd HH:mm' }}</td>
             <td>{{ t.title }}</td>
-            <td>{{ t.ticketTypeName }}</td>
             <td>{{ t.ticketStatusName }}</td>
-            <td>{{ t.ticketPriorityName }}</td>
-            <td>{{ t.createdAt | date: 'medium' }}</td>
+            <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td> 
+           
           </tr>
           }
         </tbody>
@@ -268,23 +279,27 @@
 		<table class="table table-sm table-hover ">
         <thead>
           <tr>
-            <th >ID</th>
-            <th>Title</th>
-            <th>Type</th>
+            <th>ID</th>
+            <th>Submit date</th>
+            <th>Title</th> 
             <th>Status</th>
             <th>Priority</th>
-            <th>Created At</th>
+            <th>Rating</th>
+             
           </tr>
         </thead>
         <tbody>
           @for (t of cases; track t.id) {
           <tr>
-            <td >{{ t.id }}</td>
-            <td>{{ t.title }}</td>
-            <td>{{ t.ticketTypeName }}</td>
+            <td>
+              <a [routerLink]="['/cases', t.id]" class="text-decoration-none">{{ t.id }}</a>
+            </td>
+                <td>{{ t.submitDate | date: 'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ t.title }}</td> 
             <td>{{ t.ticketStatusName }}</td>
-            <td>{{ t.ticketPriorityName }}</td>
-            <td>{{ t.createdAt | date: 'medium' }}</td>
+            <td>{{ t.ticketSeverityName }}</td>  
+            <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td> 
+         
           </tr>
           }
         </tbody>
@@ -314,6 +329,62 @@
             <td>{{ t.ticketStatusName }}</td>
             <td>{{ t.ticketPriorityName }}</td>
             <td>{{ t.createdAt | date: 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+		</ng-template>
+	</li>
+
+  <li [ngbNavItem]="4">
+		<button ngbNavLink>CONTACTS</button>
+		<ng-template ngbNavContent>
+			  <table class="table table-sm table-hover ">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of contacts; track t.id) {
+          <tr>
+            <td >{{ t.id }}</td>
+            <td>{{ t.name }}</td>
+            <td>{{ t.email }}</td>
+            <td>{{ t.phone }}</td>
+            <td>{{ t.inputDate | date: 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+		</ng-template>
+	</li>
+
+   <li [ngbNavItem]="5">
+		<button ngbNavLink>TICKET BALANCE</button>
+		<ng-template ngbNavContent>
+			  <table class="table table-sm table-hover ">
+        <thead>
+          <tr> 
+            <th>Date</th>
+            <th>Description</th>
+            <th class="text-end">ticket In</th>
+            <th class="text-end">ticket Out</th>
+            <th class="text-end">Balance</th> 
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of ticketBalance; track t.id; let i = $index) {
+          <tr>
+            <td >{{ t.date }} {{ i }}</td>
+            <td>{{ t.title }} {{ t.note }}</td>
+            <td class="text-end">{{ t.ticketIn }}</td>
+            <td class="text-end">{{ t.ticketOut }}</td>
+            <td class="text-end">{{ t.balance }}</td>
           </tr>
           }
         </tbody>

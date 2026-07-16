@@ -29,7 +29,7 @@
           (change)="loadTasks()">
           <option value="">All project</option>
           @for (project of projects; track trackById($index, project)) {
-          <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
+          <option [value]="project.id">{{ project.name }}</option>
           }
         </select>
       </div>
@@ -67,7 +67,7 @@
             <th>Project</th>
             <th>Status</th>
             <th>Submit Date</th>
-            <th>Target Date</th>
+            <th>Category</th>
             <th class="text-end">Action</th>
           </tr>
         </thead>
@@ -78,10 +78,10 @@
             <td>
               <div class="fw-semibold">{{ row.title }}</div>
             </td>
-            <td>{{ row.projectId }}</td>
+            <td>{{ row.projectName }}</td>
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
-            <td>{{ row.targetCompletionDate | date: 'mediumDate' }}</td>
+            <td>{{ row.ticketCategoryName }}</td>
             <td class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router ,  RouterModule } from '@angular/router';
+// import { ActivatedRoute, Router , RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
@@ -24,7 +25,7 @@ interface ProjectFormModel {
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule],
+  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule,RouterModule ],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.css',
 })
@@ -32,6 +33,7 @@ export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+
 active = 1;
   projectId = '';
   project: any = null;
@@ -55,6 +57,10 @@ active = 1;
   task: any[] = [];
   cases : any[] = [];
   cr: any[] = [];
+  contacts : any[] = [];
+  ticketBalance : any = null;
+ 
+
   ngOnInit(): void {
     this.projectId = String(this.route.snapshot.paramMap.get('id') || '').trim();
 
@@ -63,7 +69,7 @@ active = 1;
       return;
     }
 
-    void this.loadOptions();
+    this.loadOptions();
     this.loadProjectDetail();
   }
 
@@ -76,6 +82,7 @@ active = 1;
         this.loading = false;
         this.project = response?.data || null;
         this.projectUsers = response?.data?.users || [];
+        this.contacts = response?.data?.contacts || [];
         this.populateFormFromProject();
       },
       error: (error) => {
@@ -91,17 +98,19 @@ active = 1;
 
     try {
       const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse, 
-        userResponse, taskResponse, caseResponse, crResponse, ticketCategoriesResponse
+        userResponse, taskResponse, caseResponse, crResponse, ticketCategoriesResponse, ticketBalanceResponse
       ] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/product', { status: 1 })),
         firstValueFrom(this.apiService.get('/user', { status: 1 })),
-        firstValueFrom(this.apiService.get('/ticket', { ticketTypeId: 1, closed: false, ticketStatusId: 1 })),
-         firstValueFrom(this.apiService.get('/ticket', { ticketTypeId: 2, closed: false, ticketStatusId: 1 })),
-         firstValueFrom(this.apiService.get('/ticket', { ticketTypeId: 3, closed: false, ticketStatusId: 1 })),
-          firstValueFrom(this.apiService.get('/ticket-categories',  { status: 1 ,parentId :0})),
+        firstValueFrom(this.apiService.get('/ticket', {  projectId: this.projectId, closed : false })),
+        firstValueFrom(this.apiService.get('/cases', {   projectId: this.projectId, closed : false })),
+        firstValueFrom(this.apiService.get('/ticket', {   projectId: this.projectId , closed : false})),
+        firstValueFrom(this.apiService.get('/ticket-categories',  { status: 1 ,parentId :0})),
+         firstValueFrom(this.apiService.get(`/ticket-balance/project/${this.projectId}`)),
+        
       ]);
 
       this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
@@ -109,11 +118,11 @@ active = 1;
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
       this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
        const users = Array.isArray(userResponse?.data) ? userResponse.data : [];
-       this.task = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
-        this.cases = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
-        this.cr = Array.isArray(crResponse?.data) ? crResponse.data : [];
-        this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
-
+      this.task = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
+      this.cases = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
+      this.cr = [];
+      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
+      this.ticketBalance = ticketBalanceResponse?.data || null; 
 
       for (const user of users) {
         const arr = {

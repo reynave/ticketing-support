@@ -341,3 +341,9 @@ tr.disabled td{
 .form-label{
 	margin-bottom: 0.3rem;
 }
+
+.bg-danger{
+	color : #fff !important;
+	background-color: #F62440 !important;
+}
+ 

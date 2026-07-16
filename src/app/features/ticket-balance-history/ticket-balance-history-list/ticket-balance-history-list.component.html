@@ -1,0 +1,57 @@
+<div class="container-fluid">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Ticket Balance History</div>
+      <div class="page-subtitle">List pergerakan ticket balance dari tabel ticket_balance.</div>
+    </div>
+    <button type="button" class="btn btn-primary-sm" (click)="loadHistory()">Refresh</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card">
+    @if (loading) {
+      <div class="text-muted">Loading ticket balance history...</div>
+    } @else if (!rows.length) {
+      <div class="text-muted">No ticket balance history data.</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Project / Note</th>
+              <th>Ticket</th> 
+              <th class="text-end">Ticket In</th>
+              <th class="text-end">Ticket Out</th>
+              <th class="text-end">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track trackById($index, row)) {
+              <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.date | date: 'medium' }}</td>
+                <td>
+                  <div class="fw-semibold" *ngIf="row.projectId">
+                    <a [routerLink]="['/project', row.projectId]" class="text-decoration-none"> 
+                    {{ row.projectName || '-' }}  <i class="bi bi-link-45deg"></i> 
+                    </a> 
+                  </div>
+                  {{ row.note }}
+                </td>
+                <td>{{ row.ticketId || '-' }}</td> 
+                <td class="text-end">{{ row.ticketIn }}</td>
+                <td class="text-end">{{ row.ticketOut }}</td>
+                <td class="text-end fw-semibold">{{ row.balanceChange }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

@@ -36,8 +36,8 @@ export class AdminLayoutComponent implements OnInit {
   ];
 
    readonly auditMenus = [ 
-    { path: '/userLogin', label: 'Log In', icon: 'search_activity' },
-    { path: '/ticketBalance', label: 'Ticket Balance', icon: 'fact_check'  },
+    { path: '/user-login-history', label: 'Login History', icon: 'search_activity' },
+    { path: '/ticket-balance-history', label: 'Ticket Balance', icon: 'fact_check'  },
     
   ];
 

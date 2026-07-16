@@ -1,0 +1,75 @@
+<div class="container-fluid">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Login History</div>
+      <div class="page-subtitle">Audit daftar login dari tabel user_login_history.</div>
+    </div>
+    <button type="button" class="btn btn-primary-sm" (click)="loadHistory()">Refresh</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-6">
+        <label class="form-label small" for="login-history-keyword">Keyword</label>
+        <input
+          id="login-history-keyword"
+          class="form-control form-control-sm"
+          [(ngModel)]="keyword"
+          (keyup.enter)="loadHistory()"
+          placeholder="Search user, IP, or user agent"
+        />
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label small" for="login-history-user">User ID</label>
+        <input
+          id="login-history-user"
+          class="form-control form-control-sm"
+          [(ngModel)]="selectedUserId"
+          (keyup.enter)="loadHistory()"
+          placeholder="Filter by user ID"
+        />
+      </div>
+      <div class="col-12 col-md-2 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadHistory()">Search</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    @if (loading) {
+      <div class="text-muted">Loading login history...</div>
+    } @else if (!rows.length) {
+      <div class="text-muted">No login history data.</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User ID</th>
+              <th>User Name</th>
+              <th>Login Time</th>
+              <th>IP Address</th> 
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track trackById($index, row)) {
+              <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.userId }}</td>
+                <td>{{ row.userName || '-' }}</td>
+                <td>{{ row.loginTime | date: 'medium' }}</td>
+                <td>{{ row.ipAddress }}</td> 
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
