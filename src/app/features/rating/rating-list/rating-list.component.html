@@ -52,12 +52,13 @@
                         <td><strong>{{ row.ticketTypeName | uppercase }}</strong></td>
                         <td>
                             <div class="fw-semibold">{{ row.title }}</div>
-
+                        </td>
                         <td>{{ row.projectName || '-' }}</td>
                         <td>{{ (row.actualCompletionDate || row.updateDate || row.submitDate) | date: 'mediumDate' }}
                         </td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-primary py-0" (click)="open(content)">Rate</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary py-0"
+                                (click)="open(content, row)">Rate</button>
                         </td>
                     </tr>
                     }
@@ -69,14 +70,57 @@
 </div>
 
 <ng-template #content let-modal>
-	<div class="modal-header">
-		<h4 class="modal-title" id="modal-basic-title">Rate</h4>
-		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-	</div>
-	<div class="modal-body">
-		Rate content goes here...
-	</div>
-	<div class="modal-footer">
-		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Save</button>
-	</div>
+    <div class="modal-header">
+        <strong class="modal-title" id="modal-basic-title">Ticket: {{ detail?.id || '-' }}</strong>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-2">
+            <div class="fw-semibold">{{ detail?.title || '-' }}</div>
+        </div>
+
+        @if (questionErrorMessage) {
+        <div class="alert alert-warning py-2">{{ questionErrorMessage }}</div>
+        }
+
+        @if (loadingQuestions) {
+        <div class="text-muted">Loading rating questions...</div>
+        } @else if (!ratingQuestions.length) {
+        <div class="text-muted">Rating question master belum ada data aktif.</div>
+        } @else {
+        <div class="list-group">
+            <table class="table table-sm table-hover align-middle">
+                <tbody>
+                    @for (question of ratingQuestions; track trackById($index, question)) {
+                    <tr>
+                        <td class="align-top pe-2">
+                            <span class="fw-semibold">{{ $index + 1 }}.</span>
+                        </td>
+                        <td class="align-top">
+                            <span>{{ question.name }}</span>
+                        </td>
+                        <td>
+
+                            <ngb-rating [(rate)]="question.value" [max]="5">
+                                <ng-template let-fill="fill" let-index="index">
+                                    <i class="bi-star{{ fill === 100 ? '-fill' : '' }}" [class.filled]="fill === 100"
+                                        [class.low]="index < 2"></i>
+                                </ng-template>
+                            </ngb-rating>
+                        </td>
+                        <Td>
+                            <span class="ms-2">{{ question.value || 0 }}</span>
+                        </Td>
+                    </tr>
+                    }
+            </table>
+
+        </div>
+        }
+        
+         
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="onSubmitRate()">Submit</button>
+    </div>
 </ng-template>

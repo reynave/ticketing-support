@@ -37,6 +37,7 @@ export class ProjectDetailComponent implements OnInit {
 active = 1;
   projectId = '';
   project: any = null;
+  searchKeyword = '';
 
   clients: any[] = [];
   projectTypes: any[] = [];
@@ -307,5 +308,26 @@ active = 1;
 
   back(){
     history.back();
+  }
+
+  private matchesSearch(row: any): boolean {
+    const keyword = this.searchKeyword.trim().toLowerCase();
+
+    if (!keyword) {
+      return true;
+    }
+
+    const id = String(row?.id ?? '').toLowerCase();
+    const title = String(row?.title ?? '').toLowerCase();
+
+    return id.includes(keyword) || title.includes(keyword);
+  }
+
+  get filteredTask(): any[] {
+    return this.task.filter((row) => this.matchesSearch(row));
+  }
+
+  get filteredCases(): any[] {
+    return this.cases.filter((row) => this.matchesSearch(row));
   }
 }

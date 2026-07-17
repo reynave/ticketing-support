@@ -239,11 +239,21 @@
 
 
 
+
+  <div class="card border shadow-sm mb-3 p-3">
+    <label class="form-label small fw-semibold" for="project-ticket-search">Search by ID / Title</label>
+    <input id="project-ticket-search" class="form-control form-control-sm" [(ngModel)]="searchKeyword"
+      placeholder="search by ID or Title in tasks, cases, or change requests" />
+  </div>
+
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
 	<li [ngbNavItem]="1">
 		<button ngbNavLink>TASKS</button>
 		<ng-template ngbNavContent>
+
+
 			  <table class="table table-sm table-hover ">
+
         <thead>
           <tr>
             <th>ID</th>
@@ -255,18 +265,15 @@
           </tr>
         </thead>
         <tbody>
-          @for (t of task; track t.id) {
+          @for (t of filteredTask; track t.id) {
           <tr>
             <td>
-              <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
-        
-
+              <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a> 
             </td>
             <td>{{ t.submitDate | date: 'yyyy-MM-dd HH:mm' }}</td>
             <td>{{ t.title }}</td>
-            <td>{{ t.ticketStatusName }}</td>
-            <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td> 
-           
+            <td>{{ t.ticketStatusName }}  </td>
+            <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>  
           </tr>
           }
         </tbody>
@@ -289,7 +296,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (t of cases; track t.id) {
+          @for (t of filteredCases; track t.id) {
           <tr>
             <td>
               <a [routerLink]="['/cases', t.id]" class="text-decoration-none">{{ t.id }}</a>
