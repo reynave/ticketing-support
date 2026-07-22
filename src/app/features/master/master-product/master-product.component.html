@@ -1,12 +1,12 @@
 <div class="container">
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
-      <div class="page-title">Master Ticket Categories</div>
-      <div class="page-subtitle">Manage ticket category hierarchy with parent category mapping.</div>
+      <div class="page-title">Master Product</div>
+      <div class="page-subtitle">Manage product hierarchy with parent and child structure.</div>
     </div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-secondary btn-sm" routerLink="/master">Back to Master</a>
-      <button type="button" class="btn btn-sm btn-primary" (click)="openNewParentModal()">New Category</button>
+      <button type="button" class="btn btn-sm btn-primary" (click)="openNewParentModal()">New Product</button>
       <button type="button" class="btn btn-sm btn-outline-primary" (click)="loadRows()" [disabled]="loading">
         {{ loading ? 'Refreshing...' : 'Refresh' }}
       </button>
@@ -24,8 +24,8 @@
   <div class="stat-card mb-3">
     <div class="row g-2 align-items-end">
       <div class="col-12 col-md-3">
-        <label class="form-label" for="ticket-category-filter-status">Status</label>
-        <select id="ticket-category-filter-status" class="form-select form-select-sm" [(ngModel)]="selectedStatus" (change)="loadRows()">
+        <label class="form-label" for="product-filter-status">Status</label>
+        <select id="product-filter-status" class="form-select form-select-sm" [(ngModel)]="selectedStatus" (change)="loadRows()">
           <option value="">All</option>
           <option value="1">Active</option>
           <option value="0">Inactive</option>
@@ -33,9 +33,9 @@
       </div>
 
       <div class="col-12 col-md-4">
-        <label class="form-label" for="ticket-category-filter-parent">Parent</label>
+        <label class="form-label" for="product-filter-parent">Parent</label>
         <select
-          id="ticket-category-filter-parent"
+          id="product-filter-parent"
           class="form-select form-select-sm"
           [(ngModel)]="selectedParentId"
           (change)="loadRows()"
@@ -51,7 +51,7 @@
 
       <div class="col-12 col-md-3">
         <div class="small text-muted mb-1">Hierarchy note</div>
-        <div class="small">Rows with `parentId = 0` are root categories.</div>
+        <div class="small">Rows with parentId = 0 are root products.</div>
       </div>
 
       <div class="col-12 col-md-2 d-flex gap-2">
@@ -62,9 +62,9 @@
 
   <div class="stat-card">
     @if (loading) {
-    <div class="text-muted">Loading ticket categories...</div>
+    <div class="text-muted">Loading product master...</div>
     } @else if (!rows.length) {
-    <div class="text-muted">No ticket category data available.</div>
+    <div class="text-muted">No product data available.</div>
     } @else {
     <div class="table-responsive">
       <table class="table table-sm table-hover align-middle">
@@ -72,18 +72,15 @@
           <tr>
             <th>ID</th>
             <th>Name</th> 
-            <th>Weight</th>
             <th>Status</th>
             <th class="text-end">Action</th>
           </tr>
         </thead>
         <tbody>
           @for (row of rows; track trackById($index, row)) {
-          <tr class="table-parent"  >
+          <tr class="parent">
             <td>{{ row.id }}</td>
-            <td>{{ row.name }}</td>
-         
-            <td>{{ row.weight }}</td>
+            <td>{{ row.name }}</td> 
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <td class="text-end">
               @if (isParentRow(row)) {
@@ -93,19 +90,18 @@
             </td>
           </tr>
 
-            @if (row.children && row.children.length) {
-                @for (child of row.children; track trackById($index, child)) {
-                <tr>
-                    <td>{{ child.id }}</td>
-                    <td class="ps-4">↳ {{ child.name }}</td> 
-                    <td>{{ child.weight }}</td>
-                    <td>{{ child.status === 1 ? 'Active' : 'Inactive' }}</td>
-                    <td class="text-end">
-                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(child)">Detail</button>
-                    </td>
-                </tr>
-                }
+          @if (row.children && row.children.length) {
+            @for (child of row.children; track trackById($index, child)) {
+            <tr>
+              <td>{{ child.id }}</td>
+              <td class="ps-4">↳ {{ child.name }}</td> 
+              <td>{{ child.status === 1 ? 'Active' : 'Inactive' }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(child)">Detail</button>
+              </td>
+            </tr>
             }
+          }
           }
         </tbody>
       </table>
@@ -114,13 +110,13 @@
   </div>
 </div>
 
-<ng-template #categoryFormModal>
+<ng-template #productFormModal>
   <div class="modal-header">
-    <h5 class="modal-title">{{ formMode === 'parent' ? 'New Parent Category' : 'New Child Category' }}</h5>
+    <h5 class="modal-title">{{ formMode === 'parent' ? 'New Parent Product' : 'New Child Product' }}</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
   </div>
 
-  <form #categoryFormNg="ngForm" (ngSubmit)="saveCategory(categoryFormNg)">
+  <form #productFormNg="ngForm" (ngSubmit)="saveProduct(productFormNg)">
     <div class="modal-body d-grid gap-2">
       @if (formMode === 'child') {
       <div class="small text-muted">
@@ -129,33 +125,28 @@
       }
 
       <div>
-        <label class="form-label" for="new-category-name">Category Name <span class="text-danger">*</span></label>
-        <input id="new-category-name" class="form-control" name="name" [(ngModel)]="formModel.name" required />
+        <label class="form-label" for="new-product-name">Product Name <span class="text-danger">*</span></label>
+        <input id="new-product-name" class="form-control" name="name" [(ngModel)]="formModel.name" required />
       </div>
 
       <div>
-        <label class="form-label" for="new-category-weight">Weight <span class="text-danger">*</span></label>
-        <input id="new-category-weight" class="form-control" type="number" name="weight" [(ngModel)]="formModel.weight" required />
-      </div>
-
-      <div>
-        <label class="form-label" for="new-category-status">Status</label>
-        <select id="new-category-status" class="form-select" name="status" [(ngModel)]="formModel.status">
+        <label class="form-label" for="new-product-status">Status</label>
+        <select id="new-product-status" class="form-select" name="status" [(ngModel)]="formModel.status">
           <option [ngValue]="1">Active</option>
           <option [ngValue]="0">Inactive</option>
         </select>
       </div>
 
       <div>
-        <label class="form-label" for="new-category-parent">Parent Id</label>
-        <input id="new-category-parent" class="form-control" name="parentId" [(ngModel)]="formModel.parentId" readonly />
+        <label class="form-label" for="new-product-parent">Parent Id</label>
+        <input id="new-product-parent" class="form-control" name="parentId" [(ngModel)]="formModel.parentId" readonly />
       </div>
     </div>
 
     <div class="modal-footer">
       <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary" [disabled]="saving || categoryFormNg.invalid">
-        {{ saving ? 'Saving...' : 'Save Category' }}
+      <button type="submit" class="btn btn-primary" [disabled]="saving || productFormNg.invalid">
+        {{ saving ? 'Saving...' : 'Save Product' }}
       </button>
     </div>
   </form>

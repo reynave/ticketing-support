@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 export class MasterHomeComponent {
   readonly masterMenus = [
     { key: 'industry', label: 'Industry' },
-    { key: 'product', label: 'Product' },
+    { key: 'product', label: 'Product', route: '/master-product' },
     { key: 'project', label: 'Project', route: '/projects' },
     { key: 'project-type', label: 'Project Type' },
     { key: 'project-billeable', label: 'Project Billeable' },

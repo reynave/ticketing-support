@@ -1,0 +1,80 @@
+<div class="container">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Product Detail</div>
+      <div class="page-subtitle">Update product name, parent, and status.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back To List</a>
+    </div>
+  </div>
+
+  @if (message) {
+  <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    @if (loading) {
+    <div class="text-muted">Loading product detail...</div>
+    } @else if (!product) {
+    <div class="text-muted">Product not found.</div>
+    } @else {
+    <div class="row g-2">
+      <div class="col-12 col-md-3"><strong>ID:</strong> {{ product.id }}</div>
+      <div class="col-12 col-md-5"><strong>Name:</strong> {{ product.name }}</div>
+      <div class="col-12 col-md-2"><strong>Status:</strong> {{ product.status === 1 ? 'Active' : 'Inactive' }}</div>
+      <div class="col-12"><strong>Parent:</strong> {{ getParentName(product.parentId) }}</div>
+    </div>
+    }
+  </div>
+
+  <div class="stat-card">
+    <form #productForm="ngForm" (ngSubmit)="save(productForm)">
+      <div class="table-responsive">
+        <table class="table table-borderless table-sm mb-0">
+          <tbody>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Name <span class="text-danger">*</span></label></td>
+              <td>
+                <input class="form-control form-control-sm" name="name" [(ngModel)]="formModel.name" required />
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Parent</label></td>
+              <td>
+                <select class="form-select form-select-sm" name="parentId" [(ngModel)]="formModel.parentId" [disabled]="loadingParents">
+                  <option [ngValue]="0">Root</option>
+                  @for (parent of parentOptions; track parent.id) {
+                  @if (parent.id !== productId) {
+                  <option [ngValue]="parent.id">{{ parent.name }}</option>
+                  }
+                  }
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Status</label></td>
+              <td>
+                <select class="form-select form-select-sm" name="status" [(ngModel)]="formModel.status">
+                  <option [ngValue]="1">Active</option>
+                  <option [ngValue]="0">Inactive</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving || productForm.invalid">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

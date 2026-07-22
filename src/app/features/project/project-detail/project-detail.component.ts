@@ -104,7 +104,7 @@ active = 1;
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/product', { status: 1 })),
+        firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })),
         firstValueFrom(this.apiService.get('/user', { status: 1 })),
         firstValueFrom(this.apiService.get('/ticket', {  projectId: this.projectId, closed : false })),
         firstValueFrom(this.apiService.get('/cases', {   projectId: this.projectId, closed : false })),
