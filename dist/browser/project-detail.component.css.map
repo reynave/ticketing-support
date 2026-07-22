@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/project/project-detail/project-detail.component.css"],
+  "sourcesContent": [".project-detail-page .card {\r\n  border-color: #e9ecef;\r\n}\r\n\r\n.project-detail-page .card-header {\r\n  border-bottom: 1px solid #e9ecef;\r\n}\r\n\r\n.project-detail-page .form-label {\r\n  margin-bottom: 0.35rem;\r\n}\r\n.bi{\r\n  font-size: 1rem;\r\n}"],
+  "mappings": ";AAAA,CAAC,oBAAoB,CAAC;AACpB,gBAAc;AAChB;AAEA,CAJC,oBAIoB,CAAC;AACpB,iBAAe,IAAI,MAAM;AAC3B;AAEA,CARC,oBAQoB,CAAC;AACpB,iBAAe;AACjB;AACA,CAAC;AACC,aAAW;AACb;",
+  "names": []
+}

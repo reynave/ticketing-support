@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/layout/admin-layout/admin-layout.component.css"],
+  "sourcesContent": [".profile-box {\r\n  margin-top: 1rem;\r\n  padding-bottom: 1rem;\r\n}\r\n\r\n.menu-icon {\r\n  font-size: 20px;\r\n  line-height: 1;\r\n  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,cAAY;AACZ,kBAAgB;AAClB;AAEA,CAAC;AACC,aAAW;AACX,eAAa;AACb;AAAA,IAAyB,OAAO,CAAC;AAAA,IAAE,OAAO,GAAG;AAAA,IAAE,OAAO,CAAC;AAAA,IAAE,OAAO;AAClE;",
+  "names": []
+}

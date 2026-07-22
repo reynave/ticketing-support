@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/user-login-history/user-login-history-list/user-login-history-list.component.css"],
+  "sourcesContent": [".login-user-agent {\r\n  max-width: 420px;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,aAAW;AACb;",
+  "names": []
+}

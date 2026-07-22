@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/master/master-home/master-home.component.css"],
+  "sourcesContent": [".small-title {\r\n  font-size: 1.1rem;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,aAAW;AACb;",
+  "names": []
+}

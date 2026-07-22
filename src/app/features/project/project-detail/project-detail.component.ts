@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router ,  RouterModule } from '@angular/router';
 // import { ActivatedRoute, Router , RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
-import { NgbDatepickerModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerModule, NgbModal, NgbModalModule, NgbModalRef, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 interface ProjectFormModel {
   name: string;
@@ -22,10 +22,23 @@ interface ProjectFormModel {
   ticketCategoriesParentId : number;
 }
 
+interface TaskGroup {
+  id: number | string;
+  name: string;
+  data: any[];
+}
+
+interface TicketBalanceFormModel {
+  date: string;
+  ticketIn: number;
+  ticketOut: number;
+  note: string;
+}
+
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule,RouterModule ],
+  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule, NgbModalModule, RouterModule ],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.css',
 })
@@ -33,6 +46,10 @@ export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly modalService = inject(NgbModal);
+
+  @ViewChild('ticketBalanceModal') ticketBalanceModal?: TemplateRef<unknown>;
+  private ticketBalanceModalRef: NgbModalRef | null = null;
 
 active = 1;
   projectId = '';
@@ -60,6 +77,9 @@ active = 1;
   cr: any[] = [];
   contacts : any[] = [];
   ticketBalance : any = null;
+  savingTicketBalance = false;
+  ticketBalanceError = '';
+  ticketBalanceForm: TicketBalanceFormModel = this.defaultTicketBalanceForm();
  
 
   ngOnInit(): void {
@@ -70,21 +90,28 @@ active = 1;
       return;
     }
 
-    this.loadOptions();
+   
     this.loadProjectDetail();
   }
-
+  ticketChildCategories : any = [];
+ 
   loadProjectDetail(): void {
     this.loading = true;
     this.errorMessage = '';
 
     this.apiService.get(`/project/${this.projectId}`).subscribe({
       next: (response) => {
-        this.loading = false;
+    
         this.project = response?.data || null;
         this.projectUsers = response?.data?.users || [];
         this.contacts = response?.data?.contacts || [];
         this.populateFormFromProject();
+        this.ticketChildCategories = response?.data?.ticketCategories || [];
+
+        this.users = response?.data?.users || [];
+        console.log('Users:', this.users);
+        this.loadOptions();
+
       },
       error: (error) => {
         this.loading = false;
@@ -99,13 +126,12 @@ active = 1;
 
     try {
       const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse, 
-        userResponse, taskResponse, caseResponse, crResponse, ticketCategoriesResponse, ticketBalanceResponse
+         taskResponse, caseResponse, crResponse, ticketCategoriesResponse, ticketBalanceResponse
       ] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
-        firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })),
-        firstValueFrom(this.apiService.get('/user', { status: 1 })),
+        firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })), 
         firstValueFrom(this.apiService.get('/ticket', {  projectId: this.projectId, closed : false })),
         firstValueFrom(this.apiService.get('/cases', {   projectId: this.projectId, closed : false })),
         firstValueFrom(this.apiService.get('/ticket', {   projectId: this.projectId , closed : false})),
@@ -117,24 +143,38 @@ active = 1;
       this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
       this.projectTypes = Array.isArray(projectTypeResponse?.data) ? projectTypeResponse.data : [];
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
-      this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
-       const users = Array.isArray(userResponse?.data) ? userResponse.data : [];
-      this.task = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
-      this.cases = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
-      this.cr = [];
+      this.products = Array.isArray(productResponse?.data) ? productResponse.data : []; 
+      const task = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
+      const caseRows = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
+      const crRowsRaw = Array.isArray(crResponse?.data) ? crResponse.data : [];
+      const crRows = crRowsRaw.filter((row: any) => this.isChangeRequestTicket(row));
+
+      const ticketChildCategories = Array.isArray(this.ticketChildCategories) ? this.ticketChildCategories : [];
+      this.task = ticketChildCategories.map((item: any) => ({
+        ...item,
+        data: task.filter((t: any) => t.ticketCategoryId === item.id),
+      }));
+      console.log(this.task)
+
+
+
+      this.cases = ticketChildCategories.map((item: any) => ({
+        ...item,
+        data: caseRows.filter((t: any) => t.ticketCategoryId === item.id),
+      }));
+      console.log(this.cases)
+
+      this.cr = ticketChildCategories.map((item: any) => ({
+        ...item,
+        data: crRows.filter((t: any) => t.ticketCategoryId === item.id),
+      }));
+
+      
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
       this.ticketBalance = ticketBalanceResponse?.data || null; 
 
-      for (const user of users) {
-        const arr = {
-            id: user.id,
-            name : `${user.firstName} ${user.lastName}`,
-            userAuthLevel : user.userAuthLevel || '',
-            checked : false,
-            asManager : false,
-        }
-        this.users.push(arr); 
-      }
+     
+    
     } catch {
       this.clients = [];
       this.projectTypes = [];
@@ -142,8 +182,12 @@ active = 1;
       this.products = [];
       this.users = [];
       this.ticketCategories = [];
+      this.task = [];
+      this.cases = [];
+      this.cr = [];
     } finally {
       this.loadingOptions = false;
+          this.loading = false;
     }
   }
  toggleManager(index: number): void {
@@ -310,6 +354,91 @@ active = 1;
     history.back();
   }
 
+  openTicketBalanceModal(): void {
+    if (!this.ticketBalanceModal) {
+      return;
+    }
+
+    this.ticketBalanceForm = this.defaultTicketBalanceForm();
+    this.ticketBalanceError = '';
+
+    this.ticketBalanceModalRef = this.modalService.open(this.ticketBalanceModal, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+  }
+
+  closeTicketBalanceModal(): void {
+    this.ticketBalanceModalRef?.close();
+    this.ticketBalanceModalRef = null;
+    this.ticketBalanceError = '';
+  }
+
+  saveTicketBalance(form: NgForm): void {
+    if (form.invalid || this.savingTicketBalance || !this.projectId) {
+      return;
+    }
+
+    const ticketIn = Number(this.ticketBalanceForm.ticketIn || 0);
+    const ticketOut = Number(this.ticketBalanceForm.ticketOut || 0);
+
+    if (ticketIn <= 0 && ticketOut <= 0) {
+      this.ticketBalanceError = 'ticketIn or ticketOut must be greater than 0.';
+      return;
+    }
+
+    this.savingTicketBalance = true;
+    this.ticketBalanceError = '';
+
+    const payload = {
+      projectId: this.projectId,
+      date: this.ticketBalanceForm.date,
+      ticketIn,
+      ticketOut,
+      note: this.ticketBalanceForm.note.trim(),
+    };
+
+    this.apiService.post('/ticket-balance', payload).subscribe({
+      next: (response) => {
+        this.savingTicketBalance = false;
+        this.closeTicketBalanceModal();
+        this.message = response?.message || 'Ticket balance transaction created.';
+        this.refreshTicketBalance();
+        this.active = 5; // Switch to the Ticket Balance tab after saving
+      },
+      error: (error) => {
+        this.savingTicketBalance = false;
+        this.ticketBalanceError = error?.error?.message || 'Failed to create ticket balance transaction.';
+      },
+    });
+  }
+
+  private refreshTicketBalance(): void {
+    if (!this.projectId) {
+      return;
+    }
+
+    this.apiService.get(`/ticket-balance/project/${this.projectId}`).subscribe({
+      next: (response) => {
+        this.ticketBalance = response?.data || [];
+      },
+      error: () => {
+        this.ticketBalance = [];
+      },
+    });
+  }
+
+  get currentTicketBalance(): number {
+    const rows = Array.isArray(this.ticketBalance) ? this.ticketBalance : [];
+
+    if (!rows.length) {
+      return 0;
+    }
+
+    return Number(rows[0]?.balance || 0);
+  }
+
   private matchesSearch(row: any): boolean {
     const keyword = this.searchKeyword.trim().toLowerCase();
 
@@ -319,15 +448,138 @@ active = 1;
 
     const id = String(row?.id ?? '').toLowerCase();
     const title = String(row?.title ?? '').toLowerCase();
+    const category = String(row?.ticketCategoryName ?? row?.name ?? '').toLowerCase();
 
-    return id.includes(keyword) || title.includes(keyword);
+    return id.includes(keyword) || title.includes(keyword) || category.includes(keyword);
   }
 
-  get filteredTask(): any[] {
-    return this.task.filter((row) => this.matchesSearch(row));
+  private isChangeRequestTicket(row: any): boolean {
+    const ticketTypeName = String(row?.ticketTypeName || '').trim().toLowerCase();
+    const ticketTypeCode = String(row?.ticketTypeCode || '').trim().toLowerCase();
+
+    return ticketTypeName.includes('change') || ticketTypeCode === 'cr';
+  }
+
+  get groupedFilteredTask(): TaskGroup[] {
+    const grouped = Array.isArray(this.task) ? this.task : [];
+
+    // Preferred payload: [{ id, name, data: Task[] }]
+    if (grouped.some((row) => Array.isArray(row?.data))) {
+      return grouped
+        .map((group: any) => {
+          const rows = Array.isArray(group?.data) ? group.data : [];
+          const filteredRows = rows.filter((row: any) => {
+            const enrichedRow = {
+              ...row,
+              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
+            };
+
+            return this.matchesSearch(enrichedRow);
+          });
+
+          return {
+            id: group?.id,
+            name: String(group?.name || group?.id || 'Unknown Category'),
+            data: filteredRows,
+          };
+        })
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+    }
+
+    // Backward compatibility for older flat task payload.
+    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
+    return [
+      {
+        id: 'ungrouped',
+        name: 'Ungrouped',
+        data: fallbackRows,
+      },
+    ];
   }
 
   get filteredCases(): any[] {
     return this.cases.filter((row) => this.matchesSearch(row));
+  }
+
+  get groupedFilteredCases(): TaskGroup[] {
+    const grouped = Array.isArray(this.cases) ? this.cases : [];
+
+    if (grouped.some((row) => Array.isArray(row?.data))) {
+      return grouped
+        .map((group: any) => {
+          const rows = Array.isArray(group?.data) ? group.data : [];
+          const filteredRows = rows.filter((row: any) => {
+            const enrichedRow = {
+              ...row,
+              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
+            };
+
+            return this.matchesSearch(enrichedRow);
+          });
+
+          return {
+            id: group?.id,
+            name: String(group?.name || group?.id || 'Unknown Category'),
+            data: filteredRows,
+          };
+        })
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+    }
+
+    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
+    return [
+      {
+        id: 'ungrouped-cases',
+        name: 'Ungrouped',
+        data: fallbackRows,
+      },
+    ];
+  }
+
+  get groupedFilteredCr(): TaskGroup[] {
+    const grouped = Array.isArray(this.cr) ? this.cr : [];
+
+    if (grouped.some((row) => Array.isArray(row?.data))) {
+      return grouped
+        .map((group: any) => {
+          const rows = Array.isArray(group?.data) ? group.data : [];
+          const filteredRows = rows.filter((row: any) => {
+            const enrichedRow = {
+              ...row,
+              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
+            };
+
+            return this.matchesSearch(enrichedRow);
+          });
+
+          return {
+            id: group?.id,
+            name: String(group?.name || group?.id || 'Unknown Category'),
+            data: filteredRows,
+          };
+        })
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+    }
+
+    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
+    return [
+      {
+        id: 'ungrouped-cr',
+        name: 'Ungrouped',
+        data: fallbackRows,
+      },
+    ];
+  }
+
+  private defaultTicketBalanceForm(): TicketBalanceFormModel {
+    const today = new Date();
+    const isoDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    return {
+      date: isoDate,
+      ticketIn: 0,
+      ticketOut: 0,
+      note: '',
+    };
   }
 }

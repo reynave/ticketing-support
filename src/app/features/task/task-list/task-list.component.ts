@@ -15,8 +15,7 @@ import {
   NgbModalRef,
 } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
-import { ApiService } from '../../../core/services/api.service';
-import th from '@angular/common/locales/extra/th';
+import { ApiService } from '../../../core/services/api.service'; 
 import { AuthService } from '../../../core/services/auth.service';
 
 interface TaskFormModel {
@@ -36,6 +35,7 @@ interface TaskFormModel {
   ratesBy: number;
   issueNo: string;
   category: number;
+  productChildId: string;
 }
 
 @Component({
@@ -159,7 +159,7 @@ export class TaskListComponent implements OnInit {
       this.loadingOptions = false;
     }
   }
-
+modules : any = [];
   selectTaskCategory(): void {
     
 
@@ -176,6 +176,9 @@ export class TaskListComponent implements OnInit {
     this.selectChildCategory = selectedTicketCategories[0]?.children || [];  
 
     this.internalUsers = selectedProject?.users || [];
+
+    this.modules = selectedProject?.modules || [];
+    console.log('Selected Project Modules:', this.modules);
    
   }
 
@@ -240,6 +243,7 @@ export class TaskListComponent implements OnInit {
       //  ratesBy: Number(this.formModel.ratesBy),
       //  issueNo: this.formModel.issueNo.trim(),
       ticketCategoryId: this.formModel.category,
+      productChildId: this.formModel.productChildId || null, // Add productChildId to the payload
     };
     console.log('Payload:', payload);
 
@@ -337,6 +341,7 @@ export class TaskListComponent implements OnInit {
       title: '',
       description: '',
       projectId: '',
+      productChildId: '',
       submitBy: 1,
       submitDate: formattedToday,
       targetCompletionDate: formattedToday,
