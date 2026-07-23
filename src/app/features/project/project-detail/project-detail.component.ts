@@ -6,6 +6,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { NgbDatepickerModule, NgbModal, NgbModalModule, NgbModalRef, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { AddContactModalComponent, AddContactModalResult } from '../../../core/components/add-contact-modal/add-contact-modal.component';
 
 interface ProjectFormModel {
   name: string;
@@ -60,7 +61,7 @@ active = 1;
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
   products: any[] = [];
- ticketCategories: any[] = [];
+  ticketCategories: any[] = [];
   loading = false;
   loadingOptions = false;
   saving = false;
@@ -88,9 +89,7 @@ active = 1;
     if (!this.projectId) {
       void this.router.navigate(['/master-project']);
       return;
-    }
-
-   
+    } 
     this.loadProjectDetail();
   }
   ticketChildCategories : any = [];
@@ -375,6 +374,43 @@ active = 1;
     this.ticketBalanceError = '';
   }
 
+  openAddContactModal(): void {
+    const modalRef = this.modalService.open(AddContactModalComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.project = this.project;
+    modalRef.componentInstance.contacts = Array.isArray(this.project?.contacts)
+      ? this.project.contacts
+      : [];
+
+    void modalRef.result.then((result: AddContactModalResult | undefined) => {
+      if (!result) {
+        return;
+      }
+
+      this.loadProjectDetail();
+      
+      // this.contacts = [
+      //   ...this.contacts,
+      //   {
+      //     id: `TMP-${Date.now()}`,
+      //     name: result.name,
+      //     email: result.email,
+      //     phone: result.phone,
+      //     inputDate: new Date().toISOString(),
+      //   },
+      // ];
+
+      this.message = 'Contact added.';
+      this.errorMessage = '';
+    }).catch(() => {
+      // Ignore dismiss action.
+    });
+  }
+
   saveTicketBalance(form: NgForm): void {
     if (form.invalid || this.savingTicketBalance || !this.projectId) {
       return;
@@ -581,5 +617,26 @@ active = 1;
       ticketOut: 0,
       note: '',
     };
+  }
+
+  removeSelectedContacts() : void {
+     
+
+    const payload = this.contacts.filter(c => c.checkbox)
+     
+     console.log('Selected contacts:', payload);
+     
+    const request$ = this.apiService.put(`/project/contact`, payload);
+
+    request$.subscribe({
+      next: (response) => {
+        this.saving = false;  
+        this.loadProjectDetail();  
+      },
+      error: (error) => {
+        this.saving = false;
+        alert('Error : ' + (error?.message || 'Unknown error'));
+      },
+    });
   }
 }

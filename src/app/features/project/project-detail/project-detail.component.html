@@ -5,7 +5,7 @@
       <p class="text-muted small mb-0">Detail dan edit project dari endpoint standalone project master.</p>
     </div>
     <a class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</a>
-   
+
   </div>
 
   @if (message) {
@@ -27,7 +27,7 @@
   } @else {
   <div class="card border shadow-sm mb-4">
     <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
-      <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
+      <div class="sticky-top card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
         <span class="fw-semibold small">Project Form</span>
         <div class="d-flex gap-2">
           @if (formMode === 'edit') {
@@ -42,8 +42,9 @@
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
           }
 
-            <button type="button" class="btn btn-success btn-sm" (click)="openTicketBalanceModal()">Add Ticket Balance</button>
-    
+          <button type="button" class="btn btn-success btn-sm" (click)="openTicketBalanceModal()">Add Ticket
+            Balance</button>
+
 
         </div>
       </div>
@@ -170,7 +171,7 @@
 
             <div class="form-control "
               [ngClass]="{'bg-danger': currentTicketBalance < 0, 'bg-light': currentTicketBalance >= 0}">
-              {{ currentTicketBalance }}</div>
+              {{ currentTicketBalance | number }}</div>
 
           </div>
 
@@ -386,12 +387,11 @@
       <button ngbNavLink>CONTACTS</button>
       <ng-template ngbNavContent>
 
-        
-
         <table class="table table-sm table-hover ">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
+              <th></th>
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
@@ -399,9 +399,14 @@
             </tr>
           </thead>
           <tbody>
-            @for (t of contacts; track t.id) {
+            @for (t of contacts; track t.id; let i = $index) {
             <tr>
-              <td>{{ t.id }}</td>
+              <td>{{ i + 1 }}</td>
+              <td (click)="t.checkbox = !t.checkbox" style="cursor: pointer;">
+                <i class="bi bi-check-square-fill" *ngIf="t.checkbox"></i>
+                <i class="bi bi-square" *ngIf="!t.checkbox"></i>
+
+              </td>
               <td>{{ t.name }}</td>
               <td>{{ t.email }}</td>
               <td>{{ t.phone }}</td>
@@ -410,6 +415,11 @@
             }
           </tbody>
         </table>
+
+        <div class="text-end mb-2">
+          <button class="btn btn-sm btn-danger mx-1" (click)="removeSelectedContacts()">Remove Contact</button>
+          <button type="button" class="btn btn-sm btn-primary mx-1" (click)="openAddContactModal()">Add Contact</button>
+        </div>
       </ng-template>
     </li>
 
@@ -431,8 +441,8 @@
             <tr>
               <td>{{ t.date | date: 'mediumDate' }}</td>
               <td>{{ t.title }} {{ t.note }}</td>
-              <td class="text-end">{{ t.ticketIn }}</td>
-              <td class="text-end">{{ t.ticketOut }}</td>
+              <td class="text-end text-primary"><strong>{{  t.ticketIn > 0 ? (t.ticketIn  | number) : '-' }}</strong></td>
+              <td class="text-end text-danger"><strong>{{ t.ticketOut > 0 ? (t.ticketOut  | number) : '-' }}</strong></td>
               <td class="text-end">{{ t.balance }}</td>
             </tr>
             }
@@ -458,50 +468,37 @@
         <div class="alert alert-danger py-2 mb-0">{{ ticketBalanceError }}</div>
         }
 
-        <div>
-          <label class="form-label" for="ticket-balance-date">Date <span class="text-danger">*</span></label>
-          <input
-            id="ticket-balance-date"
-            class="form-control"
-            type="date"
-            name="date"
-            [(ngModel)]="ticketBalanceForm.date"
-            required
-          />
-        </div>
+
 
         <div class="row g-2">
-          <div class="col-12 col-md-6">
-            <label class="form-label" for="ticket-balance-in">Ticket In</label>
-            <input
-              id="ticket-balance-in"
-              class="form-control"
-              type="number"
-              min="0"
-              name="ticketIn"
-              [(ngModel)]="ticketBalanceForm.ticketIn"
-            />
+          <div class="col-12 col-md-6"> 
+              <label class="form-label" for="ticket-balance-date">Date <span class="text-danger">*</span></label>
+              <input id="ticket-balance-date" class="form-control" type="date" name="date"
+                [(ngModel)]="ticketBalanceForm.date" required />
+       
           </div>
           <div class="col-12 col-md-6">
-            <label class="form-label" for="ticket-balance-out">Ticket Out</label>
-            <input
-              id="ticket-balance-out"
-              class="form-control"
-              type="number"
-              min="0"
-              name="ticketOut"
-              [(ngModel)]="ticketBalanceForm.ticketOut"
-            />
+            <label class="form-label" for="ticket-balance-in">Ticket In  <span class="text-danger">*</span></label>
+            <input id="ticket-balance-in" class="form-control" type="number" min="0" name="ticketIn"
+              [(ngModel)]="ticketBalanceForm.ticketIn" required />
+          </div>
+
+          <div class="col-12">
+            <!-- note -->
+            <label class="form-label" for="ticket-balance-note">Description  <span class="text-danger">*</span></label>
+            <input id="ticket-balance-note" class="form-control" name="note" required
+              [(ngModel)]="ticketBalanceForm.note" />
+
           </div>
         </div>
 
-        <div class="small text-muted">Either Ticket In or Ticket Out must be greater than 0.</div>
+     
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" (click)="closeTicketBalanceModal()">Cancel</button>
         <button type="submit" class="btn btn-primary" [disabled]="savingTicketBalance || ticketBalanceFormNg.invalid">
-          {{ savingTicketBalance ? 'Saving...' : 'Save Ticket Balance' }}
+          {{ savingTicketBalance ? 'Saving...' : 'Add Balance' }}
         </button>
       </div>
     </form>
@@ -520,8 +517,8 @@
     <a class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</a>
   </div>
   <div class="row">
-    <div class="col-12 my-5 absolute-center text-center"> 
-     <div> Loading...</div>
+    <div class="col-12 my-5 absolute-center text-center">
+      <div> Loading...</div>
       <img src="./img/4167289_18784.jpg" alt="Loading..." class="img-fluid" style="max-width: 400px;">
     </div>
   </div>

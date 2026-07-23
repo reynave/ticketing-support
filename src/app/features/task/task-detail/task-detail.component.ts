@@ -6,7 +6,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { filter, firstValueFrom, map } from 'rxjs';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
@@ -29,7 +29,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule],
+  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule, RouterLink],
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.css',
 })

@@ -31,3 +31,7 @@
   }
 }
  
+.task-form-table th {
+  font-size: 0.7rem;
+  font-family: "Inter", sans-serif;
+}
