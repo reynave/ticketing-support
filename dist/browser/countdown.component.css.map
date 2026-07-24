@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["angular:styles/component:css;31f8b3c1cd55dd47c86f87a7804a62bfcd767c28ea1979c09ab0dcc8ca7afc45;C:/nodejs/8thinktank-ticketing/frontEnd/ng18/src/app/features/cases/case-detail/countdown.component.ts"],
-  "sourcesContent": ["\n    .countdown { \n      font-family: monospace;\n    }\n    .countdown-invalid { \n      color: #999;\n    }\n  "],
-  "mappings": ";AACI,CAAC;AACC,eAAa;AACf;AACA,CAAC;AACC,SAAO;AACT;",
-  "names": []
-}

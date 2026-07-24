@@ -6,6 +6,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { filter, firstValueFrom, map } from 'rxjs';
@@ -38,6 +39,7 @@ import { CaseCreateTaskModalComponent } from '../../../core/components/case-crea
     NgbDatepickerModule,
     CountdownComponent,
     CaseCreateTaskModalComponent,
+    RouterLink
   ],
   templateUrl: './case-detail.component.html',
   styleUrl: './case-detail.component.css',
@@ -78,11 +80,11 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   ticketSeverities: any = [];
   taskId = '';
   task: any = null;
-  projects: any[] = [];
+  projects: any = [];
   internalUsers: any[] = [];
   ticketCategories: any[] = [];
   relatedTasks: any[] = [];
-
+  contacts: any = [];
   loading = false;
   loadingOptions = false;
   saving = false;
@@ -257,10 +259,8 @@ ticketBalance : number = 0;
         ? ticketStatusResponse.data
         : [];
 
-      this.projects = Array.isArray(projectResponse?.data)
-        ? projectResponse.data
-        : [];
-
+  
+      this.projects =projectResponse.data; 
         this.ticketBalance = Number(projectResponse.data?.ticketBalance?.balance || 0);
 
       this.internalUsers = projectResponse.data?.users || [];
@@ -270,6 +270,7 @@ ticketBalance : number = 0;
         : [];
 
       this.ticketCategories = projectResponse.data?.ticketCategories || [];
+      this.contacts = projectResponse.data?.contacts || [];
 
       console.log(
         'this.ticketCategories',
@@ -338,6 +339,7 @@ ticketBalance : number = 0;
   }
 
   onStatusChange(event: Event): void {
+   
     const value = (event.target as HTMLSelectElement).value;
     console.log('selected value:', value);
     console.log('dari ngModel:', this.formModel.ticketStatusId);
@@ -372,19 +374,19 @@ ticketBalance : number = 0;
     //   return;
     // }
 
-    const targetCompletionDate =
-      this.formModel.targetCompletionDate['year'] +
-      '-' +
-      String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
-      '-' +
-      String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
+    // const targetCompletionDate =
+    //   this.formModel.targetCompletionDate['year'] +
+    //   '-' +
+    //   String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
+    //   '-' +
+    //   String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
 
-    const actualCompletionDate =
-      this.formModel.actualCompletionDate['year'] +
-      '-' +
-      String(this.formModel.actualCompletionDate['month']).padStart(2, '0') +
-      '-' +
-      String(this.formModel.actualCompletionDate['day'] + 1).padStart(2, '0');
+    // const actualCompletionDate =
+    //   this.formModel.actualCompletionDate['year'] +
+    //   '-' +
+    //   String(this.formModel.actualCompletionDate['month']).padStart(2, '0') +
+    //   '-' +
+    //   String(this.formModel.actualCompletionDate['day'] + 1).padStart(2, '0');
 
     const today = new Date(this.inputDate);
     console.log('this.inputDate', this.inputDate, today);
@@ -421,10 +423,10 @@ ticketBalance : number = 0;
       projectId: this.formModel.projectId,
       submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
-      targetCompletionDate: targetCompletionDate,
+      // targetCompletionDate: targetCompletionDate,
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
-      actualCompletionDate: actualCompletionDate,
+      // actualCompletionDate: actualCompletionDate,
       ticketStatusId: Number(this.formModel.ticketStatusId),
       rating: Number(this.formModel.rating),
       ratesBy: Number(this.formModel.ratesBy),
@@ -559,10 +561,10 @@ ticketBalance : number = 0;
       projectId: String(this.task?.projectId || ''),
       submitBy: this.task?.submitBy,
       submitDate: this.toDateTimeLocalInput(this.task?.submitDate),
-      targetCompletionDate: targetCompletionDate,
+      targetCompletionDate: this.task?.targetCompletionDate,
       assignTo: this.task?.assignTo,
       taskSolution: String(this.task?.taskSolution || ''),
-      actualCompletionDate: actualCompletionDate,
+      actualCompletionDate: this.task?.actualCompletionDate,
       ticketStatusId: Number(this.task?.ticketStatusId ?? 100),
       rating: Number(this.task?.rating ?? 0),
       ratesBy: Number(this.task?.ratesBy ?? 0),

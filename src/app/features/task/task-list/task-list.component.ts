@@ -215,8 +215,7 @@ modules : any = [];
       return;
     }
 
-    const payload = {
-      id: this.formModel.id.trim() || undefined,
+    const payload = { 
       ticketTypeId: this.taskTypeId,
       //  crNoRef: this.formModel.crNoRef.trim(),
       title: this.formModel.title.trim(),
@@ -238,10 +237,7 @@ modules : any = [];
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
 
-      ticketStatusId: Number(this.formModel.ticketStatusId),
-      //  rating: Number(this.formModel.rating),
-      //  ratesBy: Number(this.formModel.ratesBy),
-      //  issueNo: this.formModel.issueNo.trim(),
+      ticketStatusId: Number(this.formModel.ticketStatusId), 
       ticketCategoryId: this.formModel.category,
       productChildId: this.formModel.productChildId || null, // Add productChildId to the payload
     };

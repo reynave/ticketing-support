@@ -4,7 +4,7 @@
     <div>
       <h5 class="fw-bold mb-0">Case {{ taskId }}</h5>
     </div>
-   
+
     <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
       <h5 class="fw-semibold mb-0 font-monospace text-danger"> Remaining Time :
 
@@ -77,73 +77,50 @@
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Case ID</label>
                   </td>
                   <td>
-                    <div class="form-control form-control-sm bg-light">{{ task.id }}</div>
+                    {{ task.id }}
                   </td>
                 </tr>
-
-
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity
-                    </label>
-                  </td>
-                  <td>
-
-                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
-                      name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
-                      required>
-                      <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                        severity.duration }} hours)
-                      </option>
-                    </select>
-                  </td>
-                </tr>
-
                 @if(task.crNoRef !== ''){
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-cr">CR No
                       Ref</label></td>
                   <td>
-                    <div class="form-control form-control-sm bg-light"> {{task.crNoRef}}</div>
+                    {{task.crNoRef}}
                   </td>
                 </tr>
                 }
-                @if(task.issueNo !== ''){
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-issue">Issue
-                      No</label></td>
-                  <td>
-                    <div class="form-control form-control-sm bg-light"> {{task.issueNo}}</div>
-                  </td>
-                </tr>
-                }
-
-
-
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold"
-                      for="detail-task-project">Project</label>
-                  </td>
-                  <td>
-                    <div class="form-control form-control-sm  bg-light">{{ task.productName }}</div>
-                  </td>
-                </tr>
 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold"
                       for="detail-task-client">Client</label>
                   </td>
                   <td>
-                    <div class="form-control form-control-sm bg-light">{{ task.clientName }}</div>
+                    {{ task.clientName }}
                   </td>
                 </tr>
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold"
-                      for="detail-task-project-type">Project
-                      Type</label>
+                  <th class="label-col" colspan="2">PROJECT</th>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-project">Project
+                      Name</label>
                   </td>
                   <td>
-                    <div class="form-control form-control-sm bg-light">{{ task.projectType }}</div>
+                    <a href="javascript:;" [routerLink]="['/project', task.projectId]"
+                      routerLinkActive="router-link-active">{{ task.projectName }}</a>
+                  </td>
+                </tr>
+
+
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project-type">Project Type</label>
+                  </td>
+                  <td>
+                    {{ task.projectType }}
                   </td>
                 </tr>
 
@@ -152,9 +129,37 @@
                       for="detail-task-project-type">Ticket Category</label>
                   </td>
                   <td>
-                    <div class="form-control form-control-sm bg-light">{{ task.ticketCategory }}</div>
+                    {{ task.ticketCategory }}
                   </td>
                 </tr>
+
+                <tr>
+                  <th class="label-col" colspan="2">PRODUCT</th>
+                </tr>
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project-type">Product Name</label>
+                  </td>
+                  <td>
+                    {{ task.productName }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold"
+                      for="detail-task-project-type">Module</label>
+                  </td>
+                  <td>
+                    {{ task.productChildName }}
+                  </td>
+                </tr>
+
+
+
+
+
+
+
 
               </tbody>
             </table>
@@ -167,11 +172,9 @@
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
                       <span class="text-danger">*</span></label>
-
-
                   </td>
                   <td>
-                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
+                    <select id="detail-task-status" (change)="onStatusChange($event); formModel.assignTo = ''" class="form-select form-select-sm"
                       name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'"
                       required>
                       <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id"
@@ -181,29 +184,93 @@
                   </td>
                 </tr>
 
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign
+                      To
+                      <span class="text-danger">*</span></label>
+                  </td>
+                  <td>
+ 
+                    <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
+                      [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
+
+
+                      @if(formModel.ticketStatusId <= 199) {
+                      <ng-container *ngFor="let user of internalUsers">
+                        <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                          {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
+                        </option>
+                      </ng-container>
+                      }
+                      @if(formModel.ticketStatusId == 400) {
+                      <ng-container *ngFor="let user of contacts">
+                        <option [ngValue]="user.userId">
+                          {{ user.name }} [Customer]
+                        </option>
+                      </ng-container>
+                      }
+
+                      @if(formModel.ticketStatusId >= 900) {
+                      <ng-container *ngFor="let user of internalUsers">
+                        <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                          {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
+                        </option>
+                      </ng-container>
+                      <ng-container *ngFor="let user of contacts">
+                        <option [ngValue]="user.userId">
+                          {{ user.name }} [Customer]
+                        </option>
+                      </ng-container>
+                      }
+
+
+
+                    </select>
+
+                      <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select an Assign To</em></small></div>
+
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity
+                    </label>
+                  </td>
+                  <td>
+                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
+                      name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
+                      required>
+                      <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
+                        severity.duration }} hours)
+                      </option>
+                    </select>
+                  </td>
+                </tr>
+
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
                       Date</label></td>
                   <td>
-
-                    <div class="form-control form-control-sm bg-light">{{ formModel.submitDate | date:'medium' }}
-                    </div>
+                    {{ formModel.submitDate | date:'medium' }}
                   </td>
                 </tr>
 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-target-date">Target
-                      Completion <span class="text-danger">*</span></label>
+                      Completion</label>
                   </td>
                   <td>
-                    <div class="input-group">
+                    {{formModel.targetCompletionDate | date:'medium'}}
+                    <!-- <div class="input-group">
                       <input id="detail-task-target-date" class="form-control form-control-sm" type="text" readonly
                         name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" ngbDatepicker
                         #d="ngbDatepicker" [readonly]="formMode === 'view'" required />
 
                       <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
                         (click)="d.toggle()" type="button"></button>
-                    </div>
+                    </div> -->
                   </td>
                 </tr>
 
@@ -211,14 +278,15 @@
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
                       Completion Date</label></td>
                   <td>
-                    <div class="input-group">
+                    {{formModel.actualCompletionDate | date:'medium'}}
+                    <!-- <div class="input-group">
                       <input id="detail-task-actual-date" class="form-control form-control-sm" type="text" readonly
                         name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate" ngbDatepicker
                         #d2="ngbDatepicker" [readonly]="formMode === 'view'" required />
 
                       <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
                         (click)="d2.toggle()" type="button"></button>
-                    </div>
+                    </div> -->
                   </td>
                 </tr>
 
@@ -232,25 +300,6 @@
                   </td>
                 </tr>
 
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign
-                      To
-                      <span class="text-danger">*</span></label>
-                  </td>
-                  <td>
-
-                    <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
-                      [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
-
-                      <option *ngFor="let item of internalUsers" [ngValue]="item.userId">{{ item.name }} {{
-                        item.asManager == 1 ? '(Manager)' : '' }}</option>
-
-
-                    </select>
-                  </td>
-                </tr>
-
-
 
 
               </tbody>
@@ -260,18 +309,20 @@
           <div class="col-12">
             <div class="px-2 mb-3" *ngIf="ticketBased == 1">
               <div class="alert alert-warning">
-                <div class="mb-2"><strong>Note:</strong> Please fill in the ticket estimation cost, title and description before saving the
-                case.
-               <div>
-                 <b> {{ticketBalance}}</b> remaining balance for this project.
-               </div>
+                <div class="mb-2"><strong>Note:</strong> Please fill in the ticket estimation cost, title and
+                  description before saving the
+                  case.
+                  <div>
+                    <b> {{ticketBalance}}</b> remaining balance for this project.
+                  </div>
+                </div>
+
+                <label class="form-label   fw-semibold">Total Ticket<span class="text-danger">*</span></label>
+                <input type="number" id="detail-task-ticket" class="form-control form-control-sm"
+                  name="ticketEstimationCost" [(ngModel)]="formModel.ticketEstimationCost"
+                  [readonly]="formMode === 'view'" required style="width: 200px;" />
               </div>
-              
-                 <label  class="form-label   fw-semibold">Total Ticket<span class="text-danger">*</span></label>
-              <input  type="number"   id="detail-task-ticket" class="form-control form-control-sm" name="ticketEstimationCost"
-                [(ngModel)]="formModel.ticketEstimationCost" [readonly]="formMode === 'view'" required  style="width: 200px;"/>
-              </div>
-             
+
             </div>
             <div class="px-2 mb-3">
               <label class="form-label small fw-semibold" for="detail-task-title">Title <span
@@ -332,9 +383,9 @@
       <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
         <span class="fw-semibold small">Task</span>
         <app-case-create-task-modal [caseId]="taskId" [projectId]="task?.projectId || ''"
-          [assignTo]="task?.assignTo || 0" [submitBy]="me?.id || 0" [ticketCategories]="ticketCategories"
-          [internalUsers]="internalUsers" [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()"
-          (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
+          [modules]="projects.modules || []" [assignTo]="task?.assignTo || 0" [submitBy]="me?.id || 0"
+          [ticketCategories]="ticketCategories" [internalUsers]="internalUsers" [loadingOptions]="loadingOptions"
+          (created)="onRelatedTaskCreated()" (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
       </div>
 
       @if (loadingRelatedTasks) {
@@ -380,7 +431,7 @@
       @if(taskLogs.length === 0) {
       <div class="card-body text-muted">No logs activity.</div>
       } @else {
-      <table class="table table-sm align-middle task-form-table mb-0 table-striped">
+     <table class="table table-sm align-middle task-form-table mb-0 table-striped">
         <thead>
           <tr>
             <th width="200px">Date</th>
@@ -390,7 +441,13 @@
         </thead>
         <tbody>
           <tr *ngFor="let log of taskLogs">
-            <td class="align-top">{{ log.inputDate | date:'medium' }}</td>
+            <td class="align-top">
+              <div>{{ log.starDateTime | date:'medium' }}</div>
+             
+              @if (log.closeDateTime) {
+              <div class="text-muted small">Close: {{ log.closeDateTime | date:'medium' }}</div>
+              }
+            </td>
             <td class="align-top">
               @if(log.parentId != 0){
 
@@ -402,10 +459,10 @@
               </div>
               }
               <div [innerHTML]="log.description"></div>
-              <div class="row g-1">
-                <div class="col-3" *ngFor="let item of log.attachments" (click)="imgPopup(content,item )">
-                  <img [src]="item.url" class="img-thumbnail">
-                </div>
+              <div>
+                <span class="pe-2" *ngFor="let item of log.attachments" (click)="imgPopup(content,item )">
+                  <a href="javascript:;">{{item.originalName}}</a>
+                </span>
               </div>
 
               <a href="javascript:void(0)" (click)="open(addActivity, log)">reply</a>

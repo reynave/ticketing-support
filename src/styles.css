@@ -374,3 +374,8 @@ i {
 .table-disabled td{
 	 opacity: 0.5; /* 50% transparent */
 }
+
+.task-form-table th {
+  font-size: 0.7rem;
+  font-family: "Inter", sans-serif;
+}

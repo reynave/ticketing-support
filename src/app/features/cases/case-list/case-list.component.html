@@ -165,8 +165,16 @@
 
         <div class="col-12 col-md-6">
           <div class="mb-2">
-            <label class="form-label" for="task-status">Case Status</label>
-            <div class="form-control bg-light">Open</div>
+             <label class="form-label" for="task-assign-to">Module <span class="text-danger">*</span></label>
+            @if(formModel.projectId == '') {
+            <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
+            } @else {
+            <select id="task-assign-to" class="form-select" name="productChildId" [(ngModel)]="formModel.productChildId" required>
+              @for (mod of modules; track trackById($index, mod)) {
+              <option [value]="mod.id">{{ mod.name }}</option>
+              }
+            </select>
+            }
           </div>
 
           <div class="mb-2">

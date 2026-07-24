@@ -32,6 +32,7 @@ export class CaseCreateTaskModalComponent {
   @Input() crId = '';
   @Input() caseId = '';
   @Input() projectId = '';
+  @Input() modules: any[] = [];
   @Input() assignTo: number | string = 0;
   @Input() submitBy: number | string = 0;
   @Input() ticketCategories: any[] = [];
@@ -86,6 +87,7 @@ export class CaseCreateTaskModalComponent {
       taskSolution: '',
       ticketStatusId: Number(this.relatedTaskForm.ticketStatusId || 100),
       ticketCategoryId: Number(this.relatedTaskForm.ticketCategoryId || 0),
+      productChildId : Number(this.relatedTaskForm.productChildId || 0),
     };
 
     this.savingRelatedTask = true;
@@ -128,6 +130,7 @@ export class CaseCreateTaskModalComponent {
       assignTo: null,
       ticketStatusId: 100,
       ticketCategoryId: null,
+      productChildId : null,
     };
   }
 

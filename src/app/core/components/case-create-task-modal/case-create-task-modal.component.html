@@ -70,10 +70,21 @@
           <div class="invalid-feedback">Task Category is required.</div>
         </div>
 
+      <div class="col-12 col-md-6"> 
+            <label class="form-label" for="task-assign-to">Modules <span class="text-danger">*</span></label>
+            @if(relatedTaskForm.projectId == '') {
+            <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
+            } @else {
+            <select id="task-assign-to" class="form-select" name="productChildId" [(ngModel)]="relatedTaskForm.productChildId" required>
+              <option *ngFor="let mod of modules" [value]="mod.id">{{ mod.name }}</option>
+            </select>
+            }  
+          </div>
+
+
         <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-assign"
-            >Assign To <span class="text-danger">*</span></label
-          >
+         
+          <label class="form-label" for="related-task-assign">Assign To <span class="text-danger">*</span></label>
           <select
             id="related-task-assign"
             class="form-select"
@@ -84,9 +95,11 @@
             required
           >
             <option [ngValue]="null" disabled>Select user</option>
-            <option *ngFor="let user of internalUsers" [ngValue]="user.userId">
-              {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
-            </option>
+            <ng-container *ngFor="let user of internalUsers">
+              <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }} 
+              </option>
+            </ng-container>
           </select>
           <div class="invalid-feedback">Assign To is required.</div>
         </div>

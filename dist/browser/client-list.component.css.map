@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/client/client-list/client-list.component.css"],
-  "sourcesContent": [".action-buttons {\r\n  display: flex;\r\n  justify-content: flex-end;\r\n  gap: 0.35rem;\r\n}\r\n"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,mBAAiB;AACjB,OAAK;AACP;",
-  "names": []
-}

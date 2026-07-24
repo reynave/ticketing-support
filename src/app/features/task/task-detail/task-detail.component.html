@@ -304,12 +304,10 @@
         <tbody>
           <tr *ngFor="let log of taskLogs">
             <td class="align-top">
-              <div>{{ log.inputDate | date:'medium' }}</div>
-              @if (log.starDateTime) {
-              <div class="text-muted small">Start: {{ log.starDateTime | date:'medium' }}</div>
-              }
-              @if (log.clsoeDateTime) {
-              <div class="text-muted small">Close: {{ log.clsoeDateTime | date:'medium' }}</div>
+              <div>{{ log.starDateTime | date:'medium' }}</div>
+              
+              @if (log.closeDateTime) {
+              <div class="text-muted small">Close: {{ log.closeDateTime | date:'medium' }}</div>
               }
             </td>
             <td class="align-top">

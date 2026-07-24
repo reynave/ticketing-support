@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/task/task-list/task-list.component.css"],
-  "sourcesContent": [".action-buttons {\r\n  display: flex;\r\n  justify-content: flex-end;\r\n  gap: 0.35rem;\r\n}\r\n\r\n.table td {\r\n  vertical-align: middle;\r\n}\r\n"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,mBAAiB;AACjB,OAAK;AACP;AAEA,CAAC,MAAM;AACL,kBAAgB;AAClB;",
-  "names": []
-}

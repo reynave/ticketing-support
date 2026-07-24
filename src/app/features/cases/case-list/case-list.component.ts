@@ -36,6 +36,7 @@ interface CaseFormModel {
   issueNo: string;
   category: number;
   severityId: number;
+  productChildId : number;
 }
 
 @Component({
@@ -190,7 +191,7 @@ export class CaseListComponent implements OnInit {
       backdrop: 'static',
     });
   }
-
+modules : any[] = [];
   selectCaseCategory(): void {
     const selectedProject = this.projects.find(
       (project) => project.id === this.formModel.projectId,
@@ -202,6 +203,8 @@ export class CaseListComponent implements OnInit {
 
     this.selectChildCategory = selectedTicketCategories[0]?.children || [];
 
+  
+
     const hasSelectedCategory = this.selectChildCategory.some(
       (category) => String(category.id) === String(this.formModel.category),
     );
@@ -211,6 +214,7 @@ export class CaseListComponent implements OnInit {
     }
 
     this.internalUsers = selectedProject?.users || [];
+      this.modules = selectedProject?.modules || [];
   }
 
   closeModal(): void {
@@ -269,6 +273,7 @@ export class CaseListComponent implements OnInit {
       severityId: this.formModel.severityId,
       ticketCategoryId: this.formModel.category,
       deadlineDateTime: deadlineDateTime,
+         productChildId: this.formModel.productChildId || null, // Add productChildId to the payload
     };
     console.log('Payload:', payload);
 
@@ -377,6 +382,7 @@ export class CaseListComponent implements OnInit {
       issueNo: '',
       category: 0,
       severityId: 0,
+      productChildId: 0,
     };
   }
 
