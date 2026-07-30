@@ -64,6 +64,7 @@
           <tr>
             <th>ID</th>
             <th>Title</th>
+            <th>Clients</th>
             <th>Project</th>
             <th>Status</th>
             <th>Submit Date</th>
@@ -78,7 +79,9 @@
             <td>
               <div class="fw-semibold">{{ row.title }}</div>
             </td>
+                  <td>{{ row.clientName }}</td>
             <td>{{ row.projectName }}</td>
+      
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
             <td>{{ row.ticketCategoryName }}</td>

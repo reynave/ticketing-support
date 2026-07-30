@@ -64,7 +64,9 @@
           <tr>
             <th>ID</th>
             <th>Severity</th>
+           
             <th>Title</th>
+             <th>Client</th>
             <th>Project</th>
             <th>Status</th>
             <th>Submit Date</th>
@@ -80,10 +82,12 @@
             <td>
               <div class="text-{{row.color}} fw-bold">{{ row.ticketSeverityName }} </div>
             </td>
+            <td>{{ row.title }}</td>
+             <td>{{ row.clientName }}</td>
             <td>
-              <div class="fw-semibold">{{ row.title }}</div>
+              <div class="fw-semibold">{{ row.projectName }}</div>
             </td>
-            <td>{{ row.projectId }}</td>
+       
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
             <td>{{ row.targetCompletionDate | date: 'mediumDate' }}</td>
