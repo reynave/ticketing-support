@@ -8,7 +8,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 interface UserFormModel {
   email: string;
   password: string;
-  authlevelId: number;
+  userAuthLevelId: number;
   firstName: string;
   lastName: string;
   userTypeId: number;
@@ -36,14 +36,15 @@ export class UserListComponent implements OnInit {
   message = '';
   errorMessage = '';
 
-  selectedUserTypeFilter = '';
+  selectedUserTypeFilter :any = '1';
   selectedStatusFilter = '';
-
+accessRightOptions : any = [];
   userForm: UserFormModel = this.defaultForm();
   modalRef: NgbModalRef | null = null;
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadAccessRightOptions()
   }
 
   loadUsers(): void {
@@ -84,6 +85,17 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  loadAccessRightOptions(): void {
+    this.apiService.get('/master/user-auth-level').subscribe({
+      next: (response) => {
+        this.accessRightOptions = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.accessRightOptions = [];
+      },
+    });
+  }
+
   saveUser(form: NgForm): void {
     if (form.invalid || this.saving) {
       return;
@@ -96,7 +108,7 @@ export class UserListComponent implements OnInit {
 
     const payload: Record<string, string | number> = {
       email: this.userForm.email.trim(),
-      authlevelId: Number(this.userForm.authlevelId),
+      userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
       userTypeId: Number(this.userForm.userTypeId),
@@ -170,7 +182,7 @@ export class UserListComponent implements OnInit {
     return {
       email: '',
       password: '',
-      authlevelId: 1,
+      userAuthLevelId: 1,
       firstName: '',
       lastName: '',
       userTypeId: 1,

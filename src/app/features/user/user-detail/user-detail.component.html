@@ -95,7 +95,7 @@
           </div>
 
           <div class="col-6">
-            <div class="form-group">
+            <div class="form-group" *ngIf="userForm.userTypeId === 1">
               <label class="form-label small fw-semibold" for="detail-edit-userAuthLevelId">Access Rules <span
                   class="text-danger">*</span></label>
               <select id="detail-edit-userAuthLevelId" class="form-select form-select-sm" name="userAuthLevelId"
@@ -109,11 +109,7 @@
 
             <div class="form-group">
               <label class="form-label small fw-semibold" for="detail-edit-userTypeId">User Type</label>
-              <select id="detail-edit-userTypeId" class="form-select form-select-sm" name="userTypeId"
-                [(ngModel)]="userForm.userTypeId" [disabled]="formMode === 'view'" (change)="onUserTypeChange()">
-                <option [ngValue]="1">Internal</option>
-                <option [ngValue]="2">External</option>
-              </select>
+              <div class="form-control form-control-sm bg-light" > {{ user.userTypeId === 2 ? 'External' : 'Internal' }}</div>
             </div>
 
             <div class="form-group">

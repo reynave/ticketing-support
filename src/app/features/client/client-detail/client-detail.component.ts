@@ -21,6 +21,7 @@ interface ClientFormModel {
   address: string;
   IndustryId: number;
   status: number;
+  phone: string;
 }
 
 interface ClientUserFormModel {
@@ -30,6 +31,7 @@ interface ClientUserFormModel {
   firstName: string;
   lastName: string;
   status: number;
+  phone : string;
 }
 
 @Component({
@@ -225,6 +227,7 @@ export class ClientDetailComponent implements OnInit {
       address: String(this.client?.address || ''),
       IndustryId: Number(this.client?.IndustryId ?? 0),
       status: Number(this.client?.status ?? 1),
+      phone: String(this.client?.phone || '')
     };
     this.openClientModal();
   }
@@ -319,11 +322,13 @@ export class ClientDetailComponent implements OnInit {
     }
 
     const payload: Record<string, string | number> = {
-      email: this.userForm.email.trim(),
-      authlevelId: Number(this.userForm.authlevelId),
+      email: this.userForm.email.trim(), 
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
       status: Number(this.userForm.status),
+      phone: this.userForm.phone.trim(),
+      userAuthLevelId : 0,
+      password: this.userForm.password.trim(),
     };
 
     if (this.userForm.password.trim()) {
@@ -340,10 +345,12 @@ export class ClientDetailComponent implements OnInit {
         this.closeUserModal();
         this.message = response?.message || 'User created.';
         this.loadClientUsers();
+        this.modalService.dismissAll()
       },
       error: (error) => {
         this.savingUser = false;
         this.errorMessage = error?.error?.message || 'Failed to create user.';
+         this.modalService.dismissAll()
       },
     });
   }
@@ -422,6 +429,7 @@ export class ClientDetailComponent implements OnInit {
       address: '',
       IndustryId: 0,
       status: 1,
+      phone: '',
     };
   }
 
@@ -433,6 +441,7 @@ export class ClientDetailComponent implements OnInit {
       firstName: '',
       lastName: '',
       status: 1,
+      phone: '',
     };
   }
 }
