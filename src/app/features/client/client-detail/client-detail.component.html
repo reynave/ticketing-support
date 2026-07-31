@@ -8,15 +8,15 @@
       <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back To List</a>
       <button type="button" class="btn btn-sm btn-outline-primary" (click)="openUpdateClientModal()">Update
         Client</button>
-      <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingClient" (click)="deleteClient()">
+      <!-- <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingClient" (click)="deleteClient()">
         {{ deletingClient ? 'Deleting...' : 'Delete Client' }}
-      </button>
+      </button> -->
     </div>
   </div>
 
-  <div class="alert alert-warning">
+  <!-- <div class="alert alert-warning">
     <strong>Warning:</strong> Deleting client will deactivate all external users under this client.
-  </div>
+  </div> -->
 
   @if (message) {
   <div class="alert alert-success py-2">{{ message }}</div>

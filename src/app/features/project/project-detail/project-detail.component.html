@@ -207,30 +207,19 @@
                 </tr>
               </thead>
               <tbody>
-                @for (user of users; track user.id ; let i = $index) {
-
-                <tr>
-
-                  <td class="text-center" (click)="user.checked = !user.checked">
-                    @if(user.checked !== 1) {
-                    <i class="bi bi-square"></i>
-                    } @else {
-                    <i class="bi bi-check-square-fill"></i>
-                    }
+                @for (user of users; track user.id ; let i = $index) { 
+                <tr> 
+                  <td (click)="user.checked = !user.checked" style="cursor: pointer;">
+                    <i class="bi bi-check-square-fill" *ngIf="user.checked == 1"></i>
+                    <i class="bi bi-square" *ngIf="user.checked != 1"></i>
                   </td>
-
-
+ 
                   <td> {{ user.name }} [{{ user.id }}] </td>
                   <td> {{ user.userAuthLevel }} </td>
-
-
-                  <td class="text-center" (click)="toggleManager(i)">
-
-                    @if(user.asManager !== 1) {
-                    <i class="bi bi-circle"></i>
-                    } @else {
-                    <i class="bi bi-check-circle-fill"></i>
-                    }
+ 
+                  <td (click)="toggleManager(i)" style="cursor: pointer;">
+                    <i class="bi bi-check-circle-fill" *ngIf="user.asManager == 1"></i>
+                    <i class="bi bi-circle" *ngIf="user.asManager != 1"></i>
                   </td>
 
                 </tr>

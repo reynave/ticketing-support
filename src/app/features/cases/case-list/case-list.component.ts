@@ -34,9 +34,9 @@ interface CaseFormModel {
   rating: number;
   ratesBy: number;
   issueNo: string;
-  category: number;
-  severityId: number;
-  productChildId : number;
+  category: number | null;
+  severityId: number | null;
+  productChildId: number | null;
 }
 
 @Component({
@@ -210,11 +210,25 @@ modules : any[] = [];
     );
 
     if (!hasSelectedCategory) {
-      this.formModel.category = 0;
+      this.formModel.category = null;
     }
 
     this.internalUsers = selectedProject?.users || [];
-      this.modules = selectedProject?.modules || [];
+    this.modules = selectedProject?.modules || [];
+
+    const hasSelectedAssignee = this.internalUsers.some(
+      (user) => String(user.id) === String(this.formModel.assignTo),
+    );
+    if (!hasSelectedAssignee) {
+      this.formModel.assignTo = '';
+    }
+
+    const hasSelectedModule = this.modules.some(
+      (module) => String(module.id) === String(this.formModel.productChildId),
+    );
+    if (!hasSelectedModule) {
+      this.formModel.productChildId = null;
+    }
   }
 
   closeModal(): void {
@@ -236,7 +250,20 @@ modules : any[] = [];
     }
   }
   saveCase(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    const hasRequiredSelections =
+      !!String(this.formModel.projectId || '').trim() &&
+      this.formModel.category !== null &&
+      this.formModel.severityId !== null &&
+      this.formModel.productChildId !== null &&
+      !!String(this.formModel.assignTo || '').trim() &&
+      !!String(this.formModel.title || '').trim() &&
+      !!String(this.formModel.description || '').trim() &&
+      !!this.formModel.submitDate &&
+      !!this.formModel.targetCompletionDate;
+
+    if (form.invalid || !hasRequiredSelections || this.saving) {
+      form.control.markAllAsTouched();
+      this.errorMessage = 'Please complete all required fields.';
       return;
     }
     const today = new Date();
@@ -270,10 +297,10 @@ modules : any[] = [];
       ticketStatusId: Number(this.formModel.ticketStatusId),
       //  rating: Number(this.formModel.rating),
       //  ratesBy: Number(this.formModel.ratesBy),
-      severityId: this.formModel.severityId,
-      ticketCategoryId: this.formModel.category,
+      severityId: Number(this.formModel.severityId),
+      ticketCategoryId: Number(this.formModel.category),
       deadlineDateTime: deadlineDateTime,
-         productChildId: this.formModel.productChildId || null, // Add productChildId to the payload
+      productChildId: Number(this.formModel.productChildId),
     };
     console.log('Payload:', payload);
 
@@ -374,15 +401,15 @@ modules : any[] = [];
       submitBy: 1,
       submitDate: formattedToday,
       targetCompletionDate: formattedToday,
-      assignTo: 1,
+      assignTo: '',
       taskSolution: '',
       ticketStatusId: 100,
       rating: 0,
       ratesBy: 0,
       issueNo: '',
-      category: 0,
-      severityId: 0,
-      productChildId: 0,
+      category: null,
+      severityId: null,
+      productChildId: null,
     };
   }
 

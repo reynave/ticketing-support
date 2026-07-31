@@ -101,7 +101,31 @@ export class RatingListComponent implements OnInit {
       questionId: question.id,
       rating: question.value || 0,
     }));
-    console.log(payload ,this.detail.id);
-    this.modalService.dismissAll();
+
+    let rate = 0;
+    let total = 0;
+    for(const question of this.ratingQuestions) {
+      total += 1;
+      rate += question.value || 0;
+    }
+
+    const averageRating = total > 0 ? rate / total : 0;
+
+    console.log(payload, this.detail.id, averageRating);
+
+    this.apiService.post('/rating/rate', {
+      ticketId: this.detail.id,
+      averageRating: averageRating,
+      ratings: payload, 
+    }).subscribe({
+      next: (response) => {
+        this.modalService.dismissAll();
+        this.loadRatings();
+      },
+      error: (error) => {
+        console.error('Failed to submit rating:', error);
+      }
+    });
+     
   }
 }

@@ -69,13 +69,15 @@
             <th>Status</th>
             <th>Submit Date</th>
             <th>Category</th>
-            <th class="text-end">Action</th>
+            <!-- <th class="text-end">Action</th> -->
           </tr>
         </thead>
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr>
-            <td>{{ row.id }}</td>
+            <td>
+              <a href="javascript:void(0)" (click)="goToDetail(row)">{{ row.id }}</a>
+            </td>
             <td>
               <div class="fw-semibold">{{ row.title }}</div>
             </td>
@@ -85,13 +87,13 @@
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
             <td>{{ row.ticketCategoryName }}</td>
-            <td class="text-end action-buttons">
+            <!-- <td class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteTask(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td>
+            </td> -->
           </tr>
           }
         </tbody>
