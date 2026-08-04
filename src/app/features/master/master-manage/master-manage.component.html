@@ -5,7 +5,7 @@
       <div class="page-subtitle">Reusable list and form for all master keys.</div>
     </div>
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to Master Menu</a>
+      <a class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back</a>
       @if (canShowCreateButton()) {
       <button class="btn btn-primary-sm" type="button" (click)="openCreate()">
         <i class="bi bi-plus-lg me-1"></i>Add Data
@@ -19,7 +19,7 @@
   } @else {
   <div class="stat-card mb-3">
     <div class="d-flex gap-2 align-items-center flex-wrap">
-      @if (config.hasStatusFilter) {
+      @if (canUseStatusFilter()) {
       <div class="d-flex align-items-center gap-2">
         <label class="small text-muted mb-0">Filter Status</label>
         <select class="form-select form-select-sm filter-input" [(ngModel)]="selectedStatus"
@@ -226,6 +226,12 @@
           @if (field.type === 'textarea') {
           <textarea class="form-control" rows="3" [name]="field.key" [(ngModel)]="formModel[field.key]"
             [required]="field.required === true"></textarea>
+          } @else if (field.key === 'status') {
+          <select class="form-select" [name]="field.key" [(ngModel)]="formModel[field.key]"
+            [required]="field.required === true">
+            <option [ngValue]="1">Active</option>
+            <option [ngValue]="0">Inactive</option>
+          </select>
           } @else {
           <input class="form-control" [type]="field.type" [name]="field.key" [(ngModel)]="formModel[field.key]"
             [required]="field.required === true" />

@@ -319,8 +319,8 @@
 
                 <label class="form-label   fw-semibold">Total Ticket<span class="text-danger">*</span></label>
                 <input type="number" id="detail-task-ticket" class="form-control form-control-sm"
-                  name="ticketEstimationCost" [(ngModel)]="formModel.ticketEstimationCost"
-                  [readonly]="formMode === 'view'" required style="width: 200px;" />
+                  name="ticketEstimationCost" [(ngModel)]="formModel.ticketEstimationCost" min="0"
+                  [readonly]="formMode === 'view'" (change)="formModel.ticketEstimationCost < 0 ? formModel.ticketEstimationCost = 0 : formModel.ticketEstimationCost" required style="width: 200px;" />
               </div>
 
             </div>

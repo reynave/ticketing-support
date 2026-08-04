@@ -71,6 +71,7 @@
         <thead>
           <tr>
             <th>ID</th>
+            <th>Sorting</th>
             <th>Name</th> 
             <th>Weight</th>
             <th>Status</th>
@@ -80,28 +81,28 @@
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr class="table-parent"  >
-            <td>{{ row.id }}</td>
-            <td>{{ row.name }}</td>
-         
+            <td>{{ row.id }}</td> 
+            <td>{{ row.sorting }}</td>
+            <td><a href="javascript:;" (click)="goToDetail(row)">{{ row.name }}</a></td>
             <td>{{ row.weight }}</td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <td class="text-end">
               @if (isParentRow(row)) {
               <button type="button" class="btn btn-sm btn-outline-success me-2" (click)="openNewChildModal(row)">Create Child</button>
-              }
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
+              } 
             </td>
           </tr>
 
             @if (row.children && row.children.length) {
                 @for (child of row.children; track trackById($index, child)) {
                 <tr>
-                    <td>{{ child.id }}</td>
-                    <td class="ps-4">↳ {{ child.name }}</td> 
+                    <td> <i class="bi bi-arrow-return-right"></i> {{ row.id }}.{{ child.id }}</td>
+                    <td>{{ child.sorting }}</td>
+                    <td class="ps-4"> <i class="bi bi-arrow-return-right"></i> <a href="javascript:;" (click)="goToDetail(child)"> {{ child.name }}</a></td> 
                     <td>{{ child.weight }}</td>
                     <td>{{ child.status === 1 ? 'Active' : 'Inactive' }}</td>
                     <td class="text-end">
-                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(child)">Detail</button>
+                     
                     </td>
                 </tr>
                 }

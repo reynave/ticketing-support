@@ -32,6 +32,8 @@ interface ClientUserFormModel {
   lastName: string;
   status: number;
   phone : string;
+  position: string;
+  division: string;
 }
 
 @Component({
@@ -329,6 +331,8 @@ export class ClientDetailComponent implements OnInit {
       phone: this.userForm.phone.trim(),
       userAuthLevelId : 0,
       password: this.userForm.password.trim(),
+      position: this.userForm.position.trim(),
+      division: this.userForm.division.trim(),
     };
 
     if (this.userForm.password.trim()) {
@@ -350,7 +354,7 @@ export class ClientDetailComponent implements OnInit {
       error: (error) => {
         this.savingUser = false;
         this.errorMessage = error?.error?.message || 'Failed to create user.';
-         this.modalService.dismissAll()
+        this.modalService.dismissAll()
       },
     });
   }
@@ -442,6 +446,8 @@ export class ClientDetailComponent implements OnInit {
       lastName: '',
       status: 1,
       phone: '',
+      position: '',
+      division: '',
     };
   }
 }

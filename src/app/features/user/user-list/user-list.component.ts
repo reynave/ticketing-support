@@ -11,6 +11,8 @@ interface UserFormModel {
   userAuthLevelId: number;
   firstName: string;
   lastName: string;
+  division: string;
+  position: string;
   userTypeId: number;
   clientId: number;
   status: number;
@@ -111,6 +113,8 @@ accessRightOptions : any = [];
       userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
+      division: this.userForm.division.trim(),
+      position: this.userForm.position.trim(),
       userTypeId: Number(this.userForm.userTypeId),
       clientId: Number(this.userForm.clientId),
       status: Number(this.userForm.status),
@@ -185,6 +189,8 @@ accessRightOptions : any = [];
       userAuthLevelId: 1,
       firstName: '',
       lastName: '',
+      division: '',
+      position: '',
       userTypeId: 1,
       clientId: 0,
       status: 1,

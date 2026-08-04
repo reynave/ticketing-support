@@ -436,7 +436,7 @@ ticketBalance : number = 0;
       updateBy: this.formModel.submitBy,
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
       deadlineDateTime: deadlineDateTime,
-      ticketEstimationCost : this.formModel.ticketEstimationCost,
+      ticketEstimationCost : this.formModel.ticketEstimationCost < 0 ? 0 : this.formModel.ticketEstimationCost,
     };
     console.log('saveTask payload', payload);
 

@@ -96,6 +96,23 @@
               </div>
             </div>
 
+           
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label small fw-semibold" for="detail-edit-division">Division</label>
+                  <input id="detail-edit-division" class="form-control form-control-sm" name="division"
+                    [(ngModel)]="userForm.division" [readonly]="formMode === 'view'" placeholder="Input division" />
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label small fw-semibold" for="detail-edit-position">Position</label>
+                  <input id="detail-edit-position" class="form-control form-control-sm" name="position"
+                    [(ngModel)]="userForm.position" [readonly]="formMode === 'view'" placeholder="Input position" />
+                </div>
+              </div>
+            
+
 
 
 

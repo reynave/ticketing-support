@@ -46,8 +46,11 @@ export class MasterManageComponent implements OnInit {
   readonly masterConfigs: Record<string, MasterConfig> = {
     industry: {
       label: 'Industry',
-      fields: [{ key: 'name', label: 'Name', type: 'text', required: true }],
-      hasStatusFilter: false,
+      fields: [
+        { key: 'name', label: 'Name', type: 'text', required: true },
+        { key: 'status', label: 'Status', type: 'number' },
+      ],
+      hasStatusFilter: true,
     },
     product: {
       label: 'Product',
@@ -85,10 +88,10 @@ export class MasterManageComponent implements OnInit {
     'user-auth-level': {
       label: 'User Auth Level',
       fields: [
-        { key: 'name', label: 'Name', type: 'text', required: true }, 
-        
+        { key: 'name', label: 'Name', type: 'text', required: true },
+        { key: 'status', label: 'Status', type: 'number' },
       ],
-      hasStatusFilter: false,
+      hasStatusFilter: true,
     },
     'user-type': {
       label: 'User Type',
@@ -203,7 +206,7 @@ export class MasterManageComponent implements OnInit {
 
     const query: any = {};
 
-    if (this.config.hasStatusFilter && this.selectedStatus !== '') {
+    if (this.canUseStatusFilter() && this.selectedStatus !== '') {
       query.status = this.selectedStatus;
     }
 
@@ -359,6 +362,10 @@ export class MasterManageComponent implements OnInit {
 
   showAccessRightButton(): boolean {
     return this.masterKey === 'user-auth-level';
+  }
+
+  canUseStatusFilter(): boolean {
+    return !!this.config?.fields.some((field) => field.key === 'status');
   }
 
   toChecked(value: any): boolean {

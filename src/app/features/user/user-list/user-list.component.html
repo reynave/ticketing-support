@@ -42,7 +42,8 @@
             <th>ID</th>
             <th>Email</th>
             <th>Name</th>
-            <th>Type</th>
+            <th>division</th>
+            <th>Position</th> 
             <th *ngIf="selectedUserTypeFilter == '2'">ClientId</th>
             <th>Status</th>
          
@@ -54,11 +55,14 @@
             <td> <a href="javascript:;" [routerLink]="['/users', row.id]">{{ row.id }}</a> </td>
             <td>{{ row.email }}</td>
             <td>{{ row.firstName }} {{ row.lastName }}</td>
-            <td>{{ row.userTypeId === 2 ? 'External' : 'Internal' }}</td>
+
+            <td>{{ row.division }}</td>
+            <td>{{ row.position }}</td>
+
+ 
             <td *ngIf="row.userTypeId === 2">
               <a href="javascript:;" [routerLink]="['/clients/',row.clientId]" routerLinkActive="router-link-active">{{
-                row.clientName }}</a>
-
+                row.clientName }}</a> 
             </td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <!-- <td class="text-end action-buttons">
@@ -122,6 +126,18 @@
           </div>
 
 
+        </div>
+
+        <div class="col-6">
+          <label class="form-label" for="list-user-division">Division</label>
+          <input id="list-user-division" class="form-control" name="division" [(ngModel)]="userForm.division"
+            placeholder="Input division" />
+        </div>
+
+        <div class="col-6">
+          <label class="form-label" for="list-user-position">Position</label>
+          <input id="list-user-position" class="form-control" name="position" [(ngModel)]="userForm.position"
+            placeholder="Input position" />
         </div>
 
         <div class="col-6">

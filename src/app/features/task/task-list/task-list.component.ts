@@ -215,6 +215,11 @@ modules : any = [];
       return;
     }
 
+    if (!String(this.formModel.assignTo || '').trim()) {
+      this.errorMessage = 'Assign To wajib dipilih.';
+      return;
+    }
+
     const payload = { 
       ticketTypeId: this.taskTypeId,
       //  crNoRef: this.formModel.crNoRef.trim(),
@@ -341,7 +346,7 @@ modules : any = [];
       submitBy: 1,
       submitDate: formattedToday,
       targetCompletionDate: formattedToday,
-      assignTo: 1,
+      assignTo: '',
       taskSolution: '',
       ticketStatusId: 100,
       rating: 0,

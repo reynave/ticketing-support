@@ -384,7 +384,8 @@
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Created At</th>
+              <th>Division</th>
+              <th>Position</th>
             </tr>
           </thead>
           <tbody>
@@ -396,10 +397,17 @@
                 <i class="bi bi-square" *ngIf="!t.checkbox"></i>
 
               </td>
-              <td>{{ t.name }}</td>
+              <td>
+                <a href="javascript:;" [routerLink]="['/users', t.userId]" routerLinkActive="router-link-active" >
+                  {{ t.name }}
+                </a>
+
+
+              </td>
               <td>{{ t.email }}</td>
               <td>{{ t.phone }}</td>
-              <td>{{ t.inputDate | date: 'medium' }}</td>
+              <td>{{ t.division }}</td>
+              <td>{{ t.position }}</td>
             </tr>
             }
           </tbody>

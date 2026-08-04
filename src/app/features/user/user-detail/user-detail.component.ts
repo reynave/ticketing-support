@@ -10,6 +10,8 @@ interface UserFormModel {
   userAuthLevelId: number;
   firstName: string;
   lastName: string;
+  division: string;
+  position: string;
   userTypeId: number;
   clientId: number;
   status: number;
@@ -105,6 +107,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
+      division: this.userForm.division.trim(),
+      position: this.userForm.position.trim(),
       userTypeId: Number(this.userForm.userTypeId),
       clientId: Number(this.userForm.clientId),
       status: Number(this.userForm.status),
@@ -123,7 +127,8 @@ export class UserDetailComponent implements OnInit {
         this.saving = false;
         this.message = response?.message || 'User updated.';
         this.formMode = 'view';
-        this.loadUserDetail();
+        //this.loadUserDetail();
+        this.goBack();
       },
       error: (error) => {
         this.saving = false;
@@ -170,6 +175,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: 1,
       firstName: '',
       lastName: '',
+      division: '',
+      position: '',
       userTypeId: 1,
       clientId: 0,
       status: 1,
@@ -183,6 +190,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: Number(this.user?.userAuthLevelId ?? 1),
       firstName: String(this.user?.firstName || ''),
       lastName: String(this.user?.lastName || ''),
+      division: String(this.user?.division || ''),
+      position: String(this.user?.position || ''),
       userTypeId: Number(this.user?.userTypeId ?? 1),
       clientId: Number(this.user?.clientId ?? 0),
       status: Number(this.user?.status ?? 1),

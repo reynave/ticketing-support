@@ -17,37 +17,36 @@
   <div class="alert alert-danger py-2">{{ errorMessage }}</div>
   }
 
-  <div class="stat-card mb-3">
+ 
     @if (loading) {
-    <div class="text-muted">Loading ticket category detail...</div>
+       <div class="stat-card mb-3"> 
+    <div class="text-muted">Loading ticket category detail...</div></div>
     } @else if (!category) {
-    <div class="text-muted">Ticket category not found.</div>
-    } @else {
-    <div class="row g-2">
-      <div class="col-12 col-md-3"><strong>ID:</strong> {{ category.id }}</div>
-      <div class="col-12 col-md-5"><strong>Name:</strong> {{ category.name }}</div>
-      <div class="col-12 col-md-2"><strong>Weight:</strong> {{ category.weight }}</div>
-      <div class="col-12 col-md-2"><strong>Status:</strong> {{ category.status === 1 ? 'Active' : 'Inactive' }}</div>
-      <div class="col-12"><strong>Parent:</strong> {{ getParentName(category.parentId) }}</div>
-    </div>
-    }
-  </div>
+             <div class="stat-card mb-3"> 
+    <div class="text-muted">Ticket category not found.</div> </div>
+    }  
 
   <div class="stat-card">
     <form #ticketCategoryForm="ngForm" (ngSubmit)="save(ticketCategoryForm)">
       <div class="table-responsive">
         <table class="table table-borderless table-sm mb-0">
           <tbody>
+              <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Parent</label></td>
+              <td>
+                <div class="form-control form-control-sm bg-light">{{category.parentName}}</div>
+              </td>
+            </tr>
             <tr>
               <td class="align-middle form-label-cell"><label class="form-label mb-0">Name <span class="text-danger">*</span></label></td>
               <td>
                 <input class="form-control form-control-sm" name="name" [(ngModel)]="formModel.name" required />
               </td>
             </tr>
-            <tr>
-              <td class="align-middle form-label-cell"><label class="form-label mb-0">Parent</label></td>
+              <tr>
+              <td class="align-middle form-label-cell"><label class="form-label mb-0">Sorting <span class="text-danger">*</span></label></td>
               <td>
-                <div class="form-control form-control-sm bg-light">{{category.parentName}}</div>
+                <input class="form-control form-control-sm" type="number" name="sorting" [(ngModel)]="formModel.sorting" required />
               </td>
             </tr>
             <tr>

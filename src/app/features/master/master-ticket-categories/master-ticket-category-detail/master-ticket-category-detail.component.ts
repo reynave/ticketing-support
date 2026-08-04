@@ -10,6 +10,7 @@ interface TicketCategoryFormModel {
   parentId: number;
   weight: number;
   status: number;
+  sorting: number;
 }
 
 @Component({
@@ -88,6 +89,7 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
       name: this.formModel.name.trim(),
       parentId: Number(this.formModel.parentId),
       weight: Number(this.formModel.weight),
+      sorting: Number(this.formModel.sorting),
       status: Number(this.formModel.status),
     };
 
@@ -132,6 +134,7 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
     this.formModel = {
       name: String(this.category.name || ''),
       parentId: Number(this.category.parentId || 0),
+      sorting: Number(this.category.sorting || 0),
       weight: Number(this.category.weight || 0),
       status: Number(this.category.status ?? 1),
     };
@@ -141,6 +144,7 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
     return {
       name: '',
       parentId: 0,
+      sorting: 0,
       weight: 0,
       status: 1,
     };

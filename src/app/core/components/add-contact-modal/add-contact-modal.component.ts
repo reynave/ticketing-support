@@ -15,6 +15,8 @@ interface AddContactFormModel {
   lastName: string;
   email: string;
   phone: string;
+  division: string;
+  position: string;
 }
 
 @Component({
@@ -33,6 +35,8 @@ export class AddContactModalComponent implements OnInit {
     lastName: '',
     email: '',
     phone: '',
+    division: '',
+    position: '',
   };
 
   saving = false;
@@ -75,19 +79,21 @@ export class AddContactModalComponent implements OnInit {
   addContact(form: NgForm): void {
     this.saving = true;
     const payload = {
-        userAuthLevelId : 0, // Assuming 0 is the userAuthLevelId for contacts
+      userAuthLevelId : 0, // Assuming 0 is the userAuthLevelId for contacts
       userTypeId : 2, // Assuming 2 is the userTypeId for contacts
       password: 'defaultPassword', // You might want to handle password differently  
       firstName: this.formModel.firstName.trim(),
       lastName: this.formModel.lastName.trim(),
       email: this.formModel.email.trim(),
       phone: this.formModel.phone.trim(),
+      division: this.formModel.division.trim(),
+      position: this.formModel.position.trim(),
       projectId: this.project?.id,
       clientId: this.project?.clientId,
     };
     console.log('Form submitted:', payload);
 
-     const request$ = this.apiService.post(`/user`, payload);
+    const request$ = this.apiService.post(`/user`, payload);
 
     request$.subscribe({
       next: (response) => {

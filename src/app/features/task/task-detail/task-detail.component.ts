@@ -109,6 +109,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   assignTo: string = '';
   me: any = {};
   projectId : string = '';
+  ticketCategoryOptions : any = [];
   ngOnInit(): void {
     this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
@@ -223,18 +224,24 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse,   ticketStatusResponse] =
+      const [projectResponse, ticketCategoryResponse, ticketStatusResponse] =
         await Promise.all([
           firstValueFrom(this.apiService.get('/project', { status: 1 , id: this.projectId})),
           // firstValueFrom(
           //   this.apiService.get('/user', { presence: 1, status: 1 }),
           // ),
+            firstValueFrom(
+            this.apiService.get('/ticket-categories', { presence: 1  }),
+          ),
           firstValueFrom(
             this.apiService.get('/master/status/task', { presence: 1 }),
           ),
         ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
+        : [];
+      this.ticketCategoryOptions = Array.isArray(ticketCategoryResponse?.data)
+        ? ticketCategoryResponse.data
         : [];
 
       this.projects = Array.isArray(projectResponse?.data)
@@ -248,6 +255,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       this.projects = [];
       this.internalUsers = [];
       this.ticketStatusOptions = [];
+      this.ticketCategoryOptions = [];
     } finally {
       this.loadingOptions = false;
     }

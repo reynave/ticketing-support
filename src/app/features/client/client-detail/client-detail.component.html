@@ -102,6 +102,8 @@
             <th>ID</th>
             <th>Email</th>
             <th>Name</th>
+            <th>Division</th>
+            <th>Position</th>
             <th>Status</th>
             <!-- <th class="text-end">Action</th> -->
           </tr>
@@ -112,6 +114,8 @@
             <td> <a  href="javascript:;" [routerLink]="['/users', row.id]"> {{ row.id }}</a> </td>
             <td>{{ row.email }}</td>
             <td>{{ row.firstName }} {{ row.lastName }}</td>
+            <td>{{ row.division }}</td>
+            <td>{{ row.position }}</td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <!-- <td class="text-end action-buttons">
               
@@ -186,7 +190,7 @@
 
 <ng-template #clientUserFormModal>
   <div class="modal-header">
-    <h5 class="modal-title">Create External User</h5>
+    <h5 class="modal-title">Add Contact</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeUserModal()"></button>
   </div>
 
@@ -224,9 +228,18 @@
           placeholder="Input phone" />
       </div>
 
-      
- 
+         <div>
+        <label class="form-label" for="detail-user-division">Division</label>
+        <input id="detail-user-division" class="form-control" name="division" [(ngModel)]="userForm.division" required
+          placeholder="Input division" />
+      </div>
 
+         <div>
+        <label class="form-label" for="detail-user-position">Position</label>
+        <input id="detail-user-position" class="form-control" name="position" [(ngModel)]="userForm.position" required
+          placeholder="Input position" />
+      </div>
+ 
       <div>
         <label class="form-label" for="detail-user-status">Status</label>
         <select id="detail-user-status" class="form-select" name="status" [(ngModel)]="userForm.status">

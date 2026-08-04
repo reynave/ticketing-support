@@ -121,6 +121,15 @@
                   </td>
                   <td>
                     {{ task.ticketCategory }}
+
+<!-- 
+                     {{task.ticketCategoryId}} - {{task.ticketCategoryName}}
+                    <select id="detail-task-category" class="form-select form-select-sm" name="ticketCategoryId"
+                      [(ngModel)]="formModel.ticketCategoryId" [disabled]="formMode === 'view'" required>
+                      @for (category of ticketCategoryOptions; track category.id) {
+                      <option [ngValue]="category.id">{{ category.name }}</option>
+                      }
+                    </select> -->
                   </td>
                 </tr>
 
