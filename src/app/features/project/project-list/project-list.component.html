@@ -81,14 +81,13 @@
                   <th>Billeable</th>
                   <th>Product</th>
                   <th>Period</th>
-                  <th>Status</th>
-                  <th class="text-end">Action</th>
+                  <th>Status</th> 
                </tr>
             </thead>
             <tbody>
                @for (row of rows; track trackById($index, row)) {
                <tr [class]="row.status === 1 ? '' : 'disabled'">
-                  <td>{{ row.id }}</td>
+                  <td> <a href="javascript:void(0)" (click)="goToDetail(row)">{{ row.id }}</a> </td>
                   <td>{{ row.name }}</td>
                   <td>{{ row.clientName || row.clientId }}</td>
                   <td>{{ row.projectTypeName || row.projectTypeId }}</td>
@@ -96,11 +95,7 @@
                   <td>{{ row.productName || row.productId }}</td>
                   <td>{{ row.startDate | date: 'dd MMM yyyy' }} - {{ row.endDate | date: 'dd MMM yyyy' }}</td>
                   <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-                  <td class="text-end action-buttons">
-                     <button type="button" class="btn btn-sm btn-outline-primary"
-                        (click)="goToDetail(row)">Detail</button>
-
-                  </td>
+                  
                </tr>
                }
             </tbody>

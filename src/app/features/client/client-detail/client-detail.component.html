@@ -33,12 +33,12 @@
     <div class="text-muted">Client not found.</div>
     } @else {
     <div class="row g-2">
-      <div class="col-12 col-md-6"><strong>ID:</strong> {{ client.id }}</div>
-      <div class="col-12 col-md-6"><strong>Code:</strong> {{ client.code }}</div>
-      <div class="col-12 col-md-6"><strong>Name:</strong> {{ client.name }}</div>
-      <div class="col-12 col-md-6"><strong>Industry:</strong> {{ client.industryName }}</div>
-      <div class="col-12 col-md-6"><strong>Status:</strong> {{ client.status === 1 ? 'Active' : 'Inactive' }}</div>
-      <div class="col-12"><strong>Address:</strong> {{ client.address }}</div>
+      <div class="col-12 col-md-6"><strong>ID :</strong> {{ client.id }}</div>
+      <div class="col-12 col-md-6"><strong>Code :</strong> {{ client.code }}</div>
+      <div class="col-12 col-md-6"><strong>Name :</strong> {{ client.name }}</div>
+      <div class="col-12 col-md-6"><strong>Industry :</strong> {{ client.industryName }}</div>
+      <div class="col-12 col-md-6"><strong>Status :</strong> {{ client.status === 1 ? 'Active' : 'Inactive' }}</div>
+      <div class="col-12"><strong>Address :</strong> {{ client.address }}</div>
     </div>
     }
   </div>
@@ -62,23 +62,19 @@
             <th>Name</th>
             <th>Product</th>
             <th>Start Date</th>
-            <th>Status</th>
-            <th class="text-end">Action</th>
+            <th>Status</th> 
           </tr>
         </thead>
         <tbody>
           @for (row of projects; track trackById($index, row)) {
           <tr [class]="{  'disabled': row.status !== 1 }">
-            <td>{{ row.id }}</td>
+            <td> <a href="javascript:void(0)"  [routerLink]="['/project', row.id]"
+                routerLinkActive="router-link-active">{{ row.id }}</a> </td>
             <td>{{ row.name }}</td>
             <td>{{ row.productName || row.productId }} - {{ row.projectTypeName || row.projectTypeId }}</td>
             <td>{{ row.startDate | date: 'mediumDate' }}</td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <td class="text-end action-buttons">
-              <button type="button" class="btn btn-sm btn-outline-primary" [routerLink]="['/project', row.id]"
-                routerLinkActive="router-link-active">Detail</button>
-
-            </td>
+             
           </tr>
           }
         </tbody>
@@ -107,23 +103,23 @@
             <th>Email</th>
             <th>Name</th>
             <th>Status</th>
-            <th class="text-end">Action</th>
+            <!-- <th class="text-end">Action</th> -->
           </tr>
         </thead>
         <tbody>
           @for (row of users; track trackById($index, row)) {
           <tr>
-            <td>{{ row.id }}</td>
+            <td> <a  href="javascript:;" [routerLink]="['/users', row.id]"> {{ row.id }}</a> </td>
             <td>{{ row.email }}</td>
             <td>{{ row.firstName }} {{ row.lastName }}</td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <td class="text-end action-buttons">
-              <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/users', row.id]">Edit</a>
+            <!-- <td class="text-end action-buttons">
+              
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingUserId === row.id"
                 (click)="deleteUser(row)">
                 {{ deletingUserId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td>
+            </td> -->
           </tr>
           }
         </tbody>

@@ -65,7 +65,7 @@ export class AdminLayoutComponent implements OnInit {
     },
    
     { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },
-    { key: 'user-type', label: 'User Type', icon: 'groups' },
+    //{ key: 'user-type', label: 'User Type', icon: 'groups' },
     {
       key: 'global-setting',
       label: 'Global Setting',

@@ -24,10 +24,9 @@
           <option value="1">Internal</option>
           <option value="2">External</option>
         </select>
-        @if(selectedUserTypeFilter == '1') { 
- <button type="button" class="btn btn-primary-sm" style="width: 200px;" (click)="openCreateModal()">Create User</button>
+         
+        <button type="button" class="btn btn-primary-sm" [disabled]="selectedUserTypeFilter == '2'" style="width: 200px;" (click)="openCreateModal()">New User</button>
        
-         }
       </div>
     </div>
 
@@ -46,13 +45,13 @@
             <th>Type</th>
             <th *ngIf="selectedUserTypeFilter == '2'">ClientId</th>
             <th>Status</th>
-            <th class="text-end">Action</th>
+         
           </tr>
         </thead>
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr>
-            <td>{{ row.id }}</td>
+            <td> <a href="javascript:;" [routerLink]="['/users', row.id]">{{ row.id }}</a> </td>
             <td>{{ row.email }}</td>
             <td>{{ row.firstName }} {{ row.lastName }}</td>
             <td>{{ row.userTypeId === 2 ? 'External' : 'Internal' }}</td>
@@ -62,13 +61,13 @@
 
             </td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <td class="text-end action-buttons">
+            <!-- <td class="text-end action-buttons">
               <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/users', row.id]">Edit</a>
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteUser(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td>
+            </td> -->
           </tr>
           }
         </tbody>
@@ -81,7 +80,7 @@
 <!-- Create Modal -->
 <ng-template #createUserModal let-modal>
   <div class="modal-header">
-    <h5 class="modal-title">Create User</h5>
+    <h5 class="modal-title">New Internal User</h5>
     <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
   </div>
 

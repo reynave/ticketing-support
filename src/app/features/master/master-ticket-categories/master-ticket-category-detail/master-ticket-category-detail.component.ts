@@ -101,6 +101,7 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
         this.message = response?.message || 'Ticket category updated.';
         this.category = response?.data || this.category;
         this.populateForm();
+        this.goBack();
       },
       error: (error) => {
         this.saving = false;

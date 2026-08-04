@@ -429,7 +429,8 @@ export class MasterManageComponent implements OnInit {
       }
 
       this.message = 'Access right updated successfully.';
-      this.loadAccessRightMatrix();
+      //this.loadAccessRightMatrix();
+      this.goBack();
     } catch (error: any) {
       this.errorMessage = error?.error?.message || 'Failed to update access right.';
     } finally {

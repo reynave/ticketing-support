@@ -29,25 +29,19 @@
               <th>Code</th>
               <th>Name</th>
                 <th>Industry</th>
-              <th>Status</th>
-              <th class="text-end">Action</th>
+              <th>Status</th> 
             </tr>
           </thead>
           <tbody>
             @for (row of rows; track trackById($index, row)) {
               <tr>
-                <td>{{ row.id }}</td>
+                <td> <a href="javascript:void(0)" (click)="goToDetail(row)">{{ row.id }}</a> </td>
                 <td>{{ row.code }}</td>
                 <td>{{ row.name }}</td>
                  <td>{{ row.industryName }}</td>
                 
                 <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-                <td class="text-end action-buttons">
-                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
-                  <!-- <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id" (click)="deleteClient(row)">
-                    {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
-                  </button> -->
-                </td>
+                
               </tr>
             }
           </tbody>

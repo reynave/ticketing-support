@@ -47,14 +47,7 @@
             <tr>
               <td class="align-middle form-label-cell"><label class="form-label mb-0">Parent</label></td>
               <td>
-                <select class="form-select form-select-sm" name="parentId" [(ngModel)]="formModel.parentId" [disabled]="loadingParents">
-                  <option [ngValue]="0">Root</option>
-                  @for (parent of parentOptions; track parent.id) {
-                  @if (parent.id !== categoryId) {
-                  <option [ngValue]="parent.id">{{ parent.name }}</option>
-                  }
-                  }
-                </select>
+                <div class="form-control form-control-sm bg-light">{{category.parentName}}</div>
               </td>
             </tr>
             <tr>
@@ -64,13 +57,19 @@
               </td>
             </tr>
             <tr>
-              <td class="align-middle form-label-cell"><label class="form-label mb-0">Status</label></td>
+              <td class="align-top form-label-cell"><label class="form-label mb-0">Status</label></td>
               <td>
-                <select class="form-select form-select-sm" name="status" [(ngModel)]="formModel.status">
+                <select [disabled]="category.total > 0" class="form-select form-select-sm" name="status" [(ngModel)]="formModel.status">
                   <option [ngValue]="1">Active</option>
                   <option [ngValue]="0">Inactive</option>
                 </select>
+
+                 <div class="alert alert-warning mt-2 mb-0 py-1" *ngIf="category.total > 0">
+                Cannot change or inactivate this category because it has {{category.total}} tickets and projects associated with it.
+              </div>
               </td>
+
+             
             </tr>
           </tbody>
         </table>

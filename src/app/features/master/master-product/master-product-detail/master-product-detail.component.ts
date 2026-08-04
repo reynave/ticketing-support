@@ -99,6 +99,7 @@ export class MasterProductDetailComponent implements OnInit {
         this.message = response?.message || 'Product updated.';
         this.product = response?.data || this.product;
         this.populateForm();
+        this.goBack();
       },
       error: (error) => {
         this.saving = false;
