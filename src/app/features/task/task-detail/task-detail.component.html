@@ -116,22 +116,32 @@
                     {{ task.projectType }}
                   </td>
                 </tr>
-                <tr>
+
+                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold">Ticket Category</label>
                   </td>
                   <td>
-                    {{ task.ticketCategory }}
+                    {{ task.ParentCategoryName }} 
+                  </td>
+                </tr>
 
-<!-- 
-                     {{task.ticketCategoryId}} - {{task.ticketCategoryName}}
+
+                <tr>
+                  <td class="label-col"><label class="form-label small fw-semibold">Sub Category</label>
+                  </td>
+                  <td>
+                   
+ 
                     <select id="detail-task-category" class="form-select form-select-sm" name="ticketCategoryId"
                       [(ngModel)]="formModel.ticketCategoryId" [disabled]="formMode === 'view'" required>
                       @for (category of ticketCategoryOptions; track category.id) {
-                      <option [ngValue]="category.id">{{ category.name }}</option>
+                      <option [ngValue]="category.id">  {{ category.name }}</option>
                       }
-                    </select> -->
+                    </select>  
                   </td>
                 </tr>
+
+
 
                 <tr>
                   <th colspan="2" class="bg-light">PRODUCT</th>

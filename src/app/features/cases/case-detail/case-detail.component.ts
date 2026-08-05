@@ -126,6 +126,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   deadlineDateTime: string = '';
   assignTo: string = '';
   inputDate: string = '';
+   ticketCategoryOptions : any = [];
   ngOnInit(): void {
     this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
@@ -244,15 +245,19 @@ ticketBalance : number = 0;
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, ticketStatusResponse, ticketSeverityResponse] =
+      const [projectResponse, ticketStatusResponse, ticketSeverityResponse, ticketCategoriesResponse] =
         await Promise.all([
           firstValueFrom(this.apiService.get(`/project/${this.projectId}`)),
 
           firstValueFrom(
             this.apiService.get('/master/status/cases', { presence: 1 }),
           ),
+          
           firstValueFrom(
             this.apiService.get('/master/ticketSeverity', { presence: 1 }),
+          ),
+             firstValueFrom(
+            this.apiService.get('/ticket-categories', { presence: 1 , status: 1, parentId: this.task?.ticketCategoriesParentId }),
           ),
         ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
@@ -267,6 +272,11 @@ ticketBalance : number = 0;
 
       this.ticketSeverities = Array.isArray(ticketSeverityResponse?.data)
         ? ticketSeverityResponse.data
+        : [];
+
+     
+        this.ticketCategoryOptions = Array.isArray(ticketCategoriesResponse?.data)
+        ? ticketCategoriesResponse.data
         : [];
 
       this.ticketCategories = projectResponse.data?.ticketCategories || [];
@@ -437,6 +447,7 @@ ticketBalance : number = 0;
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
       deadlineDateTime: deadlineDateTime,
       ticketEstimationCost : this.formModel.ticketEstimationCost < 0 ? 0 : this.formModel.ticketEstimationCost,
+      ticketCategoryId : Number(this.formModel.ticketCategoryId)
     };
     console.log('saveTask payload', payload);
 
@@ -536,6 +547,7 @@ ticketBalance : number = 0;
       issueNo: '',
       ticketSeverityId: 0,
       ticketEstimationCost: 0,
+      ticketCategoryId: 0,
     };
   }
 
@@ -571,6 +583,7 @@ ticketBalance : number = 0;
       issueNo: String(this.task?.issueNo || ''),
       ticketSeverityId: Number(this.task?.ticketSeverityId ?? 0),
       ticketEstimationCost : Number(this.task?.ticketEstimationCost ?? 0),
+      ticketCategoryId : Number(this.task?.ticketCategoryId ?? 0),
     };
   }
 

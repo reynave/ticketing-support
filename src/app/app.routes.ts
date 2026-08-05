@@ -7,6 +7,7 @@ import { MasterTicketCategoriesComponent } from './features/master/master-ticket
 import { MasterTicketCategoryDetailComponent } from './features/master/master-ticket-categories/master-ticket-category-detail/master-ticket-category-detail.component';
 import { MasterProductComponent } from './features/master/master-product/master-product.component';
 import { MasterProductDetailComponent } from './features/master/master-product/master-product-detail/master-product-detail.component';
+import { HomeComponent } from './features/home/home.component';
 import { ClientListComponent } from './features/client/client-list/client-list.component';
 import { ClientDetailComponent } from './features/client/client-detail/client-detail.component';
 import { UserListComponent } from './features/user/user-list/user-list.component';
@@ -41,7 +42,11 @@ export const routes: Routes = [
 			{
 				path: '',
 				pathMatch: 'full',
-				redirectTo: 'master',
+				redirectTo: 'home',
+			},
+			{
+				path: 'home',
+				component: HomeComponent,
 			},
 			{
 				path: 'clients',

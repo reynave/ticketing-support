@@ -17,14 +17,15 @@ export class AdminLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   readonly moduleMenus = [ 
+    { path: '/home', label: 'Home', icon: 'home' , badge: '' },
     { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '' },
     { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '' },
-    {
-      path: '/change-requests',
-      label: 'Change Requests',
-      icon: 'change_circle',
-      badge: '',
-    },
+    // {
+    //   path: '/change-requests',
+    //   label: 'Change Requests',
+    //   icon: 'change_circle',
+    //   badge: '',
+    // },
 
     { path: '/projects', label: 'Projects', icon: 'workspaces' },
     { path: '/clients', label: 'Clients', icon: 'apartment' },
@@ -92,9 +93,9 @@ export class AdminLayoutComponent implements OnInit {
     this.apiService.get('/master/loadbBadge').subscribe({
       next: (response) => {
         const badgeData = response.data;
-        this.moduleMenus[0].badge = badgeData.find((b: { name: string; }) => b.name === 'task')?.total || '';
-        this.moduleMenus[1].badge = badgeData.find((b: { name: string; }) => b.name === 'issue')?.total || '';
-        this.moduleMenus[2].badge = badgeData.find((b: { name: string; }) => b.name === 'cr')?.total || '';
+        this.moduleMenus[1].badge = badgeData.find((b: { name: string; }) => b.name === 'task')?.total || '';
+        this.moduleMenus[2].badge = badgeData.find((b: { name: string; }) => b.name === 'issue')?.total || '';
+        this.moduleMenus[3].badge = badgeData.find((b: { name: string; }) => b.name === 'cr')?.total || '';
       },
       error: () => {
        

@@ -68,7 +68,7 @@
              <th>Client</th>
             <th>Project</th>
             <th>Status</th>
-            <th>Submit Date</th>
+            <th>Category</th>
             <th>Target Date</th>
             <th>TASK</th>
             <!-- <th class="text-end">Action</th> -->
@@ -90,7 +90,8 @@
             </td>
        
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
-            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+          
+            <td>{{ row.ticketCategoryName }}</td>
             <td>{{ row.targetCompletionDate | date: 'mediumDate' }}</td>
             <td>
               <div *ngIf="row.taskCount" class="fw-semibold text-success">{{ row.taskCount }}</div>

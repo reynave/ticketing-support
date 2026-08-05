@@ -231,7 +231,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           //   this.apiService.get('/user', { presence: 1, status: 1 }),
           // ),
             firstValueFrom(
-            this.apiService.get('/ticket-categories', { presence: 1  }),
+            this.apiService.get('/ticket-categories', { presence: 1 , status: 1, parentId: this.task?.ticketCategoriesParentId }),
           ),
           firstValueFrom(
             this.apiService.get('/master/status/task', { presence: 1 }),
@@ -356,6 +356,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       wasTicketStatusId: this.ticketStatusId,
       wasAssignTo: this.assignTo,
       updateBy: this.formModel.submitBy,
+      ticketCategoryId : Number(this.formModel.ticketCategoryId)
     };
     console.log('saveTask payload', payload);
 
@@ -455,6 +456,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       rating: 0,
       ratesBy: 0,
       issueNo: '',
+      ticketCategoryId : 0
     };
   }
 
@@ -490,6 +492,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       rating: Number(this.task?.rating ?? 0),
       ratesBy: Number(this.task?.ratesBy ?? 0),
       issueNo: String(this.task?.issueNo || ''),
+      ticketCategoryId : Number(this.task?.ticketCategoryId ?? 0)
     };
   }
 

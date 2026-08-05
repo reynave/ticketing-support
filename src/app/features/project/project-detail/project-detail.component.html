@@ -42,9 +42,10 @@
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
           }
 
+          @if(project.ticketBased == 1) {
           <button type="button" class="btn btn-success btn-sm" (click)="openTicketBalanceModal()">Add Ticket
             Balance</button>
-
+          }
 
         </div>
       </div>
@@ -107,7 +108,7 @@
                 class="text-danger">*</span></label>
             <select id="detail-project-type" class="form-select form-select-sm" name="projectTypeId"
               [(ngModel)]="formModel.projectTypeId" [disabled]="formMode === 'view'" required>
-              <option [ngValue]="0">Select project type</option>
+              
               @for (projectType of projectTypes; track projectType.id) {
               <option [ngValue]="projectType.id">{{ projectType.name }}</option>
               }
@@ -166,7 +167,8 @@
             </div>
           </div>
 
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-6" *ngIf="project.ticketBased == 1">
+            
             <label class="form-label small fw-semibold" for="detail-project-description">Ticket Balance</label>
 
             <div class="form-control "
@@ -197,8 +199,9 @@
             } @else {
 
 
-            <table class="table table-sm table-hover align-middle">
-              <thead>
+            <div style="overflow-y: auto; max-height: 200px;">
+              <table class="table table-sm table-hover align-middle">
+              <thead class="sticky-top bg-light">
                 <tr>
                   <th class="text-center"></th>
                   <th>Name [ID]</th>
@@ -226,6 +229,7 @@
                 }
               </tbody>
             </table>
+            </div>
             }
           </div>
         </div>
@@ -420,6 +424,7 @@
       </ng-template>
     </li>
 
+    @if(project.ticketBased == 1) {
     <li [ngbNavItem]="5">
       <button ngbNavLink>TICKET BALANCE</button>
       <ng-template ngbNavContent>
@@ -447,6 +452,7 @@
         </table>
       </ng-template>
     </li>
+  }
   </ul>
 
 

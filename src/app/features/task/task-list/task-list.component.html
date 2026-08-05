@@ -67,8 +67,9 @@
             <th>Clients</th>
             <th>Project</th>
             <th>Status</th>
-            <th>Submit Date</th>
+           
             <th>Category</th>
+             <th>Submit Date</th>
             <!-- <th class="text-end">Action</th> -->
           </tr>
         </thead>
@@ -85,8 +86,9 @@
             <td>{{ row.projectName }}</td>
       
             <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
-            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+           
             <td>{{ row.ticketCategoryName }}</td>
+             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
             <!-- <td class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
@@ -201,8 +203,7 @@
           <textarea id="task-description" class="form-control" rows="3" name="description"
             [(ngModel)]="formModel.description" required></textarea>
         </div>
-
-{{formModel | json}}
+ 
       </div>
     </div>
 
