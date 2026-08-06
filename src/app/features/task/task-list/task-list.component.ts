@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild,
@@ -14,9 +15,10 @@ import {
   NgbModalModule,
   NgbModalRef,
 } from '@ng-bootstrap/ng-bootstrap';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service'; 
 import { AuthService } from '../../../core/services/auth.service';
+import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 
 interface TaskFormModel {
   id: string;
@@ -45,12 +47,13 @@ interface TaskFormModel {
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css',
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly authService = inject(AuthService);
   private readonly activeRouter = inject(ActivatedRoute);
+  private readonly socketNotificationService : any = inject(SocketNotificationService);
 
   @ViewChild('createTaskModal') createTaskModal?: TemplateRef<unknown>;
 
@@ -79,13 +82,23 @@ export class TaskListComponent implements OnInit {
 
   formModel: TaskFormModel = this.defaultForm();
   payload: any = null;
+  private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
     console.log(this.activeRouter.snapshot.queryParams, this.closed);
     this.payload = this.authService.decodeToken();
+    this.reloadSubscription = this.socketNotificationService
+      .onReloadAction()
+      .subscribe(() => {
+        this.loadTasks();
+      });
     this.formModel = this.defaultForm();
     this.loadTasks();
     this.loadOptions();
+  }
+
+  ngOnDestroy(): void {
+    this.reloadSubscription?.unsubscribe();
   }
 
   loadTasks(): void {
@@ -256,6 +269,7 @@ modules : any = [];
       next: (response) => {
         this.saving = false;
         this.closeModal();
+        this.socketNotificationService.emitReloadAction();
 
         const id = String(response?.data?.id || '').trim();
 

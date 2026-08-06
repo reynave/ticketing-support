@@ -7,18 +7,55 @@
   <div class="nav-search ms-3">
     <div class="search-wrapper">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" placeholder="Search by ticket Id / ticket subject" />
+      <input type="text" class="form-control" name="searchText"
+      placeholder="Search by ticket Id / ticket subject" [(ngModel)]="searchText" (keyup.enter)="searchBox(content)" />
     </div>
   </div>
+
+<ng-template #content let-modal>
+	<div class="modal-header">
+		<strong >Search : <em>{{searchText}}</em></strong>
+		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+	<div class="modal-body">
+		 <table class="table table-sm table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Ticket ID</th>
+          <th>Title</th>
+          <th>Type</th>
+          
+          <th>Assigned To</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ticket of searchResults" [ngClass]="ticket.ticketStatusId >= 900 ? 'table-closed' : ''">
+          <td>
+            <a href="javascript:;" (click)="modal.dismiss('Cross click')"  [routerLink]="['/' + (ticket.ticketTypeName || '').toLowerCase() + 's', ticket.id]" routerLinkActive="router-link-active" >
+            {{ ticket.id }}
+            </a>
+          </td>
+          <td>{{ ticket.title }}</td>
+          <td>{{ ticket.ticketTypeName }}</td>
+          <td>{{ ticket.assignToName }}</td> 
+          <td>{{ ticket.ticketStatusName }}</td>
+        </tr>
+      </tbody>
+    </table>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Save</button>
+	</div>
+</ng-template>
+
 
   <div class="navbar-actions">
     <button type="button" class="btn-icon" title="Back" (click)="back()">
       <i class="bi bi-arrow-left"></i>
     </button>
 
-    <div class="btn-icon" title="Notifikasi">
-      <i class="bi bi-bell" style="font-size: 1rem"></i>
-    </div>
+  
 
     <div class="avatar" title="User">{{ userInitials }}</div>
 

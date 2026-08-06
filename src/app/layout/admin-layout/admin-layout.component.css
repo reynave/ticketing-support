@@ -8,3 +8,7 @@
   line-height: 1;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+.table-closed td{
+  opacity: 0.5;
+}

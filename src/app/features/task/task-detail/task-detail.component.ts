@@ -26,6 +26,7 @@ interface UploadRow {
 }
 import { environment } from './../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
+import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 @Component({
   selector: 'app-task-detail',
   standalone: true,
@@ -50,6 +51,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly http = inject(HttpClient);
   private modalService = inject(NgbModal);
+    private readonly socketNotificationService : any = inject(SocketNotificationService);
   editor1: any = null;
   editor2: any = null;
   editor3: any = null;
@@ -371,6 +373,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         this.formMode = 'view';
         this.loadTaskDetail();
         this.loadTaskDetailLog();
+
+         this.socketNotificationService.emitReloadAction();
       },
       error: (error) => {
         this.saving = false;

@@ -29,6 +29,7 @@ import { environment } from './../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { CountdownComponent } from './countdown.component';
 import { CaseCreateTaskModalComponent } from '../../../core/components/case-create-task-modal/case-create-task-modal.component';
+import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 @Component({
   selector: 'app-case-detail',
   standalone: true,
@@ -61,6 +62,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly http = inject(HttpClient);
   private modalService = inject(NgbModal);
+    private readonly socketNotificationService : any = inject(SocketNotificationService);
   editor1: any = null;
   editor2: any = null;
   editor3: any = null;
@@ -462,6 +464,7 @@ ticketBalance : number = 0;
         this.formMode = 'view';
         this.loadTaskDetail();
         this.loadTaskDetailLog();
+          this.socketNotificationService.emitReloadAction();
       },
       error: (error) => {
         this.saving = false;

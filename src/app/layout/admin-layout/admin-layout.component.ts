@@ -1,20 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
-
+import { SocketNotificationService } from '../../core/services/socket-notification.service';
+import { FormsModule } from '@angular/forms'; 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, FormsModule],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css',
 })
-export class AdminLayoutComponent implements OnInit {
+export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   private readonly apiService = inject(ApiService);
   private readonly authService = inject(AuthService);
+  private readonly socketNotificationService = inject(SocketNotificationService);
+  private readonly router = inject(Router);
+  	private modalService = inject(NgbModal);
+  private socketSubscription?: Subscription;
 
   readonly moduleMenus = [ 
     { path: '/home', label: 'Home', icon: 'home' , badge: '' },
@@ -86,8 +93,25 @@ export class AdminLayoutComponent implements OnInit {
     return this.authService.initials(this.userName);
   }
 
+  searchText : string = '';
   ngOnInit(): void {
     this.loadbBadge();
+
+    this.socketSubscription = this.socketNotificationService
+      .onReloadAction()
+      .subscribe(() => {
+        console.log('Socket notification received from server:', {
+          action: 'reload',
+        });
+        this.loadbBadge();
+      });
+
+
+  }
+
+  ngOnDestroy(): void {
+    this.socketSubscription?.unsubscribe();
+
   }
   loadbBadge(){
     this.apiService.get('/master/loadbBadge').subscribe({
@@ -109,5 +133,31 @@ export class AdminLayoutComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+    searchResults : any = []; // Clear previous search results
+  searchBox(content:any): void {
+
+    // jika this.searchText lenght < 6 maka warning "Search text must be at least 6 characters long" dan return
+    if (this.searchText.length < 6) {
+      alert('Search text must be at least 6 characters long');
+      return;
+    }
+
+
+    this.modalService.open(content, { size: 'xl' });
+   console.log('Search text:', this.searchText);
+   this.apiService.get('/master/searchTickets', { searchText: this.searchText }).subscribe({
+      next: (response) => {
+        const searchResults = response.data;
+        console.log('Search results:', searchResults);
+        this.searchResults = searchResults; // Update the search results to be displayed in the modal
+      },
+      error: (error) => {
+        console.error('Error searching tickets:', error);
+        // Handle the error as needed, e.g., show an error message to the user
+      },
+    });
+   // this.router.navigate(['/tasks'], { queryParams: { query: this.searchText } });
+    // Implement your search logic here, e.g., navigate to a search results page or filter data
   }
 }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild,
@@ -14,9 +15,10 @@ import {
   NgbModalModule,
   NgbModalRef,
 } from '@ng-bootstrap/ng-bootstrap';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 
 interface CaseFormModel {
   id: string;
@@ -39,6 +41,11 @@ interface CaseFormModel {
   productChildId: number | null;
 }
 
+interface TicketStatusOption {
+  id: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-case-list',
   standalone: true,
@@ -46,23 +53,20 @@ interface CaseFormModel {
   templateUrl: './case-list.component.html',
   styleUrl: './case-list.component.css',
 })
-export class CaseListComponent implements OnInit {
+export class CaseListComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private readonly authService = inject(AuthService);
   private readonly activeRouter = inject(ActivatedRoute);
+  private readonly socketNotificationService = inject(SocketNotificationService);
 
   @ViewChild('createCaseModal') createCaseModal?: TemplateRef<unknown>;
 
   private modalRef: NgbModalRef | null = null;
 
   readonly taskTypeId = 2;
-  readonly ticketStatusOptions = [
-    { id: 1, name: 'Open' },
-    { id: 900, name: 'Closed' },
-    { id: 990, name: 'Cancelled' },
-  ];
+  ticketStatusOptions: TicketStatusOption[] = [];
   closed: boolean = false;
   rows: any[] = [];
   projects: any[] = [];
@@ -85,13 +89,23 @@ export class CaseListComponent implements OnInit {
 
   formModel: CaseFormModel = this.defaultForm();
   payload: any = null;
+  private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
     console.log(this.activeRouter.snapshot.queryParams, this.closed);
     this.payload = this.authService.decodeToken();
+    this.reloadSubscription = this.socketNotificationService
+      .onReloadAction()
+      .subscribe(() => {
+        this.loadCases();
+      });
     this.formModel = this.defaultForm();
     this.loadCases();
     this.loadOptions();
+  }
+
+  ngOnDestroy(): void {
+    this.reloadSubscription?.unsubscribe();
   }
 
   loadCases(): void {
@@ -137,6 +151,7 @@ export class CaseListComponent implements OnInit {
         projectResponse,
         ticketCategoriesResponse,
         ticketSeveritiesResponse,
+        ticketStatusResponse,
       ] = await Promise.all([
         firstValueFrom(this.apiService.get('/project', { status: 1 })),
 
@@ -146,8 +161,15 @@ export class CaseListComponent implements OnInit {
         firstValueFrom(
           this.apiService.get('/master/ticket-severities', { presence: 1 }),
         ),
+         firstValueFrom(
+            this.apiService.get('/master/status/cases', { presence: 1 }),
+          ),
       ]);
 
+      this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
+        ? ticketStatusResponse.data
+        : []; 
+        
       this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
         : [];
@@ -312,6 +334,7 @@ modules : any[] = [];
       next: (response) => {
         this.saving = false;
         this.closeModal();
+        this.socketNotificationService.emitReloadAction();
 
         const id = String(response?.data?.id || '').trim();
 
