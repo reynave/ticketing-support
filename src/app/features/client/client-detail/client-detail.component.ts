@@ -130,9 +130,10 @@ export class ClientDetailComponent implements OnInit {
       return;
     }
 
-    this.loadingUsers = true;
-
-    this.apiService.get(`/client/${this.clientId}/projects`).subscribe({
+    this.loadingUsers = true; 
+const showAllUrl = `/project?clientId=${this.clientId}`;
+const url = `/project?status=1&clientId=${this.clientId}`;
+    this.apiService.get(url).subscribe({
       next: (response) => {
         this.loadingUsers = false;
         this.projects = Array.isArray(response?.data) ? response.data : [];

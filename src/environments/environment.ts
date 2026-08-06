@@ -1,3 +1,8 @@
+declare var apiBaseUrl: string;
+
 export const environment = {
-	apiBaseUrl: 'https://crm.co.id/api',
+	apiBaseUrl: apiBaseUrl,
+	production: true,
+	//apiBaseUrl: 'https://crm.co.id/api',
+	// apiBaseUrl: 'https://crm.co.id/api-dev/'
 };

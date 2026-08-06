@@ -67,9 +67,9 @@
             <th>Clients</th>
             <th>Project</th>
             <th>Status</th>
-           
             <th>Category</th>
              <th>Submit Date</th>
+             <th>Assign Id</th>
             <!-- <th class="text-end">Action</th> -->
           </tr>
         </thead>
@@ -89,13 +89,15 @@
            
             <td>{{ row.ticketCategoryName }}</td>
              <td>{{ row.submitDate | date: 'mediumDate' }}</td>
-            <!-- <td class="text-end action-buttons">
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
-              <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
-                (click)="deleteTask(row)">
-                {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
-              </button>
-            </td> -->
+             <td>
+              <div *ngIf="row.assignToName; else noAssign" title="Assigned ID  {{ row.assignTo }} ">
+             {{ row.assignToName }}
+              </div>
+              <ng-template #noAssign>
+                <span class="text-muted">Not assigned</span>
+              </ng-template>
+             </td>
+            
           </tr>
           }
         </tbody>

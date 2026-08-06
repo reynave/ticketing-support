@@ -52,7 +52,7 @@ export class ProjectListComponent {
   errorMessage = '';
 
   keyword = '';
-  selectedStatus = '';
+  selectedStatus = '1';
   selectedClientId = '';
   selectedProjectTypeId = '';
   

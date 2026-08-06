@@ -27,7 +27,8 @@
   } @else {
   <div class="card border shadow-sm mb-4">
     <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
-      <div class="sticky-top card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
+      <div
+        class="sticky-top card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
         <span class="fw-semibold small">Project Form</span>
         <div class="d-flex gap-2">
           @if (formMode === 'edit') {
@@ -108,7 +109,7 @@
                 class="text-danger">*</span></label>
             <select id="detail-project-type" class="form-select form-select-sm" name="projectTypeId"
               [(ngModel)]="formModel.projectTypeId" [disabled]="formMode === 'view'" required>
-              
+
               @for (projectType of projectTypes; track projectType.id) {
               <option [ngValue]="projectType.id">{{ projectType.name }}</option>
               }
@@ -168,7 +169,7 @@
           </div>
 
           <div class="col-12 col-md-6" *ngIf="project.ticketBased == 1">
-            
+
             <label class="form-label small fw-semibold" for="detail-project-description">Ticket Balance</label>
 
             <div class="form-control "
@@ -201,34 +202,34 @@
 
             <div style="overflow-y: auto; max-height: 200px;">
               <table class="table table-sm table-hover align-middle">
-              <thead class="sticky-top bg-light">
-                <tr>
-                  <th class="text-center"></th>
-                  <th>Name [ID]</th>
-                  <th>Auth Level</th>
-                  <th class="text-center">Manager</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (user of users; track user.id ; let i = $index) { 
-                <tr> 
-                  <td (click)="user.checked = !user.checked" style="cursor: pointer;">
-                    <i class="bi bi-check-square-fill" *ngIf="user.checked == 1"></i>
-                    <i class="bi bi-square" *ngIf="user.checked != 1"></i>
-                  </td>
- 
-                  <td> {{ user.name }} [{{ user.id }}] </td>
-                  <td> {{ user.userAuthLevel }} </td>
- 
-                  <td (click)="toggleManager(i)" style="cursor: pointer;">
-                    <i class="bi bi-check-circle-fill" *ngIf="user.asManager == 1"></i>
-                    <i class="bi bi-circle" *ngIf="user.asManager != 1"></i>
-                  </td>
+                <thead class="sticky-top bg-light">
+                  <tr>
+                    <th class="text-center"></th>
+                    <th>Name [ID]</th>
+                    <th>Auth Level</th>
+                    <th class="text-center">Manager</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of users; track user.id ; let i = $index) {
+                  <tr>
+                    <td (click)="user.checked = !user.checked" style="cursor: pointer;">
+                      <i class="bi bi-check-square-fill" *ngIf="user.checked == 1"></i>
+                      <i class="bi bi-square" *ngIf="user.checked != 1"></i>
+                    </td>
 
-                </tr>
-                }
-              </tbody>
-            </table>
+                    <td> {{ user.name }} [{{ user.id }}] </td>
+                    <td> {{ user.userAuthLevel }} </td>
+
+                    <td (click)="toggleManager(i)" style="cursor: pointer;">
+                      <i class="bi bi-check-circle-fill" *ngIf="user.asManager == 1"></i>
+                      <i class="bi bi-circle" *ngIf="user.asManager != 1"></i>
+                    </td>
+
+                  </tr>
+                  }
+                </tbody>
+              </table>
             </div>
             }
           </div>
@@ -269,29 +270,32 @@
               <th>Title</th>
               <th>Status</th>
               <th>rating</th>
-              <th>ticketCategoryId</th>
+              <th>Assign To</th>
             </tr>
           </thead>
           <tbody>
             @for (group of groupedFilteredTask; track group.id) {
-            <tr class="table-light">
-              <td colspan="6" class="fw-semibold">
-                {{ group.name }} ({{ group.data.length }})
-              </td>
-            </tr>
+              @if(group.data.length > 0) {
 
-            @for (t of group.data; track t.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
-              </td>
-              <td>{{ t.submitDate | date: 'yyyy-MM-dd' }}</td>
-              <td>{{ t.title }}</td>
-              <td>{{ t.ticketStatusName }} </td>
-              <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
-              <td>{{ t.ticketCategoryId }}</td>
-            </tr>
-            }
+                <tr class="table-light">
+                  <td colspan="6" class="fw-semibold">
+                    {{ group.name }} ({{ group.data.length }})
+                  </td>
+                </tr>
+
+                @for (t of group.data; track t.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
+                  </td>
+                  <td>{{ t.submitDate | date: 'yyyy-MM-dd' }}</td>
+                  <td>{{ t.title }}</td>
+                  <td>{{ t.ticketStatusName }} </td>
+                  <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
+                  <td>{{ t.assignTo }}</td>
+                </tr>
+                }
+              }
             }
           </tbody>
         </table>
@@ -309,13 +313,14 @@
               <th>Status</th>
               <th>Priority</th>
               <th>Rating</th>
-
+              <th>AssignTo</th>
             </tr>
           </thead>
           <tbody>
             @for (group of groupedFilteredCases; track group.id) {
+              @if(group.data.length > 0) {
             <tr class="table-light">
-              <td colspan="6" class="fw-semibold">
+              <td colspan="7" class="fw-semibold">
                 {{ group.name }} ({{ group.data.length }})
               </td>
             </tr>
@@ -330,10 +335,11 @@
               <td>{{ t.ticketStatusName }}</td>
               <td>{{ t.ticketSeverityName }}</td>
               <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
-
+              <td>{{ t.assignTo }}</td>
             </tr>
             }
             }
+          }
           </tbody>
         </table>
       </ng-template>
@@ -350,10 +356,12 @@
               <th>Status</th>
               <th>Priority</th>
               <th>Created At</th>
+              <td>AssignTo</td>
             </tr>
           </thead>
           <tbody>
             @for (group of groupedFilteredCr; track group.id) {
+              @if(group.data.length > 0) {
             <tr class="table-light">
               <td colspan="6" class="fw-semibold">
                 {{ group.name }} ({{ group.data.length }})
@@ -368,8 +376,10 @@
               <td>{{ t.ticketStatusName }}</td>
               <td>{{ t.ticketPriorityName }}</td>
               <td>{{ t.createdAt | date: 'medium' }}</td>
+              <td>{{ t.assignTo }}</td>
             </tr>
             }
+          }
             }
           </tbody>
         </table>
@@ -402,7 +412,7 @@
 
               </td>
               <td>
-                <a href="javascript:;" [routerLink]="['/users', t.userId]" routerLinkActive="router-link-active" >
+                <a href="javascript:;" [routerLink]="['/users', t.userId]" routerLinkActive="router-link-active">
                   {{ t.name }}
                 </a>
 
@@ -443,8 +453,9 @@
             <tr>
               <td>{{ t.date | date: 'mediumDate' }}</td>
               <td>{{ t.title }} {{ t.note }}</td>
-              <td class="text-end text-primary"><strong>{{  t.ticketIn > 0 ? (t.ticketIn  | number) : '-' }}</strong></td>
-              <td class="text-end text-danger"><strong>{{ t.ticketOut > 0 ? (t.ticketOut  | number) : '-' }}</strong></td>
+              <td class="text-end text-primary"><strong>{{ t.ticketIn > 0 ? (t.ticketIn | number) : '-' }}</strong></td>
+              <td class="text-end text-danger"><strong>{{ t.ticketOut > 0 ? (t.ticketOut | number) : '-' }}</strong>
+              </td>
               <td class="text-end">{{ t.balance }}</td>
             </tr>
             }
@@ -452,7 +463,7 @@
         </table>
       </ng-template>
     </li>
-  }
+    }
   </ul>
 
 
@@ -474,28 +485,28 @@
 
 
         <div class="row g-2">
-          <div class="col-12 col-md-6"> 
-              <label class="form-label" for="ticket-balance-date">Date <span class="text-danger">*</span></label>
-              <input id="ticket-balance-date" class="form-control" type="date" name="date"
-                [(ngModel)]="ticketBalanceForm.date" required />
-       
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="ticket-balance-date">Date <span class="text-danger">*</span></label>
+            <input id="ticket-balance-date" class="form-control" type="date" name="date"
+              [(ngModel)]="ticketBalanceForm.date" required />
+
           </div>
           <div class="col-12 col-md-6">
-            <label class="form-label" for="ticket-balance-in">Ticket In  <span class="text-danger">*</span></label>
+            <label class="form-label" for="ticket-balance-in">Ticket In <span class="text-danger">*</span></label>
             <input id="ticket-balance-in" class="form-control" type="number" min="0" name="ticketIn"
               [(ngModel)]="ticketBalanceForm.ticketIn" required />
           </div>
 
           <div class="col-12">
             <!-- note -->
-            <label class="form-label" for="ticket-balance-note">Description  <span class="text-danger">*</span></label>
+            <label class="form-label" for="ticket-balance-note">Description <span class="text-danger">*</span></label>
             <input id="ticket-balance-note" class="form-control" name="note" required
               [(ngModel)]="ticketBalanceForm.note" />
 
           </div>
         </div>
 
-     
+
       </div>
 
       <div class="modal-footer">
