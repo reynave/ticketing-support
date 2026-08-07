@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-
+import { environment } from '../../../../environments/environment';
 interface LoginForm {
   email: string;
   password: string;
@@ -20,10 +20,10 @@ interface LoginForm {
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-
+  env: any = environment;
   formModel: LoginForm = {
-    email: 'admin@thinktank.local',
-    password: 'Admin123!',
+    email: '',
+    password: '',
     remember: true,
   };
 
@@ -32,6 +32,10 @@ export class LoginComponent implements OnInit {
   showPassword = false;
 
   ngOnInit(): void {
+    if (this.env.production !== true) {
+      this.formModel.email = 'admin@thinktank.local';
+      this.formModel.password = 'Admin123!';
+    }
     if (this.authService.isAuthenticated) {
       void this.router.navigateByUrl('/master');
     }
@@ -45,19 +49,22 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.authService.login({
-      email: this.formModel.email,
-      password: this.formModel.password,
-    }).subscribe({
-      next: () => {
-        this.loading = false;
-        void this.router.navigateByUrl('/home');
-      },
-      error: (error) => {
-        this.loading = false;
-        this.errorMessage = error?.error?.message || 'Login failed. Please try again.';
-      },
-    });
+    this.authService
+      .login({
+        email: this.formModel.email,
+        password: this.formModel.password,
+      })
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          void this.router.navigateByUrl('/home');
+        },
+        error: (error) => {
+          this.loading = false;
+          this.errorMessage =
+            error?.error?.message || 'Login failed. Please try again.';
+        },
+      });
   }
 
   togglePassword(): void {

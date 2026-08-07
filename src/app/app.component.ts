@@ -16,6 +16,6 @@ export class AppComponent implements OnInit {
 
     setInterval(() => {
       window.location.reload();
-    }, 1000 * 60 * 5); // 5 minutes
+    }, 1000 * 60 * 55); // 5 minutes
   }
 }

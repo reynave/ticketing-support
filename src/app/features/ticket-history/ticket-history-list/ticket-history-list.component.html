@@ -1,0 +1,155 @@
+<div class="container-fluid">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Ticket History</div>
+      <div class="page-subtitle">Cari ticket berdasarkan Ticket ID dan lihat hasil Task / Cases.</div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-9">
+        <label class="form-label small" for="ticket-history-search">Ticket ID</label>
+        <input id="ticket-history-search" class="form-control form-control-sm" [(ngModel)]="searchText"
+          (keyup.enter)="search()" placeholder="Contoh: 100012 atau keyword title" />
+      </div>
+
+      <div class="col-12 col-md-3 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="search()">Search</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="reset()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    @if (loading) {
+    <div class="text-muted">Mencari ticket...</div>
+    } @else if (!hasSearched) {
+    <div class="text-muted">Masukkan Ticket ID lalu tekan Search.</div>
+    } @else if (!rows.length) {
+    <div class="text-muted">Data ticket tidak ditemukan.</div>
+    } @else {
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Assign To</th>
+            <th>Input Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track trackById($index, row)) {
+          <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.ticketTypeName || '-' }}</td>
+            <td>{{ row.title || '-' }}</td>
+            <td>{{ row.ticketStatusName || '-' }}</td>
+            <td>{{ row.assignToName || '-' }}</td>
+            <td>{{ row.inputDate | date: 'medium' }}</td>
+            <td>
+              <a (click)="open(content)" class="btn btn-sm btn-outline-primary py-0">Activities</a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>
+
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <strong class="modal-title" id="modal-basic-title">History Activities</strong>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body bg-light">
+
+    <div class="container" >
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Aktivitas</h4>
+        <span class="badge bg-primary rounded-pill">Total: 3 Log</span>
+      </div>
+
+      <!-- Container Timeline Vertikal -->
+      <div class="timeline">
+
+        <!-- Item 1: Berhasil / Sukses -->
+        <div class="timeline-item">
+          <div class="timeline-badge bg-success text-white shadow-sm">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <div class="card border-0 shadow-sm rounded-3 ms-3">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                  Pembayaran Berhasil
+                </span>
+                <small class="text-muted"><i class="bi bi-clock me-1"></i>10 Menit yang lalu</small>
+              </div>
+              <h6 class="fw-bold mb-1">Transaksi #INV-2026-0807</h6>
+              <p class="text-muted mb-2 small">Pembayaran paket berlangganan bulanan telah dikonfirmasi oleh sistem.</p>
+              <div class="border-top pt-2 mt-2 d-flex justify-content-between align-items-center">
+                <span class="small text-secondary"><i class="bi bi-person me-1"></i>Oleh: Admin</span>
+                <a href="#" class="btn btn-sm btn-link text-decoration-none p-0">Detail <i
+                    class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2: Peringatan / Warning -->
+        <div class="timeline-item">
+          <div class="timeline-badge bg-warning text-white shadow-sm">
+            <i class="bi bi-exclamation-lg"></i>
+          </div>
+          <div class="card border-0 shadow-sm rounded-3 ms-3">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill">
+                  Perubahan Akun
+                </span>
+                <small class="text-muted"><i class="bi bi-clock me-1"></i>2 Jam yang lalu</small>
+              </div>
+              <h6 class="fw-bold mb-1">Kata Sandi Diperbarui</h6>
+              <p class="text-muted mb-0 small">Sandi akun diubah dari perangkat seluler (Android / Chrome).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3: Info Standar -->
+        <div class="timeline-item">
+          <div class="timeline-badge bg-primary text-white shadow-sm">
+            <i class="bi bi-info-lg"></i>
+          </div>
+          <div class="card border-0 shadow-sm rounded-3 ms-3">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill">
+                  Sesi Masuk
+                </span>
+                <small class="text-muted"><i class="bi bi-clock me-1"></i>Kemarin, 14:30 WIB</small>
+              </div>
+              <h6 class="fw-bold mb-1">Login Berhasil</h6>
+              <p class="text-muted mb-0 small">Pengguna masuk dari IP Address: 182.1.22.89</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- End Timeline -->
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Close</button>
+  </div>
+</ng-template>

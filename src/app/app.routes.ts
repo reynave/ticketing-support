@@ -14,6 +14,7 @@ import { UserListComponent } from './features/user/user-list/user-list.component
 import { UserDetailComponent } from './features/user/user-detail/user-detail.component';
 import { UserLoginHistoryListComponent } from './features/user-login-history/user-login-history-list/user-login-history-list.component';
 import { TicketBalanceHistoryListComponent } from './features/ticket-balance-history/ticket-balance-history-list/ticket-balance-history-list.component';
+import { TicketHistoryListComponent } from './features/ticket-history/ticket-history-list/ticket-history-list.component';
 import { ProjectListComponent } from './features/project/project-list/project-list.component';
 import { ProjectDetailComponent } from './features/project/project-detail/project-detail.component';
 import { TaskListComponent } from './features/task/task-list/task-list.component';
@@ -67,6 +68,10 @@ export const routes: Routes = [
 			{
 				path: 'ticket-balance-history',
 				component: TicketBalanceHistoryListComponent,
+			},
+			{
+				path: 'ticket-history',
+				component: TicketHistoryListComponent,
 			},
 			{
 				path: 'users/:id',
