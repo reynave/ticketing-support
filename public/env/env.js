@@ -1,4 +1,4 @@
-const apiBaseUrl = 'https://crm.co.id/api-dev/';
+const apiBaseUrl = 'https://crm.co.id/api-dev';
 const production = false;
 
 /**
