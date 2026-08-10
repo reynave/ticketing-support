@@ -146,6 +146,7 @@ export class MasterTicketCategoriesComponent {
       parentId: Number(this.formModel.parentId),
       weight: Number(this.formModel.weight),
       status: Number(this.formModel.status),
+      sorting : 0,
     };
 
     this.saving = true;

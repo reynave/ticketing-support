@@ -42,7 +42,6 @@
           [disabled]="loadingParents"
         >
           <option value="">All</option>
-          <option value="0">Root Only</option>
           @for (parent of parentOptions; track trackById($index, parent)) {
           <option [value]="parent.id">{{ parent.name }}</option>
           }

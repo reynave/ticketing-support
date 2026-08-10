@@ -81,7 +81,15 @@ active = 1;
   savingTicketBalance = false;
   ticketBalanceError = '';
   ticketBalanceForm: TicketBalanceFormModel = this.defaultTicketBalanceForm();
- 
+  dataTemplate: { name: string; description: string; version: string } = {
+    name: '',
+    description: '',
+    version: '',
+  };
+  templateSaving = false;
+  templateModalRef: NgbModalRef | null = null;
+  templateError = '';
+
 
   ngOnInit(): void {
     this.projectId = String(this.route.snapshot.paramMap.get('id') || '').trim();
@@ -349,8 +357,65 @@ active = 1;
     });
   }
 
-  back(){
+  back(): void {
     history.back();
+  }
+
+  convertToTemplate(content: TemplateRef<unknown>): void {
+    const today = new Date();
+    const version = today.getFullYear()  + String(today.getMonth() + 1).padStart(2, '0')  + String(today.getDate()).padStart(2, '0');
+    this.dataTemplate = {
+      name:  '',
+      description: this.project?.description || '',
+      version: version,
+    };
+    this.templateError = '';
+    this.templateModalRef = this.modalService.open(content, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+  }
+
+  closeTemplateModal(): void {
+    this.templateModalRef?.close();
+    this.templateModalRef = null;
+    this.templateError = '';
+  }
+
+  submitTemplate(form: NgForm): void {
+    if (form.invalid || this.templateSaving || !this.projectId) {
+      return;
+    }
+
+    const payload = {
+      name: this.dataTemplate.name.trim(),
+      description: this.dataTemplate.description.trim(),
+      version: this.dataTemplate.version.trim(),
+      tempateType: 'project',
+      json: JSON.stringify({
+        projectId: this.projectId,
+        projectName: this.project?.name || '',
+        project: this.project,
+      }),
+      presence: 1,
+    };
+
+    this.templateSaving = true;
+    this.templateError = '';
+
+    this.apiService.post('/template', payload).subscribe({
+      next: (response) => {
+        this.templateSaving = false;
+        this.closeTemplateModal();
+        this.message = response?.message || 'Template created.';
+        this.errorMessage = '';
+      },
+      error: (error) => {
+        this.templateSaving = false;
+        this.templateError = error?.error?.message || 'Failed to create template.';
+      },
+    });
   }
 
   openTicketBalanceModal(): void {
@@ -639,4 +704,5 @@ active = 1;
       },
     });
   }
+
 }

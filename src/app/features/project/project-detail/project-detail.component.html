@@ -1,13 +1,51 @@
 <div class="container py-3 project-detail-page" *ngIf="loading === false">
   <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <div>
-      <h5 class="fw-bold mb-0"> Project Detail</h5>
+      <h5 class="fw-bold mb-0">Project Detail</h5>
       <p class="text-muted small mb-0">Detail dan edit project dari endpoint standalone project master.</p>
     </div>
-    <a class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</a>
 
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-dark btn-sm" (click)="convertToTemplate(modalTemplate)">Convert to <b>Template</b></button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</button>
+    </div>
   </div>
 
+  <ng-template #modalTemplate let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Convert Project to Template</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <form #templateForm="ngForm" (ngSubmit)="submitTemplate(templateForm)">
+      <div class="modal-body">
+        @if (templateError) {
+        <div class="alert alert-danger py-2 mb-3">{{ templateError }}</div>
+        }
+
+        <div class="alert alert-warning py-2 mb-3">
+          <strong>Warning:</strong> This action will create a new template based on the current project data. Please
+          ensure that you have reviewed the project details before proceeding.
+        </div>
+
+        <label class="form-label" for="template-name">Template Name <span class="text-danger">*</span></label>
+        <input type="text" id="template-name" class="form-control mb-2" name="templateName" required
+          placeholder="Enter template name" [(ngModel)]="dataTemplate.name" />
+
+        <label class="form-label" for="template-description">Description</label>
+        <input type="text" id="template-description" class="form-control mb-2" name="templateDescription"
+          placeholder="Enter template description" [(ngModel)]="dataTemplate.description" />
+
+        <label class="form-label" for="template-version">Version <span class="text-danger">*</span></label>
+        <input type="text" id="template-version" class="form-control mb-2" name="templateVersion" required
+          placeholder="Enter template version" [(ngModel)]="dataTemplate.version" />
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel click')">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="templateSaving || templateForm.invalid">{{ templateSaving ? 'Saving...' : 'Confirm' }}</button>
+      </div>
+    </form>
+  </ng-template>
   @if (message) {
   <div class="alert alert-success py-2 mb-3">{{ message }}</div>
   }
@@ -150,9 +188,9 @@
             <label class="form-label small fw-semibold" for="detail-project-start-date">Start Date <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="detail-project-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
+              <input id="detail-project-start-date" class="form-control form-control-sm" type="text" name="startDate" ngbDatepicker
                 #startDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
-              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()" type="button"
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()" type="button"
                 [disabled]="formMode === 'view'"></button>
             </div>
           </div>
@@ -161,9 +199,9 @@
             <label class="form-label small fw-semibold" for="detail-project-end-date">End Date <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="detail-project-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
+              <input id="detail-project-end-date" class="form-control form-control-sm" type="text" name="endDate" ngbDatepicker
                 #endDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
-              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()" type="button"
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()" type="button"
                 [disabled]="formMode === 'view'"></button>
             </div>
           </div>

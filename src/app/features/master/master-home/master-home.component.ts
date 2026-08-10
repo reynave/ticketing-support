@@ -18,6 +18,7 @@ export class MasterHomeComponent {
     { key: 'project-billeable', label: 'Project Billeable' },
     { key: 'ticket-categories', label: 'Ticket Categories', route: '/master-ticket-categories' },
     { key: 'project-categories', label: 'Project Categories' },
+    { key: 'template', label: 'Template', route: '/master-template' },
     { key: 'user-auth-level', label: 'User Auth Level' },
     { key: 'user-type', label: 'User Type' },
     { key: 'global-setting', label: 'Global Setting' },

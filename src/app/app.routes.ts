@@ -16,7 +16,10 @@ import { UserLoginHistoryListComponent } from './features/user-login-history/use
 import { TicketBalanceHistoryListComponent } from './features/ticket-balance-history/ticket-balance-history-list/ticket-balance-history-list.component';
 import { TicketHistoryListComponent } from './features/ticket-history/ticket-history-list/ticket-history-list.component';
 import { ProjectListComponent } from './features/project/project-list/project-list.component';
+import { ProjectCreateComponent } from './features/project/project-create/project-create.component';
 import { ProjectDetailComponent } from './features/project/project-detail/project-detail.component';
+import { MasterTemplateComponent } from './features/master/master-template/master-template.component';
+import { MasterTemplateDetailComponent } from './features/master/master-template/master-template-detail/master-template-detail.component';
 import { TaskListComponent } from './features/task/task-list/task-list.component';
 import { TaskDetailComponent } from './features/task/task-detail/task-detail.component';
 import { CaseListComponent } from './features/cases/case-list/case-list.component';
@@ -82,6 +85,10 @@ export const routes: Routes = [
 				component: ProjectListComponent,
 			},
 			{
+				path: 'project/create',
+				component: ProjectCreateComponent,
+			},
+			{
 				path: 'project/:id',
 				component: ProjectDetailComponent,
 			},
@@ -125,6 +132,14 @@ export const routes: Routes = [
 			{
 				path: 'master-product/:id',
 				component: MasterProductDetailComponent,
+			},
+			{
+				path: 'master-template',
+				component: MasterTemplateComponent,
+			},
+			{
+				path: 'master-template/:id',
+				component: MasterTemplateDetailComponent,
 			},
 			 
 			{

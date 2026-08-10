@@ -72,6 +72,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'category',
       route: '/master-ticket-categories',
     },
+
+    { key: 'template', label: 'Template', icon: 'description', route: '/master-template' },
    
     { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },
     //{ key: 'user-type', label: 'User Type', icon: 'groups' },

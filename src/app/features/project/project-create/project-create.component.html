@@ -1,0 +1,287 @@
+<div class="container py-3">
+   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+         <div class="page-title">New Project</div>
+         <div class="page-subtitle">Create a new project and assign team members.</div>
+      </div>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back</button>
+   </div>
+
+   @if (errorMessage) {
+   <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+   }
+
+   <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
+      <div class="card border-0 shadow-sm">
+         <div class="card-body">
+            @if (loadingOptions) {
+            <div class="text-muted small mb-3">Loading reference data...</div>
+            }
+
+            <div class="table-responsive">
+               <table class="table table-borderless table-sm mb-0">
+                  <thead>
+                     <tr>
+                        <th class="align-middle"><label class="form-label mb-0">Template Master</label></th>
+                        <th>
+                           <div class="row g-1">
+                              <div class="col-8"> 
+                                 <input id="master-project-template" class="form-control form-control-sm "
+                                    name="templateMaster" (click)="loadTemplateMaster(templateMasterContent)" [(ngModel)]="formModel.templateMaster" readonly
+                                    placeholder="Ex: TMP-001" />
+                              </div>
+                              <div class="col-2">
+                                 <button type="button" class="btn btn-sm  w-100 btn-primary"
+                                    (click)="loadTemplateMaster(templateMasterContent)" [disabled]="loadingTemplateMaster">
+                                   Open
+                                 </button>
+                              </div>
+                               <div class="col-2">
+                                 <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+                                    (click)="reload()" [disabled]="loadingTemplateMaster">
+                                    Reset
+                                 </button>
+                              </div>
+                           </div>
+                        </th>
+                     </tr>
+                     <ng-template #templateMasterContent>
+                        <div class="modal-header">
+                           <strong class="modal-title">Master Template</strong>
+                           <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismissAll()"></button>
+                        </div>
+                        <div class="modal-body">
+                           {{listOfTemplateMaster |json}}
+                            <!-- tolong buatkan table select untuk listOfTemplateMaster--> 
+                           <table class="table table-sm">
+                              <thead>
+                                 <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Version</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 @for (template of listOfTemplateMaster; track trackById($index, template); let i = $index) {
+                                 <tr style="cursor: pointer;" >
+                                    <td class="align-top">{{ i + 1 }}</td>
+                                    <td>{{ template.name }}</td>
+                                    <td>{{ template.description }}</td>
+                                    <td class="align-top text-center"><code>{{ template.version }}</code></td>
+                                 </tr>
+                                 }
+                              </tbody>
+                           </table>
+                        </div>
+                     </ng-template>
+                  </thead>
+                  <tbody>
+
+
+
+                     <tr>
+                        <td class="align-middle" style="width:30%">
+                           <label class="form-label mb-0">Project Name <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <input id="master-project-name" class="form-control form-control-sm" name="name"
+                              [(ngModel)]="formModel.name" placeholder="Enter project name" required />
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Client <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <select id="master-project-client" class="form-select form-select-sm" name="clientId"
+                              [(ngModel)]="formModel.clientId" required>
+                              <option value="">Select client</option>
+                              @for (client of clients; track trackById($index, client)) {
+                              <option [value]="client.id">{{ client.name }}</option>
+                              }
+                           </select>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Project Type <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <select id="master-project-type" class="form-select form-select-sm" name="projectTypeId"
+                              [(ngModel)]="formModel.projectTypeId" required>
+                              <option value="0">Select type</option>
+                              @for (projectType of projectTypes; track trackById($index, projectType)) {
+                              <option [ngValue]="projectType.id">{{ projectType.name }}</option>
+                              }
+                           </select>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Group Phase <span class="text-danger">*</span></label>
+                           <div><small><em>Ticket Parent categories</em></small></div>
+                        </td>
+                        <td>
+                           <select id="master-project-group-phase" class="form-select form-select-sm"
+                              name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" required>
+                              <option value="0">Select group phase</option>
+                              @for (ticketCategory of ticketCategories; track trackById($index,
+                              ticketCategory)) {
+                              <option [ngValue]="ticketCategory.id">{{ ticketCategory.name }}</option>
+                              }
+                           </select>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Billeable <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <select id="master-project-billeable" class="form-select form-select-sm"
+                              name="projectBilleableId" [(ngModel)]="formModel.projectBilleableId" required>
+                              <option value="0">Select billeable</option>
+                              @for (projectBilleable of projectBilleables; track trackById($index,
+                              projectBilleable)) {
+                              <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
+                              }
+                           </select>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Product <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <select id="master-project-product" class="form-select form-select-sm" name="productId"
+                              [(ngModel)]="formModel.productId" required>
+                              <option value="0">Select product</option>
+                              @for (product of products; track trackById($index, product)) {
+                              <option [ngValue]="product.id">{{ product.name }}</option>
+                              }
+                           </select>
+                        </td>
+                     </tr>
+
+
+                     <tr>
+                        <td class="align-middle"><label class="form-label mb-0">Start Date</label></td>
+                        <td>
+                           <div class="input-group">
+                              <input id="master-project-start-date" class="form-control form-control-sm" type="text"
+                                 name="startDate" ngbDatepicker #startDatePicker="ngbDatepicker" readonly
+                                 [(ngModel)]="formModel.startDate" required />
+                              <button class="btn btn-outline-secondary btn-sm bi bi-calendar3"
+                                 (click)="startDatePicker.toggle()" type="button"></button>
+                           </div>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle"><label class="form-label mb-0">End Date</label></td>
+                        <td>
+                           <div class="input-group">
+                              <input id="master-project-end-date" class="form-control form-control-sm" type="text"
+                                 name="endDate" ngbDatepicker #endDatePicker="ngbDatepicker" readonly
+                                 [(ngModel)]="formModel.endDate" required />
+                              <button class="btn btn-outline-secondary btn-sm bi bi-calendar3"
+                                 (click)="endDatePicker.toggle()" type="button"></button>
+                           </div>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle"><label class="form-label mb-0">Status</label></td>
+                        <td>
+                           <select id="master-project-status" class="form-select form-select-sm" name="status"
+                              [(ngModel)]="formModel.status" required disabled>
+                              <option [ngValue]="1">Active</option>
+                           </select>
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-middle">
+                           <label class="form-label mb-0">Project Manager <span class="text-danger">*</span></label>
+                        </td>
+                        <td>
+                           <input id="master-project-user-manager" class="form-control form-control-sm bg-light"
+                              type="text" name="userManager" readonly [(ngModel)]="formModel.userManager" required />
+                        </td>
+                     </tr>
+
+                     <tr>
+                        <td class="align-top"><label class="form-label mb-0">Users as Project's Team</label>
+                        </td>
+                        <td>
+                           <div
+                              style="overflow-y: auto; max-height: 200px; border: 1px solid #dee2e6; border-radius: 0.25rem;">
+                              <table class="table table-sm table-hover align-middle p-0">
+                                 <thead class="sticky-top">
+                                    <tr>
+                                       <th class="text-center"></th>
+                                       <th>Name [ID]</th>
+                                       <th>Auth Level</th>
+                                       <th class="text-center">Manager</th>
+                                    </tr>
+                                    <tr>
+                                       <td colspan="3">
+                                          <input id="master-project-user-search" class="form-control form-control-sm"
+                                             type="text" placeholder="Search user by name  and Enter for search"
+                                             name="userSearchKeyword" [(ngModel)]="userSearchKeyword"
+                                             (change)="searchUsers()" />
+                                       </td>
+                                       <td>
+                                          <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+                                             (click)="userSearchKeyword=''; searchUsers()">Clear</button>
+
+                                       </td>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    @for (user of users; track user.id; let i = $index) {
+                                    <tr>
+                                       <td class="text-center" (click)="user.checked = !user.checked">
+                                          @if (user.checked !== true) {
+                                          <i class="bi bi-square"></i>
+                                          } @else {
+                                          <i class="bi bi-check-square-fill"></i>
+                                          }
+                                       </td>
+
+                                       <td>{{ user.name }} [{{ user.id }}]</td>
+                                       <td>{{ user.userAuthLevel }}</td>
+
+                                       <td class="text-center" (click)="toggleManager(i)">
+                                          @if (user.asManager !== true) {
+                                          <i class="bi bi-circle"></i>
+                                          } @else {
+                                          <i class="bi bi-check-circle-fill"></i>
+                                          }
+                                       </td>
+                                    </tr>
+                                    }
+                                 </tbody>
+                              </table>
+                           </div>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+         <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
+         <button type="submit" class="btn btn-primary" [disabled]="projectFormNg.invalid || saving || loadingOptions">
+            {{ saving ? 'Saving...' : 'Save Project' }}
+         </button>
+      </div>
+   </form>
+</div>
