@@ -1,5 +1,5 @@
 declare var apiBaseUrl: string;
-declare var production: boolean;
+declare var production: any;
 export const environment = {
 	apiBaseUrl: apiBaseUrl,
 	production: production || true,
