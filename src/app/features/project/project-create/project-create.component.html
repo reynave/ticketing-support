@@ -25,61 +25,30 @@
                         <th class="align-middle"><label class="form-label mb-0">Template Master</label></th>
                         <th>
                            <div class="row g-1">
-                              <div class="col-8"> 
+                              <div class="col-8">
                                  <input id="master-project-template" class="form-control form-control-sm "
-                                    name="templateMaster" (click)="loadTemplateMaster(templateMasterContent)" [(ngModel)]="formModel.templateMaster" readonly
-                                    placeholder="Ex: TMP-001" />
+                                    name="templateName" (click)="loadTemplateMaster(templateMasterContent)"
+                                    [(ngModel)]="templateName" readonly placeholder="Ex: TMP-001" />
                               </div>
                               <div class="col-2">
                                  <button type="button" class="btn btn-sm  w-100 btn-primary"
-                                    (click)="loadTemplateMaster(templateMasterContent)" [disabled]="loadingTemplateMaster">
-                                   Open
+                                    (click)="loadTemplateMaster(templateMasterContent)">
+                                    Open
                                  </button>
                               </div>
-                               <div class="col-2">
+                              <div class="col-2">
                                  <button type="button" class="btn btn-sm btn-outline-secondary w-100"
-                                    (click)="reload()" [disabled]="loadingTemplateMaster">
+                                    (click)="reload()">
                                     Reset
                                  </button>
                               </div>
                            </div>
                         </th>
                      </tr>
-                     <ng-template #templateMasterContent>
-                        <div class="modal-header">
-                           <strong class="modal-title">Master Template</strong>
-                           <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismissAll()"></button>
-                        </div>
-                        <div class="modal-body">
-                           {{listOfTemplateMaster |json}}
-                            <!-- tolong buatkan table select untuk listOfTemplateMaster--> 
-                           <table class="table table-sm">
-                              <thead>
-                                 <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Version</th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 @for (template of listOfTemplateMaster; track trackById($index, template); let i = $index) {
-                                 <tr style="cursor: pointer;" >
-                                    <td class="align-top">{{ i + 1 }}</td>
-                                    <td>{{ template.name }}</td>
-                                    <td>{{ template.description }}</td>
-                                    <td class="align-top text-center"><code>{{ template.version }}</code></td>
-                                 </tr>
-                                 }
-                              </tbody>
-                           </table>
-                        </div>
-                     </ng-template>
+
                   </thead>
                   <tbody>
-
-
-
+ 
                      <tr>
                         <td class="align-middle" style="width:30%">
                            <label class="form-label mb-0">Project Name <span class="text-danger">*</span></label>
@@ -277,6 +246,40 @@
          </div>
       </div>
 
+      <ng-template #templateMasterContent>
+         <div class="modal-header">
+            <strong class="modal-title">Master Template</strong>
+            <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismissAll()"></button>
+         </div>
+         <div class="modal-body">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+               <table class="table table-sm table-hover">
+                  <thead class="sticky-top ">
+                     <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th class="text-center">Version</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     @for (template of listOfTemplateMaster; track trackById($index, template); let i = $index) {
+                     <tr style="cursor: pointer;" (click)="selectTemplateMaster(template)">
+                        <td class="align-top">{{ i + 1 }}</td>
+                        <td>{{ template.name }}
+
+                           <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">
+                              {{ template.description }}
+                           </div>
+                        </td>
+
+                        <td class="align-top text-center"><code>{{ template.version }}</code></td>
+                     </tr>
+                     }
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </ng-template>
       <div class="d-flex justify-content-end gap-2 mt-3">
          <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
          <button type="submit" class="btn btn-primary" [disabled]="projectFormNg.invalid || saving || loadingOptions">

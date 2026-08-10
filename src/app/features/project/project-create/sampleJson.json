@@ -1,0 +1,180 @@
+{
+  "projectId": "PRJ-FA50EC5D",
+  "projectName": "Project Fitfirst gold",
+  "project": {
+    "id": "PRJ-FA50EC5D",
+    "name": "Project Fitfirst gold",
+    "projectTypeId": 3,
+    "projectBilleableId": 1,
+    "productId": 1,
+    "ticketCategoriesParentId": 10,
+    "clientId": "351",
+    "startDate": "2026-07-13",
+    "endDate": "2026-10-30",
+    "status": 1,
+    "templateMaster": "0",
+    "presence": 1,
+    "inputDate": "2026-07-13 16:50:13",
+    "inputBy": "USR-ADMIN",
+    "updateDate": "2026-08-06 13:25:09",
+    "updateBy": "USR-ADMIN",
+    "clientName": "PT XYZ Jp.co",
+    "projectTypeName": "Software Support Fixed Cost",
+    "projectBilleableName": "Chrageable",
+    "productName": "Acumatica ERP",
+    "ticketBased": 0,
+    "users": [
+      {
+        "id": "USR-12788040",
+        "name": "Internal Tester",
+        "email": "781164843@client.local",
+        "userAuthLevel": "Administrator",
+        "division": "",
+        "position": "",
+        "userAuthLevelId": 1,
+        "userTypeId": 1,
+        "asManager": 0,
+        "checked": 1
+      },
+      {
+        "id": "USR-405F00F4",
+        "name": "Internal Tester",
+        "email": "1781164861@client.local",
+        "userAuthLevel": "Administrator",
+        "division": "",
+        "position": "",
+        "userAuthLevelId": 1,
+        "userTypeId": 1,
+        "asManager": 0,
+        "checked": 1
+      },
+      {
+        "id": "USR-ADMIN",
+        "name": "System Admin",
+        "email": "admin@thinktank.local",
+        "userAuthLevel": "Administrator",
+        "division": "",
+        "position": "",
+        "userAuthLevelId": 1,
+        "userTypeId": 1,
+        "asManager": 1,
+        "checked": 1
+      },
+      {
+        "id": "USR-62199DD8",
+        "name": "Temp Updated User",
+        "email": "temp.user.crud@thinktank.local",
+        "userAuthLevel": "ThinkTank Admin",
+        "division": "",
+        "position": "",
+        "userAuthLevelId": 2,
+        "userTypeId": 1,
+        "asManager": 0,
+        "checked": 0
+      },
+      {
+        "id": "USR-8C76A791",
+        "name": "baba cdcd",
+        "email": "cso12333@email.com",
+        "userAuthLevel": "ThinkTank Admin",
+        "division": "",
+        "position": "",
+        "userAuthLevelId": 2,
+        "userTypeId": 1,
+        "asManager": 0,
+        "checked": 0
+      },
+      {
+        "id": "USR-E5A4B811",
+        "name": "abb abb",
+        "email": "anggie123@crm.co.id",
+        "userAuthLevel": "Administrator",
+        "division": "Division 1",
+        "position": "Position 2",
+        "userAuthLevelId": 1,
+        "userTypeId": 1,
+        "asManager": 0,
+        "checked": 0
+      }
+    ],
+    "ticketCategories": [
+      {
+        "id": 114,
+        "name": "abcds"
+      },
+      {
+        "id": 100,
+        "name": "Blueprint"
+      },
+      {
+        "id": 102,
+        "name": "Configuration"
+      },
+      {
+        "id": 105,
+        "name": "Deployement"
+      },
+      {
+        "id": 106,
+        "name": "GO LIVE"
+      },
+      {
+        "id": 103,
+        "name": "SIT & UAT"
+      },
+      {
+        "id": 104,
+        "name": "Training"
+      }
+    ],
+    "ticketBalance": {
+      "ticketIn": "2146",
+      "ticketOut": "30",
+      "balance": "2116"
+    },
+    "contacts": [
+      {
+        "id": 46,
+        "userId": "DEMO1",
+        "name": "Client 200 Demo",
+        "phone": "021111111",
+        "email": "client2.demo@thinktank.local",
+        "projectId": "PRJ-FA50EC5D",
+        "division": "Division",
+        "position": "Position"
+      },
+      {
+        "id": 47,
+        "userId": "DEMO2",
+        "name": "Client 300 Demo",
+        "phone": "021111111",
+        "email": "client3.demo@thinktank.local",
+        "projectId": "PRJ-FA50EC5D",
+        "division": "",
+        "position": ""
+      },
+      {
+        "id": 52,
+        "userId": "USR-9A0C9A66",
+        "name": "Abang Abang",
+        "phone": "234234",
+        "email": "ag@jagoan.com",
+        "projectId": "PRJ-FA50EC5D",
+        "division": "Division",
+        "position": "Position"
+      }
+    ],
+    "modules": [
+      {
+        "productId": 1,
+        "id": 4,
+        "name": "Module AR"
+      },
+      {
+        "productId": 1,
+        "id": 5,
+        "name": "Module Fix Asset"
+      }
+    ]
+  }
+}

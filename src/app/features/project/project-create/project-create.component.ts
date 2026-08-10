@@ -30,7 +30,7 @@ interface ProjectFormModel {
 export class ProjectCreateComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
-      modalService = inject(NgbModal);
+  modalService = inject(NgbModal);
   clients: any[] = [];
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
@@ -45,9 +45,9 @@ export class ProjectCreateComponent {
   userSearchKeyword = '';
 
   formModel: ProjectFormModel = this.defaultForm();
-loadingTemplateMaster : boolean = false;
-
-listOfTemplateMaster: any[] = [];
+  loadingTemplateMaster: boolean = false;
+  templateName: string = '';
+  listOfTemplateMaster: any[] = [];
   constructor() {
     void this.loadOptions();
   }
@@ -56,23 +56,50 @@ listOfTemplateMaster: any[] = [];
     this.loadingOptions = true;
 
     try {
-      const [clientResponse, projectTypeResponse, projectBilleableResponse, 
-        productResponse, userResponse, ticketCategoriesResponse, templateMasterResponse] = await Promise.all([
+      const [
+        clientResponse,
+        projectTypeResponse,
+        projectBilleableResponse,
+        productResponse,
+        userResponse,
+        ticketCategoriesResponse,
+        templateMasterResponse,
+      ] = await Promise.all([
         firstValueFrom(this.apiService.get('/client')),
-        firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
-        firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
-        firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })),
+        firstValueFrom(
+          this.apiService.get('/master/project-type', { status: 1 }),
+        ),
+        firstValueFrom(
+          this.apiService.get('/master/project-billeable', { status: 1 }),
+        ),
+        firstValueFrom(
+          this.apiService.get('/product-master', { status: 1, parentId: 0 }),
+        ),
         firstValueFrom(this.apiService.get('/user', { status: 1 })),
-        firstValueFrom(this.apiService.get('/ticket-categories', { status: 1, parentId: 0 })),
+        firstValueFrom(
+          this.apiService.get('/ticket-categories', { status: 1, parentId: 0 }),
+        ),
         firstValueFrom(this.apiService.get('/template')),
       ]);
 
-      this.clients = Array.isArray(clientResponse?.data) ? clientResponse.data : [];
-      this.projectTypes = Array.isArray(projectTypeResponse?.data) ? projectTypeResponse.data : [];
-      this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
-      this.products = Array.isArray(productResponse?.data) ? productResponse.data : [];
-      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
-      this.listOfTemplateMaster = Array.isArray(templateMasterResponse?.data) ? templateMasterResponse.data : [];
+      this.clients = Array.isArray(clientResponse?.data)
+        ? clientResponse.data
+        : [];
+      this.projectTypes = Array.isArray(projectTypeResponse?.data)
+        ? projectTypeResponse.data
+        : [];
+      this.projectBilleables = Array.isArray(projectBilleableResponse?.data)
+        ? projectBilleableResponse.data
+        : [];
+      this.products = Array.isArray(productResponse?.data)
+        ? productResponse.data
+        : [];
+      this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
+        ? ticketCategoriesResponse.data
+        : [];
+      this.listOfTemplateMaster = Array.isArray(templateMasterResponse?.data)
+        ? templateMasterResponse.data
+        : [];
 
       const users = Array.isArray(userResponse?.data) ? userResponse.data : [];
       this.allUsers = users.map((user: any) => ({
@@ -91,13 +118,13 @@ listOfTemplateMaster: any[] = [];
       this.ticketCategories = [];
       this.allUsers = [];
       this.users = [];
-        this.listOfTemplateMaster = [];
+      this.listOfTemplateMaster = [];
     } finally {
       this.loadingOptions = false;
     }
   }
 
-  reload(){
+  reload() {
     location.reload();
   }
   toggleManager(index: number): void {
@@ -145,14 +172,10 @@ listOfTemplateMaster: any[] = [];
       startDate: this.formModel.startDate,
       endDate: this.formModel.endDate,
       status: Number(this.formModel.status),
-      templateMaster: '',
+      templateMaster: this.formModel.templateMaster.trim(),
       projectUsers: this.allUsers,
       ticketCategoriesParentId: Number(this.formModel.ticketCategoriesParentId),
     };
-
-    if (this.formModel.id.trim()) {
-      payload.id = this.formModel.id.trim();
-    }
 
     this.saving = true;
     this.errorMessage = '';
@@ -163,15 +186,19 @@ listOfTemplateMaster: any[] = [];
         const id = String(response?.data?.id || '').trim();
 
         if (id) {
-          void this.router.navigate(['/project', id]);
+          this.router.navigate(['/projects']).then(() => {
+            void this.router.navigate(['/project', id]);
+          });
           return;
         }
 
-        this.errorMessage = response?.message || 'Failed to save project master data.';
+        this.errorMessage =
+          response?.message || 'Failed to save project master data.';
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to save project master data.';
+        this.errorMessage =
+          error?.error?.message || 'Failed to save project master data.';
       },
     });
   }
@@ -216,5 +243,140 @@ listOfTemplateMaster: any[] = [];
   loadTemplateMaster(content: any): void {
     this.modalService.open(content, { size: 'xl' });
     this.loadingTemplateMaster = true;
+  }
+
+  selectTemplateMaster(template: any): void {
+    if (!template) {
+      return;
+    }
+
+    this.templateName = template.name;
+    this.formModel.templateMaster = String(template.id);
+
+    this.apiService.get(`/template/${template.id}`).subscribe({
+      next: (response) => {
+        const templateDetail = response?.data ?? response;
+        const parsedTemplate = this.parseTemplatePayload(
+          templateDetail,
+          template,
+        );
+
+        this.formModel = {
+          ...this.formModel,
+          ...parsedTemplate.formModel,
+        };
+
+        this.loadingTemplateMaster = false;
+        this.modalService.dismissAll();
+      },
+      error: (error) => {
+        console.error('Error loading template detail:', error);
+        this.loadingTemplateMaster = false;
+      },
+    });
+  }
+
+  private parseTemplatePayload(
+    templateDetail: any,
+    template: any,
+  ): {
+    formModel: Partial<ProjectFormModel>;
+  } {
+    const rawJson = templateDetail?.json ?? templateDetail;
+    const parsedJson = this.tryParseJson(rawJson);
+    const projectData = parsedJson?.project ?? parsedJson;
+
+    const users = Array.isArray(projectData?.users) ? projectData.users : [];
+    const managerUser = users.find((user: any) => Boolean(user?.asManager));
+
+    this.allUsers = users.map((user: any) => ({
+      id: user.id,
+      name: String(user.name || ''),
+      userAuthLevel: user.userAuthLevel || '',
+      checked: Boolean(user.checked || user.asManager),
+      asManager: Boolean(user.asManager),
+    }));
+    this.users = [...this.allUsers];
+
+    return {
+      formModel: {
+        id: String(projectData?.id ?? this.formModel.id),
+        name: String(projectData?.name ?? this.formModel.name),
+        projectTypeId: Number(
+          projectData?.projectTypeId ?? this.formModel.projectTypeId,
+        ),
+        projectBilleableId: Number(
+          projectData?.projectBilleableId ?? this.formModel.projectBilleableId,
+        ),
+        productId: Number(projectData?.productId ?? this.formModel.productId),
+        clientId: String(projectData?.clientId ?? this.formModel.clientId),
+        startDate:
+          this.parseDate(projectData?.startDate) ?? this.formModel.startDate,
+        endDate: this.parseDate(projectData?.endDate) ?? this.formModel.endDate,
+        status: Number(projectData?.status ?? this.formModel.status),
+        templateMaster: String(template?.id ?? this.formModel.templateMaster),
+        userManager: String(
+          managerUser?.name ??
+            projectData?.userManager ??
+            this.formModel.userManager,
+        ),
+        ticketCategoriesParentId: Number(
+          projectData?.ticketCategoriesParentId ??
+            this.formModel.ticketCategoriesParentId,
+        ),
+      },
+    };
+  }
+
+  private tryParseJson(value: any): any {
+    if (!value) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    }
+
+    return value;
+  }
+
+  private parseDate(
+    value: any,
+  ): { year: number; month: number; day: number } | null {
+    if (!value) {
+      return null;
+    }
+
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      'year' in value &&
+      'month' in value &&
+      'day' in value
+    ) {
+      return {
+        year: Number(value.year),
+        month: Number(value.month),
+        day: Number(value.day),
+      };
+    }
+
+    if (typeof value === 'string') {
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+      if (match) {
+        return {
+          year: Number(match[1]),
+          month: Number(match[2]),
+          day: Number(match[3]),
+        };
+      }
+    }
+
+    return null;
   }
 }

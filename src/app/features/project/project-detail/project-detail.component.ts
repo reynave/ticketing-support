@@ -387,6 +387,10 @@ active = 1;
     if (form.invalid || this.templateSaving || !this.projectId) {
       return;
     }
+    this.project['task'] = this.task;
+    this.project['cases'] = this.cases;
+    this.project['cr'] = this.cr;
+    this.project['contacts'] = this.contacts;
 
     const payload = {
       name: this.dataTemplate.name.trim(),
@@ -403,7 +407,7 @@ active = 1;
 
     this.templateSaving = true;
     this.templateError = '';
-
+    console.log('Submitting template payload:', this.project);
     this.apiService.post('/template', payload).subscribe({
       next: (response) => {
         this.templateSaving = false;
