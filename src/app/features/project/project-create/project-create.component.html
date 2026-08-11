@@ -12,7 +12,7 @@
    }
 
    <form #projectFormNg="ngForm" (ngSubmit)="saveProject(projectFormNg)">
-      <div class="card border-0 shadow-sm">
+      <div class="card border-0 shadow-sm mb-2">
          <div class="card-body">
             @if (loadingOptions) {
             <div class="text-muted small mb-3">Loading reference data...</div>
@@ -48,7 +48,7 @@
 
                   </thead>
                   <tbody>
- 
+
                      <tr>
                         <td class="align-middle" style="width:30%">
                            <label class="form-label mb-0">Project Name <span class="text-danger">*</span></label>
@@ -244,6 +244,142 @@
                </table>
             </div>
          </div>
+      </div>
+
+
+
+
+      <div class="card border-0    shadow-sm mb-2" *ngIf="templateDetail">
+         <div class="card-header">
+            Details
+         </div>
+         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+            <li [ngbNavItem]="1">
+               <button ngbNavLink>TASK</button>
+               <ng-template ngbNavContent>
+                  <div class="card-body">
+                     <table class="table table-sm table-hover ">
+                        <thead class="sticky-top ">
+                           <tr>
+                              <th>TASK CATEGORY</th>
+                              <th>Title</th>
+                              <th>Assign To</th>
+                           </tr>
+                        </thead>
+                        <tbody *ngFor="let item of templateDetail.project.task ">
+                           <tr>
+                              <th>{{item.name}} ({{ item.data.length }})</th>
+                              <th colspan="2"></th>
+
+                           </tr>
+                           <tr *ngFor="let item of item.data">
+                              <Td></Td>
+                              <td>{{item.title}}</td>
+                              <td>{{item.assignToName }}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+               <button ngbNavLink>CASES</button>
+               <ng-template ngbNavContent>
+                  <div class="card-body">
+                     <table class="table table-sm table-hover ">
+                        <thead class="sticky-top ">
+                           <tr>
+                              <th>CASES CATEGORY</th>
+                              <th>Title</th>
+                              <th>Assign To</th>
+                           </tr>
+                        </thead>
+                        <tbody *ngFor="let item of templateDetail.project.cases ">
+                           <tr>
+                              <th>{{item.name}} ({{ item.data.length }})</th>
+                              <th colspan="2"></th>
+
+                           </tr>
+                           <tr *ngFor="let item of item.data">
+                              <Td></Td>
+                              <td>{{item.title}}</td>
+                              <td>{{item.assignToName }}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </ng-template>
+            </li>
+
+            <li [ngbNavItem]="3">
+               <button ngbNavLink>CR</button>
+               <ng-template ngbNavContent>
+                  <div class="card-body">
+                     <table class="table table-sm table-hover ">
+                        <thead class="sticky-top ">
+                           <tr>
+                              <th>CR CATEGORY</th>
+                              <th>Title</th>
+                              <th>Assign To</th>
+                           </tr>
+                        </thead>
+                        <tbody *ngFor="let item of templateDetail.project.cr ">
+                           <tr>
+                              <th>{{item.name}} ({{ item.data.length }})</th>
+                              <th colspan="2"></th>
+
+                           </tr>
+                           <tr *ngFor="let item of item.data">
+                              <Td></Td>
+                              <td>{{item.title}}</td>
+                              <td>{{item.assignToName }}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </ng-template>
+            </li>
+
+            <li [ngbNavItem]="4">
+               <button ngbNavLink>CONTACTS</button>
+               <ng-template ngbNavContent>
+
+
+                  <div class="card-body">
+                   
+                     <table class="table table-sm table-hover ">
+                        <thead class="sticky-top ">
+                           <tr>
+                              <th>#</th>
+                              <th>Name</th>
+                              <th>email</th>
+                              <th>phone</th>
+                              <th>division</th>
+                              <th>position</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let item of templateDetail.project.contacts ; let i = index">
+                              <td>{{ i + 1 }}</td>
+                              <td>{{item.name}}</td>
+                              <td>{{item.email}}</td>
+                              <td>{{item.phone}}</td>
+                              <td>{{item.division}}</td>
+                              <td>{{item.position}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </ng-template>
+            </li>
+         </ul>
+
+<div [ngbNavOutlet]="nav" class="mt-2"></div>
+
+
+
+
+
       </div>
 
       <ng-template #templateMasterContent>

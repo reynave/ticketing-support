@@ -56,7 +56,7 @@
             <td>{{ row.assignToName || '-' }}</td>
             <td>{{ row.inputDate | date: 'medium' }}</td>
             <td>
-              <a (click)="open(content)" class="btn btn-sm btn-outline-primary py-0">Activities</a>
+              <a [routerLink]="['/',row.ticketTypeName.toLowerCase() +'s',row.id]" routerLinkActive="router-link-active"  class="btn btn-sm btn-outline-primary py-0">Detail</a>
             </td>
           </tr>
           }

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -24,13 +24,15 @@ interface ProjectFormModel {
 @Component({
   selector: 'app-project-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbDatepickerModule],
+  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule],
+  styleUrls: ['./project-create.component.css'],
   templateUrl: './project-create.component.html',
 })
 export class ProjectCreateComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   modalService = inject(NgbModal);
+  active : number = 1;
   clients: any[] = [];
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
@@ -175,13 +177,24 @@ export class ProjectCreateComponent {
       templateMaster: this.formModel.templateMaster.trim(),
       projectUsers: this.allUsers,
       ticketCategoriesParentId: Number(this.formModel.ticketCategoriesParentId),
+      template : {
+        cases : this.templateDetail.project.cases || [],
+        tasks : this.templateDetail.project.tasks || [],
+         task : this.templateDetail.project.task || [],
+        
+        cr  : this.templateDetail.project.cr || [],
+        contacts : this.templateDetail.project.contacts || [],
+        templateId :this.formModel.templateMaster.trim(),
+      }
     };
 
-    this.saving = true;
-    this.errorMessage = '';
-
+   this.saving = true;
+  this.errorMessage = '';
+    console.log('Payload to save project:', payload);
+ 
     this.apiService.post('/project', payload).subscribe({
       next: (response) => {
+        console.log(response);
         this.saving = false;
         const id = String(response?.data?.id || '').trim();
 
@@ -200,7 +213,7 @@ export class ProjectCreateComponent {
         this.errorMessage =
           error?.error?.message || 'Failed to save project master data.';
       },
-    });
+    }); 
   }
 
   goBack(): void {
@@ -245,6 +258,7 @@ export class ProjectCreateComponent {
     this.loadingTemplateMaster = true;
   }
 
+  templateDetail : any = null;
   selectTemplateMaster(template: any): void {
     if (!template) {
       return;
@@ -255,6 +269,7 @@ export class ProjectCreateComponent {
 
     this.apiService.get(`/template/${template.id}`).subscribe({
       next: (response) => {
+
         const templateDetail = response?.data ?? response;
         const parsedTemplate = this.parseTemplatePayload(
           templateDetail,
@@ -265,6 +280,12 @@ export class ProjectCreateComponent {
           ...this.formModel,
           ...parsedTemplate.formModel,
         };
+
+
+              //  console.log('Template detail response:', response.data.json);
+        // convert json to object if it's a string
+        this.templateDetail = this.tryParseJson(response.data.json) ?? response.data.json;
+        console.log('Parsed template detail:', this.templateDetail);
 
         this.loadingTemplateMaster = false;
         this.modalService.dismissAll();

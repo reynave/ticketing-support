@@ -1,8 +1,13 @@
-<div class="container py-3">
+<div class="container ">
     <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
             <div class="page-title">Template Master</div>
             <div class="page-subtitle">Manage template records.</div>
+        </div>
+        <div>
+            <button class="btn btn-sm btn-danger" (click)="deleteSelected()" [disabled]="disabledDelete || deleting">
+                  Delete
+            </button>
         </div>
     </div>
 
@@ -21,6 +26,8 @@
             <table class="table table-sm table-hover align-middle">
                 <thead>
                     <tr>
+                  
+                        <th style="width: 50px;"></th>
                         <th>#</th>
                         <th>Name</th>
 
@@ -29,15 +36,22 @@
                 </thead>
                 <tbody>
                     @for (row of rows; track trackById($index, row) ; let i = $index) {
-                    <tr style="cursor: pointer;" (click)="goToDetail(row)">
-                        <td class="align-top">{{ i + 1 }}</td>
-                        <td>{{ row.name }}
+                    <tr style="cursor: pointer;" >
+                        
+                        <th class="align-top text-center" (click)="toggleRowChecked(row)">
+                            <i class="bi bi-square" *ngIf="!row.checked"></i>
+
+                            <i class="bi bi-check-square-fill" *ngIf="row.checked"></i>
+                            
+                        </th>
+                        <td class="align-top" (click)="goToDetail(row)">{{ i + 1 }}</td>
+                        <td (click)="goToDetail(row)">{{ row.name }}
                             <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">
                                 {{ row.description }}
                             </div>
                         </td>
 
-                        <td class="align-top text-center"><code>{{ row.version }}</code></td>
+                        <td (click)="goToDetail(row)" class="align-top text-center"><code>{{ row.version }}</code></td>
                     </tr>
                     }
                 </tbody>

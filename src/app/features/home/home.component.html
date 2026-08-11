@@ -2,7 +2,7 @@
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <div class="page-title">Home Dashboard</div>
-      <div class="page-subtitle">Ringkasan task dan case terbaru.</div>
+      <div class="page-subtitle">Your dashboard overview.</div>
     </div>
     <button type="button" class="btn btn-outline-primary btn-sm" (click)="loadDashboard()" [disabled]="loading">
       {{ loading ? 'Loading...' : 'Refresh' }}
@@ -10,8 +10,7 @@
   </div>
 
   
-<div class="alert alert-warning"><h4>Masih di kerjain ya.. belum selesai</h4></div>
-
+ 
   @if (errorMessage) {
   <div class="alert alert-danger py-2">{{ errorMessage }}</div>
   }
@@ -19,13 +18,13 @@
   <div class="row g-3 mb-3">
     <div class="col-12 col-md-6">
       <div class="stat-card h-100">
-        <div class="stat-label">Total Task Tidak Close (ticketStatusId &lt; 900)</div>
+        <div class="stat-label">Total Task not Close (ticketStatusId &lt; 900)</div>
         <div class="stat-value">{{ totalOpenTasks }}</div>
       </div>
     </div>
     <div class="col-12 col-md-6">
       <div class="stat-card h-100">
-        <div class="stat-label">Total Case Tidak Close (ticketStatusId &lt; 900)</div>
+        <div class="stat-label">Total Case not Close (ticketStatusId &lt; 900)</div>
         <div class="stat-value">{{ totalOpenCases }}</div>
       </div>
     </div>
@@ -35,8 +34,8 @@
     <div class="col-12 col-xl-6">
       <div class="stat-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="m-0">List Task (Semua)</h6>
-          <a routerLink="/tasks" class="btn btn-link btn-sm p-0">Lihat halaman task</a>
+          <h6 class="m-0">List Task (all)</h6>
+          <a routerLink="/tasks" class="btn btn-link btn-sm p-0">View task page</a>
         </div>
 
         @if (loading) {
@@ -73,8 +72,8 @@
     <div class="col-12 col-xl-6">
       <div class="stat-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="m-0">List Case (Semua)</h6>
-          <a routerLink="/cases" class="btn btn-link btn-sm p-0">Lihat halaman case</a>
+          <h6 class="m-0">List Case (all)</h6>
+          <a routerLink="/cases" class="btn btn-link btn-sm p-0">View case page</a>
         </div>
 
         @if (loading) {

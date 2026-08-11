@@ -178,10 +178,9 @@
             </select>
           </div>
 
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-6" *ngIf=" project.templateName != '' ">
             <label class="form-label small fw-semibold" for="detail-project-template">Template Master</label>
-            <input id="detail-project-template" class="form-control form-control-sm" name="templateMaster"
-              [(ngModel)]="formModel.templateMaster" [readonly]="formMode === 'view'" placeholder="Example: TMP-001" />
+            <div class="form-control form-control-sm bg-light" >{{ project.templateName }}</div>
           </div>
 
           <div class="col-12 col-md-6">

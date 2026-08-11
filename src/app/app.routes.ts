@@ -73,7 +73,7 @@ export const routes: Routes = [
 				component: TicketBalanceHistoryListComponent,
 			},
 			{
-				path: 'ticket-history',
+				path: 'ticket',
 				component: TicketHistoryListComponent,
 			},
 			{
