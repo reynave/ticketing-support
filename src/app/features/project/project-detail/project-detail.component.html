@@ -216,9 +216,15 @@
           </div>
 
           <div class="col-12 col-md-12 mt-3">
+            {{manager}}
+            <div class="alert alert-danger text-center" *ngIf="manager == false">
+              <h4>Warning</h4>
+              No manager assigned to this project. Please assign at least one user as a manager to ensure proper project management.
+             
+            </div>
 
-            <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span
-                class="text-danger">*</span></label>
+
+            <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span class="text-danger">*</span></label>
 
             @if(formMode === 'view') {
             <div class="small text-muted mb-2">List of users assigned to this project </div>
@@ -226,7 +232,6 @@
             <div class="d-flex align-items-center gap-2 mb-1" *ngIf="item.checked == 1">
               {{i+ 1}}. <span><strong> {{ item.name }}</strong> <code>[{{ item.id }}]</code> as <em> {{
                   item.userAuthLevel }}</em></span>
-
               <span *ngIf="item.asManager == 1" class="badge bg-primary badge-sm">Manager</span>
 
             </div>

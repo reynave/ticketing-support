@@ -101,7 +101,7 @@ active = 1;
     this.loadProjectDetail();
   }
   ticketChildCategories : any = [];
- 
+  manager : boolean = true;
   loadProjectDetail(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -116,7 +116,15 @@ active = 1;
         this.ticketChildCategories = response?.data?.ticketCategories || [];
 
         this.users = response?.data?.users || [];
-        console.log('Users:', this.users);
+       
+        for (const user of this.users) {
+          if (user.asManager === 1) {
+            this.manager = true;
+            break;
+          } else {
+            this.manager = false;
+          }
+        }
         this.loadOptions();
 
       },
