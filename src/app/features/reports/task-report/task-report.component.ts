@@ -1,0 +1,116 @@
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { ApiService } from '../../../core/services/api.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
+@Component({
+  selector: 'app-task-report',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink, ],
+  templateUrl: './task-report.component.html',
+  styleUrl: './task-report.component.css',
+})
+export class TaskReportComponent implements OnInit {
+  private readonly apiService = inject(ApiService);
+	private modalService = inject(NgbModal);
+  rows: any[] = [];
+  projects: any[] = [];
+
+  loading = false;
+  errorMessage = '';
+
+  keyword = '';
+  selectedProjectId = '';
+  startDate = this.formatDate(this.addMonths(new Date(), -1));
+  endDate = this.formatDate(new Date());
+
+  ngOnInit(): void {
+    this.loadProjects();
+    this.loadReport();
+  }
+
+  async loadProjects(): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.apiService.get('/project', { status: 1 }));
+      this.projects = Array.isArray(response?.data) ? response.data : [];
+    } catch {
+      this.projects = [];
+    }
+  }
+
+  loadReport(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    const query: any = {};
+    if (this.keyword.trim()) {
+      query['keyword'] = this.keyword.trim();
+    }
+    if (this.selectedProjectId) {
+      query['projectId'] = this.selectedProjectId;
+    }
+    if (this.startDate) {
+      query['startDate'] = this.startDate;
+    }
+    if (this.endDate) {
+      query['endDate'] = this.endDate;
+    }
+
+    this.apiService.get('/adminReport/task', query).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.rows = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: (error) => {
+        this.loading = false;
+        this.rows = [];
+        this.errorMessage = error?.error?.message || 'Failed to load task report.';
+      },
+    });
+  }
+
+  resetFilter(): void {
+    this.keyword = '';
+    this.selectedProjectId = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.loadReport();
+  }
+
+  trackById(index: number, item: any): any {
+    return item?.id || index;
+  }
+
+  private addMonths(date: Date, months: number): Date {
+    const result = new Date(date);
+    result.setMonth(result.getMonth() + months);
+    return result;
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  selectedTaskDetail :any = null;
+  selectedTaskId : any = null
+  open(content: any, taskId: any): void {
+    this.modalService.open(content, { size: 'lg' });
+    this.selectedTaskId = taskId;
+    this.selectedTaskDetail = null;
+    this.apiService.get('/adminReport/task/detail', { id: this.selectedTaskId }).subscribe({
+      next: (response) => {
+        this.selectedTaskDetail = response.data;
+      },
+      error: (error) => {
+        console.error('Error fetching task detail:', error);
+        this.selectedTaskDetail = null;
+      },
+    });
+  }
+ 
+}

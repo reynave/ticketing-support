@@ -1,0 +1,172 @@
+<div class="container-fluid">
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Case Report</div>
+      <div class="page-subtitle">Daftar case yang sudah closed (ticketStatusId &gt;= 900).</div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-3">
+        <label class="form-label small" for="case-report-keyword">Keyword</label>
+        <input id="case-report-keyword" class="form-control form-control-sm" [(ngModel)]="keyword"
+          (keyup.enter)="loadReport()" placeholder="Cari id / title" />
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label small" for="case-report-project-filter">Project</label>
+        <select id="case-report-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
+          (change)="loadReport()">
+          <option value="">All project</option>
+          @for (project of projects; track trackById($index, project)) {
+          <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label small" for="case-report-start-date">Start Date</label>
+        <input id="case-report-start-date" type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
+          (change)="loadReport()" />
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label small" for="case-report-end-date">End Date</label>
+        <input id="case-report-end-date" type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
+          (change)="loadReport()" />
+      </div>
+
+      <div class="col-12 col-md-2 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadReport()">Search</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    @if (loading) {
+    <div class="text-muted">Loading case report...</div>
+    } @else if (!rows.length) {
+    <div class="text-muted">No closed case data.</div>
+    } @else {
+    <div class="table-responsive">
+      <table class="table table-sm table-hover table-report report-monospace">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Client</th>
+            <th>Project</th>
+            <th>Status</th>
+            <th>Category</th>
+            <th>Submit Date</th>
+            <th>Closed Date</th>
+            <th>Assigned</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track trackById($index, row)) {
+          <tr>
+            <td> <a href="javascript:;" (click)="open(content, row.id)">{{ row.id }}</a> </td>
+            <td>
+              <div class="fw-semibold">{{ row.title }}</div>
+            </td>
+            <td>{{ row.clientName }}</td>
+            <td>{{ row.projectName }}</td>
+            <td>{{ row.ticketStatusName }}</td>
+            <td>{{ row.ticketCategoryName }}</td>
+            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+            <td>{{ row.actualCompletionDate | date: 'mediumDate' }}</td>
+            <td>
+              {{ row.assignToName }}
+            </td>
+            <td>{{ row.rating }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>
+
+
+<ng-template #content let-modal>
+	<div class="modal-header">
+		<p class="modal-title" id="modal-basic-title">Case Detail</p>
+		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+	<div class="modal-body">
+		@if (!selectedCaseDetail) {
+		<div class="text-muted">Loading detail...</div>
+		} @else {
+		<dl class="row mb-0 small">
+			<dt class="col-4">ID</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.id }}</dd>
+
+			<dt class="col-4">Title</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.title }}</dd>
+
+			<dt class="col-4">Client</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.clientName }}</dd>
+
+			<dt class="col-4">Project</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.projectName }}</dd>
+
+			<dt class="col-4">Category</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.ticketCategoryName }}</dd>
+
+			<dt class="col-4">Status</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.ticketStatusName }}</dd>
+
+			<dt class="col-4">Assigned To</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.assignToName }}</dd>
+
+			<dt class="col-4">Submit Date</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.submitDate | date: 'medium' }}</dd>
+
+			<dt class="col-4">Target Completion</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</dd>
+
+			<dt class="col-4">Actual Completion</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.actualCompletionDate | date: 'mediumDate' }}</dd>
+
+			<dt class="col-4">Rating</dt>
+			<dd class="col-8">{{ selectedCaseDetail.detail?.rating }} / 5</dd>
+		</dl>
+
+		<hr />
+
+		<p class="fw-semibold mb-2">Rating Detail</p>
+		@if (!selectedCaseDetail.rating?.length) {
+		<div class="text-muted small">No rating data.</div>
+		} @else {
+		<table class="table table-sm">
+			<thead>
+				<tr>
+					<th>Question</th>
+					<th class="text-center">Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (item of selectedCaseDetail.rating; track item.id) {
+				<tr>
+					<td class="small">{{ item.ratingName }}</td>
+					<td class="text-center">{{ item.value }}</td>
+				</tr>
+				}
+			</tbody>
+		</table>
+		}
+		}
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Close')">Close</button>
+	</div>
+</ng-template>

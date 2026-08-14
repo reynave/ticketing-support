@@ -43,13 +43,21 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     
   ];
 
-   readonly auditMenus = [ 
+
+
+  readonly reportMenus = [ 
+    { path: '/report/task', label: 'Task History', icon: 'task_alt' },
+    { path: '/report/cases', label: 'Cases History', icon: 'report_problem'  },
+  //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
+    
+  ];
+
+    readonly auditMenus = [ 
     { path: '/user-login-history', label: 'Login History', icon: 'search_activity' },
     { path: '/ticket-balance-history', label: 'Ticket Balance', icon: 'fact_check'  },
   //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
     
   ];
-
 
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain' },

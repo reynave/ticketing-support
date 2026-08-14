@@ -25,6 +25,8 @@ import { TaskDetailComponent } from './features/task/task-detail/task-detail.com
 import { CaseListComponent } from './features/cases/case-list/case-list.component';
 import { CaseDetailComponent } from './features/cases/case-detail/case-detail.component';
 import { RatingListComponent } from './features/rating/rating-list/rating-list.component';
+import { TaskReportComponent } from './features/reports/task-report/task-report.component';
+import { CaseReportComponent } from './features/reports/case-report/case-report.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { NotFoundComponent } from './layout/not-found/not-found.component';
 import { ReloginComponent } from './features/auth/relogin/relogin.component';
@@ -111,6 +113,14 @@ export const routes: Routes = [
 			{
 				path: 'rating',
 				component: RatingListComponent,
+			},
+			{
+				path: 'report/task',
+				component: TaskReportComponent,
+			},
+			{
+				path: 'report/cases',
+				component: CaseReportComponent,
 			},
 
 			{

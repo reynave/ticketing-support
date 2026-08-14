@@ -78,6 +78,16 @@
   </div>
 
   <div class="sidebar-section">
+    <div class="sidebar-label">REPORTS</div>
+    @for (menu of reportMenus; track menu.path) {
+    <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
+      <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
+      {{ menu.label }}
+    </a>
+    }
+  </div>
+
+  <div class="sidebar-section">
     <div class="sidebar-label">AUDIT</div>
     @for (menu of auditMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">

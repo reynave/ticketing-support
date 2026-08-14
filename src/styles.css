@@ -379,3 +379,53 @@ i {
   font-size: 0.7rem;
   font-family: "Inter", sans-serif;
 }
+
+/* Styling Font & Layout untuk Report */
+.report-monospace {
+    /* Menggunakan font monospace modern bawaan OS */
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    font-size: 0.75rem; /* 14px agar pas untuk data padat */
+    letter-spacing: -0.2px;
+}
+
+/* Kustomisasi Tabel Bootstrap */
+.table-report {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table-report th {
+
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #dee2e6 !important;
+    vertical-align: middle;
+}
+
+.table-report td {
+    vertical-align: middle;
+    color: #212529;
+}
+
+/* Rataan Kanan Otomatis untuk Angka Laporan */
+.table-report .text-number {
+    text-align: right;
+    font-variant-numeric: tabular-nums; /* Memastikan lebar angka sejajar vertikal */
+}
+
+/* Warna Hover yang Halus */
+.table-report-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04) !important;
+}
+
+/* Tampilan Footer Tabel (Total/Subtotal) */
+.table-report tfoot tr td {
+    font-weight: 700;
+    background-color: #f8f9fa;
+    border-top: 2px solid #212529 !important;
+    border-bottom: 1px solid #212529 !important;
+}
