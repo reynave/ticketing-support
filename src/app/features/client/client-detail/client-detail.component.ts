@@ -31,7 +31,7 @@ interface ClientUserFormModel {
   firstName: string;
   lastName: string;
   status: number;
-  phone : string;
+  phone: string;
   position: string;
   division: string;
 }
@@ -130,10 +130,10 @@ export class ClientDetailComponent implements OnInit {
       return;
     }
 
-    this.loadingUsers = true; 
-const showAllUrl = `/project?clientId=${this.clientId}`;
-const url = `/project?status=1&clientId=${this.clientId}`;
-    this.apiService.get(url).subscribe({
+    this.loadingUsers = true;
+    const showAllUrl = `/project?clientId=${this.clientId}`;
+   // const url = `/project?status=1&clientId=${this.clientId}`;
+    this.apiService.get(showAllUrl).subscribe({
       next: (response) => {
         this.loadingUsers = false;
         this.projects = Array.isArray(response?.data) ? response.data : [];
@@ -152,14 +152,19 @@ const url = `/project?status=1&clientId=${this.clientId}`;
       confirm(
         `Remove project ${item?.name || item?.id}? This will not delete the project but will disassociate it from this client.`,
       )
-    ) { 
-      const authUser = JSON.parse(localStorage.getItem('8tt_auth_user') || '{}');
+    ) {
+      const authUser = JSON.parse(
+        localStorage.getItem('8tt_auth_user') || '{}',
+      );
       console.log('Removing project with payload:', {
         id: item.id,
         updateBy: authUser?.id || 'unknown',
       });
       this.apiService
-        .post(`/client/${this.clientId}/removeProject`, { id: item.id, updateBy: authUser?.id || 'unknown' })
+        .post(`/client/${this.clientId}/removeProject`, {
+          id: item.id,
+          updateBy: authUser?.id || 'unknown',
+        })
         .subscribe({
           next: (response) => {
             this.loadingUsers = false;
@@ -230,7 +235,7 @@ const url = `/project?status=1&clientId=${this.clientId}`;
       address: String(this.client?.address || ''),
       IndustryId: Number(this.client?.IndustryId ?? 0),
       status: Number(this.client?.status ?? 1),
-      phone: String(this.client?.phone || '')
+      phone: String(this.client?.phone || ''),
     };
     this.openClientModal();
   }
@@ -325,12 +330,12 @@ const url = `/project?status=1&clientId=${this.clientId}`;
     }
 
     const payload: Record<string, string | number> = {
-      email: this.userForm.email.trim(), 
+      email: this.userForm.email.trim(),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
       status: Number(this.userForm.status),
       phone: this.userForm.phone.trim(),
-      userAuthLevelId : 0,
+      userAuthLevelId: 0,
       password: this.userForm.password.trim(),
       position: this.userForm.position.trim(),
       division: this.userForm.division.trim(),
@@ -350,12 +355,12 @@ const url = `/project?status=1&clientId=${this.clientId}`;
         this.closeUserModal();
         this.message = response?.message || 'User created.';
         this.loadClientUsers();
-        this.modalService.dismissAll()
+        this.modalService.dismissAll();
       },
       error: (error) => {
         this.savingUser = false;
         this.errorMessage = error?.error?.message || 'Failed to create user.';
-        this.modalService.dismissAll()
+        this.modalService.dismissAll();
       },
     });
   }

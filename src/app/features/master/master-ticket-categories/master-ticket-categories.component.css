@@ -5,3 +5,8 @@
 .table-parent td{
     font-weight: bold;
 }
+
+.disable td{
+  text-decoration: line-through;
+   opacity: 0.5;
+}

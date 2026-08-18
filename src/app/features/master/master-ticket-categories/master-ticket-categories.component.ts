@@ -90,7 +90,7 @@ export class MasterTicketCategoriesComponent {
 
   resetFilter(): void {
     this.selectedStatus = '';
-    this.selectedParentId = '';
+    this.selectedParentId = ''; 
     this.loadRows();
   }
 

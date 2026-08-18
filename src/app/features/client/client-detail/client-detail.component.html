@@ -14,9 +14,10 @@
     </div>
   </div>
 
-  <!-- <div class="alert alert-warning">
-    <strong>Warning:</strong> Deleting client will deactivate all external users under this client.
-  </div> -->
+ <div class="alert alert-warning text-center" *ngIf="client.status == 0">
+    <h5>Warning:</h5> 
+    <p>This client is <strong>Inactive</strong>. All external users and projects under this client are affected.</p>
+  </div> 
 
   @if (message) {
   <div class="alert alert-success py-2">{{ message }}</div>
@@ -110,7 +111,7 @@
         </thead>
         <tbody>
           @for (row of users; track trackById($index, row)) {
-          <tr>
+         <tr [class]="{  'disabled': row.status !== 1 }">
             <td> <a  href="javascript:;" [routerLink]="['/users', row.id]"> {{ row.id }}</a> </td>
             <td>{{ row.email }}</td>
             <td>{{ row.firstName }} {{ row.lastName }}</td>
@@ -135,7 +136,7 @@
 
 <ng-template #clientFormModal>
   <div class="modal-header">
-    <h5 class="modal-title">{{ clientFormMode === 'create' ? 'Insert New Client' : 'Update Client' }}</h5>
+    <strong class="modal-title">{{ clientFormMode === 'create' ? 'Insert New Client' : 'Update Client' }}</strong>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeClientModal()"></button>
   </div>
 
