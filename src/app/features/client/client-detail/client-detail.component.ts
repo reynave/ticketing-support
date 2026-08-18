@@ -276,7 +276,11 @@ export class ClientDetailComponent implements OnInit {
         }
 
         this.message = response?.message || 'Client saved.';
-        this.loadClientDetail();
+        
+        
+    this.loadClientDetail();
+    this.loadClientUsers();
+    this.loadClientProjects();
       },
       error: (error) => {
         this.savingClient = false;
