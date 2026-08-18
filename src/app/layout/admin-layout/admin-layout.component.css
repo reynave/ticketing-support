@@ -12,3 +12,8 @@
 .table-closed td{
   opacity: 0.5;
 }
+
+small{
+  font-weight: 400;
+  font-size: 0.8rem; 
+}

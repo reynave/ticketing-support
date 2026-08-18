@@ -4,8 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "node scripts/generate-build-info.js",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "watch": "node scripts/generate-build-info.js && ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,

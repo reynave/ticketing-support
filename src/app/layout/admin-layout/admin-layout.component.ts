@@ -7,6 +7,7 @@ import { ApiService } from '../../core/services/api.service';
 import { SocketNotificationService } from '../../core/services/socket-notification.service';
 import { FormsModule } from '@angular/forms'; 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { buildInfo } from '../../../environments/build-info';
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
@@ -23,6 +24,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   	private modalService = inject(NgbModal);
   private socketSubscription?: Subscription;
 
+  ngBuildCode: string = buildInfo.buildCode; // auto-generated on each build
   readonly moduleMenus = [ 
     { path: '/home', label: 'Home', icon: 'home' , badge: '' },
     { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '' },
