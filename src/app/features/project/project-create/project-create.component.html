@@ -66,9 +66,9 @@
                         <td>
                            <select id="master-project-client" class="form-select form-select-sm" name="clientId"
                               [(ngModel)]="formModel.clientId" required>
-                              <option value="">Select client</option>
+                            
                               @for (client of clients; track trackById($index, client)) {
-                              <option [value]="client.id">{{ client.name }}</option>
+                              <option [value]="client.id" *ngIf="client.status === 1">{{ client.name }}</option>
                               }
                            </select>
                         </td>
@@ -81,9 +81,9 @@
                         <td>
                            <select id="master-project-type" class="form-select form-select-sm" name="projectTypeId"
                               [(ngModel)]="formModel.projectTypeId" required>
-                              <option value="0">Select type</option>
+                             
                               @for (projectType of projectTypes; track trackById($index, projectType)) {
-                              <option [ngValue]="projectType.id">{{ projectType.name }}</option>
+                              <option [ngValue]="projectType.id" *ngIf="projectType.status === 1">{{ projectType.name }}</option>
                               }
                            </select>
                         </td>
@@ -97,10 +97,10 @@
                         <td>
                            <select id="master-project-group-phase" class="form-select form-select-sm"
                               name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" required>
-                              <option value="0">Select group phase</option>
+                            
                               @for (ticketCategory of ticketCategories; track trackById($index,
                               ticketCategory)) {
-                              <option [ngValue]="ticketCategory.id">{{ ticketCategory.name }}</option>
+                              <option [ngValue]="ticketCategory.id" *ngIf="ticketCategory.status === 1">{{ ticketCategory.name }}</option>
                               }
                            </select>
                         </td>
@@ -113,10 +113,10 @@
                         <td>
                            <select id="master-project-billeable" class="form-select form-select-sm"
                               name="projectBilleableId" [(ngModel)]="formModel.projectBilleableId" required>
-                              <option value="0">Select billeable</option>
+                             
                               @for (projectBilleable of projectBilleables; track trackById($index,
                               projectBilleable)) {
-                              <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
+                              <option [ngValue]="projectBilleable.id" *ngIf="projectBilleable.status === 1">{{ projectBilleable.name }}</option>
                               }
                            </select>
                         </td>
@@ -129,9 +129,9 @@
                         <td>
                            <select id="master-project-product" class="form-select form-select-sm" name="productId"
                               [(ngModel)]="formModel.productId" required>
-                              <option value="0">Select product</option>
+                          
                               @for (product of products; track trackById($index, product)) {
-                              <option [ngValue]="product.id">{{ product.name }}</option>
+                              <option [ngValue]="product.id" *ngIf="product.status === 1">{{ product.name }}</option>
                               }
                            </select>
                         </td>
