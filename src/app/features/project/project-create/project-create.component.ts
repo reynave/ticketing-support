@@ -77,7 +77,7 @@ export class ProjectCreateComponent {
         firstValueFrom(
           this.apiService.get('/product-master', { status: 1, parentId: 0 }),
         ),
-        firstValueFrom(this.apiService.get('/user', { status: 1 })),
+        firstValueFrom(this.apiService.get('/user', { status: 1 , userTypeId: 1})),
         firstValueFrom(
           this.apiService.get('/ticket-categories', { status: 1, parentId: 0 }),
         ),
@@ -165,6 +165,12 @@ export class ProjectCreateComponent {
       return;
     }
 
+    if (!this.formModel.templateMaster || !this.templateDetail) {
+      this.formModel.templateMaster = ''; 
+    }
+
+    const templateProject = this.templateDetail?.project ?? {};
+
     const payload: any = {
       name: this.formModel.name.trim(),
       projectTypeId: Number(this.formModel.projectTypeId),
@@ -177,19 +183,18 @@ export class ProjectCreateComponent {
       templateMaster: this.formModel.templateMaster.trim(),
       projectUsers: this.allUsers,
       ticketCategoriesParentId: Number(this.formModel.ticketCategoriesParentId),
-      template : {
-        cases : this.templateDetail.project.cases || [],
-        tasks : this.templateDetail.project.tasks || [],
-         task : this.templateDetail.project.task || [],
-        
-        cr  : this.templateDetail.project.cr || [],
-        contacts : this.templateDetail.project.contacts || [],
-        templateId :this.formModel.templateMaster.trim(),
-      }
+      template: {
+        cases: templateProject.cases ?? [],
+        tasks: templateProject.tasks ?? [],
+        task: templateProject.task ?? [],
+        cr: templateProject.cr ?? [],
+        contacts: templateProject.contacts ?? [],
+        templateId: this.formModel.templateMaster.trim(),
+      },
     };
 
-   this.saving = true;
-  this.errorMessage = '';
+    this.saving = true;
+    this.errorMessage = '';
     console.log('Payload to save project:', payload);
  
     this.apiService.post('/project', payload).subscribe({
