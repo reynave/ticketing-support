@@ -215,7 +215,7 @@
                                  <tbody>
                                     @for (user of users; track user.id; let i = $index) {
                                     <tr>
-                                       <td class="text-center" (click)="user.checked = !user.checked">
+                                       <td class="text-center" (click)=" user.readonly == false ?  user.checked = !user.checked : null">
                                           @if (user.checked !== true) {
                                           <i class="bi bi-square"></i>
                                           } @else {
@@ -223,7 +223,7 @@
                                           }
                                        </td>
 
-                                       <td>{{ user.name }} [{{ user.id }}]</td>
+                                       <td>{{ user.name }} [{{ user.id }}]  <i class="bi bi-lock" *ngIf="user.readonly"></i>  </td>
                                        <td>{{ user.userAuthLevel }}</td>
 
                                        <td class="text-center" (click)="toggleManager(i)">
@@ -237,7 +237,10 @@
                                     }
                                  </tbody>
                               </table>
+
+                            
                            </div>
+                             my UserId : {{ userId }} 
                         </td>
                      </tr>
                   </tbody>

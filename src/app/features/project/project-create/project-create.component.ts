@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { NgbDatepickerModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface ProjectFormModel {
   id: string;
@@ -31,6 +32,7 @@ interface ProjectFormModel {
 export class ProjectCreateComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   modalService = inject(NgbModal);
   active : number = 1;
   clients: any[] = [];
@@ -50,7 +52,12 @@ export class ProjectCreateComponent {
   loadingTemplateMaster: boolean = false;
   templateName: string = '';
   listOfTemplateMaster: any[] = [];
+  userId: string = '';
   constructor() {
+    // tolong ambil userId yang di simpan di localStorage 8tt_auth_token dalam bentuk jwt token
+   
+      this.userId = this.authService.currentUser?.id || '';
+
     void this.loadOptions();
   }
 
@@ -108,7 +115,9 @@ export class ProjectCreateComponent {
         id: user.id,
         name: `${user.firstName} ${user.lastName}`,
         userAuthLevel: user.userAuthLevel || '',
-        checked: false,
+        checked: user.id == this.userId ? true : false,
+        readonly: user.id == this.userId ? true : false,
+        
         asManager: false,
       }));
       this.users = [...this.allUsers];
