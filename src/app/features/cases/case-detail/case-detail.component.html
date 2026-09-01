@@ -124,26 +124,26 @@
                   </td>
                 </tr>
 
-                  <tr>
+                <tr>
                   <td class="label-col"><label class="form-label small fw-semibold">Ticket Category</label>
                   </td>
                   <td>
-                    {{ task.ParentCategoryName }} 
+                    {{ task.ParentCategoryName }}
                   </td>
                 </tr>
 
-                 <tr>
+                <tr>
                   <td class="label-col"><label class="form-label small fw-semibold">Sub Category</label>
                   </td>
                   <td>
-                
- 
+
+
                     <select id="detail-task-category" class="form-select form-select-sm" name="ticketCategoryId"
                       [(ngModel)]="formModel.ticketCategoryId" [disabled]="formMode === 'view'" required>
                       @for (category of ticketCategoryOptions; track category.id) {
-                      <option [ngValue]="category.id">  {{ category.name }}</option>
+                      <option [ngValue]="category.id"> {{ category.name }}</option>
                       }
-                    </select>  
+                    </select>
                   </td>
                 </tr>
 
@@ -188,9 +188,9 @@
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
-                    <select id="detail-task-status" (change)="onStatusChange($event); formModel.assignTo = ''" class="form-select form-select-sm"
-                      name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId" [disabled]="formMode === 'view'"
-                      required>
+                    <select id="detail-task-status" (change)="onStatusChange($event); formModel.assignTo = ''"
+                      class="form-select form-select-sm" name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId"
+                      [disabled]="formMode === 'view'" required>
                       <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id"
                         [disabled]="status.id >= 900 && taskCount > 0">{{ status.name }}
                       </option>
@@ -205,44 +205,44 @@
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
- 
+
                     <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                       [(ngModel)]="formModel.assignTo" [disabled]="formMode === 'view' || loadingOptions" required>
 
 
-                      @if(formModel.ticketStatusId <= 199) {
-                      <ng-container *ngFor="let user of internalUsers">
+                      @if(formModel.ticketStatusId <= 199) { <ng-container *ngFor="let user of internalUsers">
                         <option *ngIf="user.checked == 1" [ngValue]="user.id">
                           {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
                         </option>
-                      </ng-container>
-                      }
-                      @if(formModel.ticketStatusId == 400) {
-                      <ng-container *ngFor="let user of contacts">
-                        <option [ngValue]="user.userId">
-                          {{ user.name }} [Customer]
-                        </option>
-                      </ng-container>
-                      }
+                        </ng-container>
+                        }
+                        @if(formModel.ticketStatusId == 400) {
+                        <ng-container *ngFor="let user of contacts">
+                          <option [ngValue]="user.userId">
+                            {{ user.name }} [Customer]
+                          </option>
+                        </ng-container>
+                        }
 
-                      @if(formModel.ticketStatusId >= 900) {
-                      <ng-container *ngFor="let user of internalUsers">
-                        <option *ngIf="user.checked == 1" [ngValue]="user.id">
-                          {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
-                        </option>
-                      </ng-container>
-                      <ng-container *ngFor="let user of contacts">
-                        <option [ngValue]="user.userId">
-                          {{ user.name }} [Customer]
-                        </option>
-                      </ng-container>
-                      }
+                        @if(formModel.ticketStatusId >= 900) {
+                        <ng-container *ngFor="let user of internalUsers">
+                          <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                            {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
+                          </option>
+                        </ng-container>
+                        <ng-container *ngFor="let user of contacts">
+                          <option [ngValue]="user.userId">
+                            {{ user.name }} [Customer]
+                          </option>
+                        </ng-container>
+                        }
 
 
 
                     </select>
 
-                      <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select an Assign To</em></small></div>
+                    <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select
+                          an Assign To</em></small></div>
 
                   </td>
                 </tr>
@@ -315,6 +315,34 @@
                 </tr>
 
 
+                <tr>
+                  <th colspan="2">TICKET CALCULATION</th>
+                </tr>
+                <tr>
+                  <td class="label-col">
+                    <label class="form-label small fw-semibold">Total Ticket <span class="text-danger">*</span></label>
+                  </td>
+                  <td>
+
+                    <input type="number" id="detail-task-ticket" class="form-control form-control-sm"
+                      name="ticketEstimationCost" [(ngModel)]="formModel.ticketEstimationCost" min="0"
+                      [readonly]="formMode === 'view'"
+                      (change)="formModel.ticketEstimationCost < 0 ? formModel.ticketEstimationCost = 0 : formModel.ticketEstimationCost"
+                      required style="width: 200px;" />
+                  </td>
+                </tr>
+
+                <tr *ngIf="formModel.ticketEstimationCost * projects.ticketBaseHours > 0">
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-estimated-hours"> Estimated Hours</label></td>
+                  <td>  
+                    <div class="form-control form-control-sm bg-light">
+                      {{formModel.ticketEstimationCost * projects.ticketBaseHours}} Hours
+                    </div>
+                    
+
+
+                  </td>
+                </tr>
 
               </tbody>
             </table>
@@ -330,11 +358,6 @@
                     <b> {{ticketBalance}}</b> remaining balance for this project.
                   </div>
                 </div>
-
-                <label class="form-label   fw-semibold">Total Ticket<span class="text-danger">*</span></label>
-                <input type="number" id="detail-task-ticket" class="form-control form-control-sm"
-                  name="ticketEstimationCost" [(ngModel)]="formModel.ticketEstimationCost" min="0"
-                  [readonly]="formMode === 'view'" (change)="formModel.ticketEstimationCost < 0 ? formModel.ticketEstimationCost = 0 : formModel.ticketEstimationCost" required style="width: 200px;" />
               </div>
 
             </div>
@@ -398,8 +421,10 @@
         <span class="fw-semibold small">Task</span>
         <app-case-create-task-modal [caseId]="taskId" [projectId]="task?.projectId || ''"
           [modules]="projects.modules || []" [assignTo]="task?.assignTo || 0" [submitBy]="me?.id || 0"
-          [ticketCategories]="ticketCategories" [internalUsers]="internalUsers" [loadingOptions]="loadingOptions"
-          (created)="onRelatedTaskCreated()" (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
+          [ticketCategories]="ticketCategories" [internalUsers]="internalUsers"
+          [ticketCategoryId]="task?.ticketCategoryId || ''" [productChildId]="task?.productChildId || ''"
+          [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()"
+          (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
       </div>
 
       @if (loadingRelatedTasks) {
@@ -445,7 +470,7 @@
       @if(taskLogs.length === 0) {
       <div class="card-body text-muted">No logs activity.</div>
       } @else {
-     <table class="table table-sm align-middle task-form-table mb-0 table-striped">
+      <table class="table table-sm align-middle task-form-table mb-0 table-striped">
         <thead>
           <tr>
             <th width="200px">Date</th>
@@ -457,7 +482,7 @@
           <tr *ngFor="let log of taskLogs">
             <td class="align-top">
               <div>{{ log.starDateTime | date:'medium' }}</div>
-             
+
               @if (log.closeDateTime) {
               <div class="text-muted small">Close: {{ log.closeDateTime | date:'medium' }}</div>
               }

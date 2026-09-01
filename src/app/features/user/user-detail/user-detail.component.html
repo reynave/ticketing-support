@@ -68,12 +68,7 @@
                 [(ngModel)]="userForm.email" [readonly]="formMode === 'view'" required placeholder="Input email" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label small fw-semibold" for="detail-edit-password">Password</label>
-              <input id="detail-edit-password" class="form-control form-control-sm" type="password" name="password"
-                [(ngModel)]="userForm.password" [readonly]="formMode === 'view'"
-                placeholder="Leave blank to keep current" />
-            </div>
+           
 
             <div class="row g-1">
               <div class="col-6">
@@ -113,7 +108,33 @@
               </div>
             
 
+ @if (formMode === 'edit') {
+            <div class="border-top mt-3 p-3 border bg-light rounded shadow-sm">
+              <div class="form-group">
+                <label class="form-label small fw-semibold" for="detail-new-password">New Password</label>
+                <input id="detail-new-password" class="form-control form-control-sm" [type]="showPassword ? 'text' : 'password'"
+                  name="newPassword" [(ngModel)]="newPassword" autocomplete="new-password" />
+              </div>
 
+              <div class="form-group">
+                <label class="form-label small fw-semibold" for="detail-confirm-password">Confirm New Password</label>
+                <input id="detail-confirm-password" class="form-control form-control-sm" [type]="showPassword ? 'text' : 'password'"
+                  name="confirmPassword" [(ngModel)]="confirmPassword" autocomplete="new-password" />
+              </div>
+
+              <div class="d-flex align-items-center justify-content-between gap-2 mt-2 flex-wrap">
+                <div class="form-check mb-0">
+                  <input id="detail-show-password" class="form-check-input" type="checkbox" name="showPassword"
+                    [(ngModel)]="showPassword" />
+                  <label class="form-check-label small" for="detail-show-password">Show password</label>
+                </div>
+                <button type="button" class="btn btn-warning btn-sm" (click)="changePassword()"
+                  [disabled]="changingPassword || !newPassword || !confirmPassword">
+                  {{ changingPassword ? 'Updating...' : 'Change Password' }}
+                </button>
+              </div>
+            </div>
+            }
 
 
           </div>

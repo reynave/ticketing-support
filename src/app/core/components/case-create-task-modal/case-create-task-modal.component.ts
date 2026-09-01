@@ -39,7 +39,8 @@ export class CaseCreateTaskModalComponent {
   @Input() internalUsers: any[] = [];
   @Input() loadingOptions = false;
   @Input() buttonLabel = 'New Task';
-
+  @Input() ticketCategoryId = '';
+  @Input() productChildId = '';
   @Output() created = new EventEmitter<void>();
   @Output() failed = new EventEmitter<string>();
 
@@ -52,8 +53,7 @@ export class CaseCreateTaskModalComponent {
     if (!this.createTaskModal) {
       return;
     }
-
-    this.relatedTaskForm = this.defaultRelatedTaskForm();
+    this.relatedTaskForm = this.defaultRelatedTaskForm(); 
     this.relatedTaskForm.projectId = String(this.projectId || '');
     this.relatedTaskForm.assignTo =
       Number(this.assignTo || 0) > 0 ? Number(this.assignTo) : null;
@@ -129,8 +129,8 @@ export class CaseCreateTaskModalComponent {
       },
       assignTo: null,
       ticketStatusId: 100,
-      ticketCategoryId: null,
-      productChildId : null,
+      ticketCategoryId: this.ticketCategoryId,
+      productChildId : this.productChildId,
     };
   }
 

@@ -178,6 +178,14 @@
             </select>
           </div>
 
+         <div class="col-12 col-md-6"> 
+           <label class="form-label small fw-semibold" for="detail-project-template"> Ticket Based </label>
+           <div class="form-control form-control-sm bg-light">
+            {{ project.ticketBaseHours }} Hour{{project.ticketBaseHours > 1 ? 's' : ''}} per Ticket 
+           </div>
+          </div>
+
+
           <div class="col-12 col-md-6" *ngIf=" project.templateName != '' ">
             <label class="form-label small fw-semibold" for="detail-project-template">Template Master</label>
             <div class="form-control form-control-sm bg-light" >{{ project.templateName }}</div>

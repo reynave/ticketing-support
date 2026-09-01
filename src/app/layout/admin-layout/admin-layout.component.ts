@@ -21,14 +21,14 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly socketNotificationService = inject(SocketNotificationService);
   private readonly router = inject(Router);
-  	private modalService = inject(NgbModal);
+  private readonly modalService = inject(NgbModal);
   private socketSubscription?: Subscription;
 
   ngBuildCode: string = buildInfo.buildCode; // auto-generated on each build
   readonly moduleMenus = [ 
     { path: '/home', label: 'Home', icon: 'home' , badge: '' },
-    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '' },
-    { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '' },
+    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '', moduleId: 5005 },
+    { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '', moduleId: 5006 },
     // {
     //   path: '/change-requests',
     //   label: 'Change Requests',
@@ -36,41 +36,42 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     //   badge: '',
     // },
 
-    { path: '/projects', label: 'Projects', icon: 'workspaces' },
-    { path: '/clients', label: 'Clients', icon: 'apartment' },
+    { path: '/projects', label: 'Projects', icon: 'workspaces', moduleId: 2001 },
+    { path: '/clients', label: 'Clients', icon: 'apartment', moduleId: 2002 },
   //  { path: '/contact', label: 'Contact', icon: 'group' },
-    { path: '/users', label: 'Users', icon: 'account_circle' },
+    { path: '/users', label: 'Users', icon: 'account_circle', moduleId: 2004 },
 
-    { path: '/rating', label: 'Rating', icon: 'star', badge: '' },
+    { path: '/rating', label: 'Rating', icon: 'star', badge: '', moduleId: 2005 },
     
   ];
 
 
 
   readonly reportMenus = [ 
-    { path: '/report/task', label: 'Task History', icon: 'task_alt' },
-    { path: '/report/cases', label: 'Cases History', icon: 'report_problem'  },
+    { path: '/report/task', label: 'Task History', icon: 'task_alt', moduleId: 5005 },
+    { path: '/report/cases', label: 'Cases History', icon: 'report_problem', moduleId: 5006 },
   //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
     
   ];
 
     readonly auditMenus = [ 
-    { path: '/user-login-history', label: 'Login History', icon: 'search_activity' },
-    { path: '/ticket-balance-history', label: 'Ticket Balance', icon: 'fact_check'  },
+      { path: '/user-login-history', label: 'Login History', icon: 'search_activity', moduleId: 6000 },
+      { path: '/ticket-balance-history', label: 'Ticket Balance', icon: 'fact_check', moduleId: 6001 },
   //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
     
   ];
 
   readonly masterMenus = [
-    { key: 'industry', label: 'Industry', icon: 'domain' },
+    { key: 'industry', label: 'Industry', icon: 'domain', moduleId: 1001 },
      {
       key: 'master-product',
       label: 'Product',
       icon: 'inventory_2',
       route: '/master-product',
+      moduleId: 1002,
     },
-    { key: 'project-type', label: 'Project Type', icon: 'schema' },
-    { key: 'project-billeable', label: 'Project Billeable', icon: 'payments' },
+    { key: 'project-type', label: 'Project Type', icon: 'schema', moduleId: 1003 },
+    { key: 'project-billeable', label: 'Project Billeable', icon: 'payments', moduleId: 1004 },
     // {
     //   key: 'project-categories',
     //   label: 'Project Categories',
@@ -81,18 +82,37 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       label: 'Ticket Categories',
       icon: 'category',
       route: '/master-ticket-categories',
+      moduleId: 1005,
     },
 
-    { key: 'template', label: 'Template', icon: 'description', route: '/master-template' },
+    { key: 'template', label: 'Template', icon: 'description', route: '/master-template', moduleId: 1010 },
    
-    { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user' },
+    { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user', moduleId: 1006 },
     //{ key: 'user-type', label: 'User Type', icon: 'groups' },
     {
       key: 'global-setting',
       label: 'Global Setting',
       icon: 'settings_applications',
+      route: '/master-global-setting',
+      moduleId: 1007,
     },
   ];
+
+  get visibleModuleMenus() {
+    return this.filterMenusByAccess(this.moduleMenus);
+  }
+
+  get visibleReportMenus() {
+    return this.filterMenusByAccess(this.reportMenus);
+  }
+
+  get visibleAuditMenus() {
+    return this.filterMenusByAccess(this.auditMenus);
+  }
+
+  get visibleMasterMenus() {
+    return this.filterMenusByAccess(this.masterMenus);
+  }
 
   get userName(): string {
     return this.authService.currentUser?.name || 'Administrator';
@@ -107,6 +127,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   searchText : string = '';
+  mobileMenuOpen = false;
   ngOnInit(): void {
     this.loadbBadge();
 
@@ -142,6 +163,20 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   back(): void {
     history.back();
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
+  }
+
+  private filterMenusByAccess(menus: any[]): any[] {
+    return menus.filter(
+      (menu) => !menu.moduleId || this.authService.hasModuleAccess(menu.moduleId),
+    );
   }
 
   logout(): void {

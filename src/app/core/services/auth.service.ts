@@ -10,6 +10,14 @@ interface LoginForm {
   password: string;
 }
 
+export interface AccessRight {
+  moduleId: number;
+  c: number;
+  r: number;
+  u: number;
+  d: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -163,7 +171,7 @@ export class AuthService {
   }
 
   decodeToken(): Record<string, any> | null {
-    const token = this.token; // sudah ada getter-nya
+    const token = this.token;
 
     if (!token) {
       return null;
@@ -176,5 +184,30 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  getAccessRights(): AccessRight[] {
+    const accessRights = this.decodeToken()?.['accessRights'];
+
+    if (Array.isArray(accessRights)) {
+      return accessRights as AccessRight[];
+    }
+
+    if (typeof accessRights === 'string') {
+      try {
+        const parsedAccessRights = JSON.parse(accessRights);
+        return Array.isArray(parsedAccessRights) ? parsedAccessRights as AccessRight[] : [];
+      } catch {
+        return [];
+      }
+    }
+
+    return [];
+  }
+
+  hasModuleAccess(moduleId: number): boolean {
+    return this.getAccessRights().some(
+      (accessRight) => Number(accessRight.moduleId) === Number(moduleId),
+    );
   }
 }

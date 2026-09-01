@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,7 @@ import { ApiService } from '../../core/services/api.service';
 })
 export class HomeComponent implements OnInit {
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
 
   loading = false;
   errorMessage = '';
@@ -24,6 +26,7 @@ export class HomeComponent implements OnInit {
   totalOpenCases = 0;
 
   ngOnInit(): void {
+    console.log('Access rights:', this.authService.getAccessRights());
     this.loadDashboard();
   }
 

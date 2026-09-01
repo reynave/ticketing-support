@@ -145,10 +145,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
           firstValueFrom(this.apiService.get('/project', { status: 1 })),
          
           firstValueFrom(
-            this.apiService.get('/ticket-categories', { presence: 1 }),
+            this.apiService.get('/ticket-categories', { status: 1 }),
           ),
           firstValueFrom(
-            this.apiService.get('/master/status/task', { presence: 1 }),
+            this.apiService.get('/master/status/task', { status: 1 }),
           ),
         ]);
 

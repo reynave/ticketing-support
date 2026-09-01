@@ -20,6 +20,7 @@ interface ProjectFormModel {
   templateMaster: string;
   userManager: string;
   ticketCategoriesParentId: number;
+  ticketBaseHours: number;
 }
 
 @Component({
@@ -200,6 +201,7 @@ export class ProjectCreateComponent {
         contacts: templateProject.contacts ?? [],
         templateId: this.formModel.templateMaster.trim(),
       },
+      ticketBaseHours : this.formModel.ticketBaseHours
     };
 
     this.saving = true;
@@ -210,7 +212,7 @@ export class ProjectCreateComponent {
       next: (response) => {
         console.log(response);
         this.saving = false;
-        const id = String(response?.data?.id || '').trim();
+        const id = String(response?.data || '').trim();
 
         if (id) {
           this.router.navigate(['/projects']).then(() => {
@@ -264,6 +266,7 @@ export class ProjectCreateComponent {
       templateMaster: '',
       userManager: '',
       ticketCategoriesParentId: 0,
+      ticketBaseHours: 0,
     };
   }
 
@@ -359,6 +362,7 @@ export class ProjectCreateComponent {
           projectData?.ticketCategoriesParentId ??
             this.formModel.ticketCategoriesParentId,
         ),
+        ticketBaseHours: this.formModel.ticketBaseHours, 
       },
     };
   }

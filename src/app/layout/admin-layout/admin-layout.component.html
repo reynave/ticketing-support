@@ -1,8 +1,11 @@
 <nav class="top-navbar">
+  <button type="button" class="btn-icon mobile-menu-toggle" title="Toggle navigation" (click)="toggleMobileMenu()">
+    <i class="bi bi-list"></i>
+  </button>
   <a class="brand-logo" routerLink="/home">
     <div class="icon"><i class="bi bi-headset"></i></div>
     <span class="lh-1">HelpDesk
-      <div>    <small>Build {{ngBuildCode}}</small></div>
+      <div> <small>Build {{ngBuildCode}}</small></div>
     </span>
 
   </a>
@@ -10,47 +13,49 @@
   <div class="nav-search ms-3">
     <div class="search-wrapper">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" name="searchText"
-      placeholder="Search by ticket Id / ticket subject" [(ngModel)]="searchText" (keyup.enter)="searchBox(content)" />
+      <input type="text" class="form-control" name="searchText" placeholder="Search by ticket Id / ticket subject"
+        [(ngModel)]="searchText" (keyup.enter)="searchBox(content)" />
     </div>
   </div>
 
-<ng-template #content let-modal>
-	<div class="modal-header">
-		<strong >Search : <em>{{searchText}}</em></strong>
-		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-	</div>
-	<div class="modal-body">
-		 <table class="table table-sm table-striped table-hover">
-      <thead>
-        <tr>
-          <th>Ticket ID</th>
-          <th>Title</th>
-          <th>Type</th>
-          
-          <th>Assigned To</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let ticket of searchResults" [ngClass]="ticket.ticketStatusId >= 900 ? 'table-closed' : ''">
-          <td>
-            <a href="javascript:;" (click)="modal.dismiss('Cross click')"  [routerLink]="['/' + (ticket.ticketTypeName || '').toLowerCase() + 's', ticket.id]" routerLinkActive="router-link-active" >
-            {{ ticket.id }}
-            </a>
-          </td>
-          <td>{{ ticket.title }}</td>
-          <td>{{ ticket.ticketTypeName }}</td>
-          <td>{{ ticket.assignToName }}</td> 
-          <td>{{ ticket.ticketStatusName }}</td>
-        </tr>
-      </tbody>
-    </table>
-	</div>
-	<div class="modal-footer">
-		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Save</button>
-	</div>
-</ng-template>
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <strong>Search : <em>{{searchText}}</em></strong>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <table class="table table-sm table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Title</th>
+            <th>Type</th>
+
+            <th>Assigned To</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of searchResults" [ngClass]="ticket.ticketStatusId >= 900 ? 'table-closed' : ''">
+            <td>
+              <a href="javascript:;" (click)="modal.dismiss('Cross click')"
+                [routerLink]="['/' + (ticket.ticketTypeName || '').toLowerCase() + 's', ticket.id]"
+                routerLinkActive="router-link-active">
+                {{ ticket.id }}
+              </a>
+            </td>
+            <td>{{ ticket.title }}</td>
+            <td>{{ ticket.ticketTypeName }}</td>
+            <td>{{ ticket.assignToName }}</td>
+            <td>{{ ticket.ticketStatusName }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="modal.close('Save click')">Save</button>
+    </div>
+  </ng-template>
 
 
   <div class="navbar-actions">
@@ -58,7 +63,7 @@
       <i class="bi bi-arrow-left"></i>
     </button>
 
-  
+
 
     <div class="avatar" title="User">{{ userInitials }}</div>
 
@@ -68,10 +73,26 @@
   </div>
 </nav>
 
+@if (mobileMenuOpen) {
+<nav class="mobile-navbar" aria-label="Mobile navigation">
+  <a *ngFor="let menu of visibleModuleMenus" [routerLink]="menu.path" class="mobile-navbar-link"
+    (click)="closeMobileMenu()">
+    {{ menu.label }}
+    <span *ngIf="menu.badge" class="badge bg-danger badge-sm">{{ menu.badge }}</span>
+  </a>
+  <a *ngFor="let menu of visibleReportMenus" [routerLink]="menu.path" class="mobile-navbar-link"
+    (click)="closeMobileMenu()">{{ menu.label }}</a>
+  <a *ngFor="let menu of visibleAuditMenus" [routerLink]="menu.path" class="mobile-navbar-link"
+    (click)="closeMobileMenu()">{{ menu.label }}</a>
+  <a *ngFor="let menu of visibleMasterMenus" [routerLink]="menu.route ? [menu.route] : ['/master', menu.key]"
+    class="mobile-navbar-link" (click)="closeMobileMenu()">{{ menu.label }}</a>
+</nav>
+}
+
 <aside class="sidebar">
   <div class="sidebar-section">
     <div class="sidebar-label">MENU</div>
-    @for (menu of moduleMenus; track menu.path) {
+    @for (menu of visibleModuleMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
       {{ menu.label }}
@@ -82,7 +103,7 @@
 
   <div class="sidebar-section">
     <div class="sidebar-label">REPORTS</div>
-    @for (menu of reportMenus; track menu.path) {
+    @for (menu of visibleReportMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
       {{ menu.label }}
@@ -92,7 +113,7 @@
 
   <div class="sidebar-section">
     <div class="sidebar-label">AUDIT</div>
-    @for (menu of auditMenus; track menu.path) {
+    @for (menu of visibleAuditMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
       {{ menu.label }}
@@ -103,7 +124,7 @@
 
   <div class="sidebar-section">
     <div class="sidebar-label">Master Data</div>
-    @for (menu of masterMenus; track menu.key) {
+    @for (menu of visibleMasterMenus; track menu.key) {
     <a [routerLink]="menu.route ? [menu.route] : ['/master', menu.key]" routerLinkActive="active" class="sidebar-link">
       <span class="material-symbols-outlined menu-icon">{{ menu.icon }}</span>
       {{ menu.label }}
@@ -113,8 +134,11 @@
 
   <div class="sidebar-section profile-box">
     <div class="sidebar-label">Signed-in User</div>
-    <div class="small text-muted">{{ userName }}</div>
-    <div class="small text-muted">{{ userEmail }}</div>
+    <div class="p-2 m-2 bg-light rounded">
+      <div class="small text-muted">{{ userName }}</div>
+      <div class="small text-muted">{{ userEmail }}</div>
+    </div>
+
   </div>
 </aside>
 

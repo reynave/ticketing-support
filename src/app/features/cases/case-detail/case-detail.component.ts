@@ -449,7 +449,8 @@ ticketBalance : number = 0;
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
       deadlineDateTime: deadlineDateTime,
       ticketEstimationCost : this.formModel.ticketEstimationCost < 0 ? 0 : this.formModel.ticketEstimationCost,
-      ticketCategoryId : Number(this.formModel.ticketCategoryId)
+      ticketCategoryId : Number(this.formModel.ticketCategoryId),
+      hours: Number(this.formModel.ticketEstimationCost) * Number(this.projects.ticketBaseHours || 0)
     };
     console.log('saveTask payload', payload);
 

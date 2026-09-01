@@ -6,7 +6,6 @@ import { ApiService } from '../../../core/services/api.service';
 
 interface UserFormModel {
   email: string;
-  password: string;
   userAuthLevelId: number;
   firstName: string;
   lastName: string;
@@ -33,6 +32,10 @@ export class UserDetailComponent implements OnInit {
   user: any = null;
   loading = false;
   saving = false;
+  changingPassword = false;
+  newPassword = '';
+  confirmPassword = '';
+  showPassword = false;
   message = '';
   errorMessage = '';
 
@@ -114,10 +117,6 @@ export class UserDetailComponent implements OnInit {
       status: Number(this.userForm.status),
     };
 
-    if (this.userForm.password.trim()) {
-      payload['password'] = this.userForm.password;
-    }
-
     this.saving = true;
     this.message = '';
     this.errorMessage = '';
@@ -135,6 +134,46 @@ export class UserDetailComponent implements OnInit {
         this.errorMessage = error?.error?.message || 'Failed to update user.';
       },
     });
+  }
+
+  changePassword(): void {
+    if (!this.userId || this.changingPassword) {
+      return;
+    }
+
+    if (!this.newPassword) {
+      this.errorMessage = 'New password is required.';
+      return;
+    }
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.errorMessage = 'Password confirmation does not match.';
+      return;
+    }
+
+    this.changingPassword = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    this.apiService
+      .put(`/user/${this.userId}/password`, {
+        password: this.newPassword,
+        confirmPassword: this.confirmPassword,
+      })
+      .subscribe({
+        next: (response) => {
+          this.changingPassword = false;
+          this.newPassword = '';
+          this.confirmPassword = '';
+          this.showPassword = false;
+          this.message = response?.message || 'Password updated.';
+          history.back();
+        },
+        error: (error) => {
+          this.changingPassword = false;
+          this.errorMessage = error?.error?.message || 'Failed to update password.';
+        },
+      });
   }
 
   onUserTypeChange(): void {
@@ -171,7 +210,6 @@ export class UserDetailComponent implements OnInit {
   private defaultForm(): UserFormModel {
     return {
       email: '',
-      password: '',
       userAuthLevelId: 1,
       firstName: '',
       lastName: '',
@@ -186,7 +224,6 @@ export class UserDetailComponent implements OnInit {
   private populateFormFromUser(): void {
     this.userForm = {
       email: String(this.user?.email || ''),
-      password: '',
       userAuthLevelId: Number(this.user?.userAuthLevelId ?? 1),
       firstName: String(this.user?.firstName || ''),
       lastName: String(this.user?.lastName || ''),

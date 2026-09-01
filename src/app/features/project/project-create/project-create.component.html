@@ -66,7 +66,7 @@
                         <td>
                            <select id="master-project-client" class="form-select form-select-sm" name="clientId"
                               [(ngModel)]="formModel.clientId" required>
-                            
+
                               @for (client of clients; track trackById($index, client)) {
                               <option [value]="client.id" *ngIf="client.status === 1">{{ client.name }}</option>
                               }
@@ -81,11 +81,28 @@
                         <td>
                            <select id="master-project-type" class="form-select form-select-sm" name="projectTypeId"
                               [(ngModel)]="formModel.projectTypeId" required>
-                             
+
                               @for (projectType of projectTypes; track trackById($index, projectType)) {
-                              <option [ngValue]="projectType.id" *ngIf="projectType.status === 1">{{ projectType.name }}</option>
+                              <option [ngValue]="projectType.id" *ngIf="projectType.status === 1">{{ projectType.name }}
+                              </option>
                               }
                            </select>
+                        </td>
+                     </tr>
+
+
+                     <tr>
+                        <td><label class="form-label mb-0">Ticket Based, 1 Ticket equals<span
+                                 class="text-danger">*</span></label></td>
+                        <td>
+                           <div class="input-group input-group-sm" style="max-width: 150px;">
+                              <input type="number" class="form-control form-control-sm text-end" name="ticketBaseHours"
+                                 [(ngModel)]="formModel.ticketBaseHours" required>
+                              <span class="input-group-text input-group-sm" id="basic-addon2">Hour{{formModel.ticketBaseHours > 1 ? 's' : ''}}</span>
+                           </div>
+                           <div class="alert alert-warning mt-2 py-1">
+                              <small><em>Jika <b>Project Type</b> tidak dipilih <b>Ticket Based</b>, maka tidak ditampilkan di Client / Customer</em></small>
+                           </div>
                         </td>
                      </tr>
 
@@ -97,10 +114,11 @@
                         <td>
                            <select id="master-project-group-phase" class="form-select form-select-sm"
                               name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" required>
-                            
+
                               @for (ticketCategory of ticketCategories; track trackById($index,
                               ticketCategory)) {
-                              <option [ngValue]="ticketCategory.id" *ngIf="ticketCategory.status === 1">{{ ticketCategory.name }}</option>
+                              <option [ngValue]="ticketCategory.id" *ngIf="ticketCategory.status === 1">{{
+                                 ticketCategory.name }}</option>
                               }
                            </select>
                         </td>
@@ -113,10 +131,11 @@
                         <td>
                            <select id="master-project-billeable" class="form-select form-select-sm"
                               name="projectBilleableId" [(ngModel)]="formModel.projectBilleableId" required>
-                             
+
                               @for (projectBilleable of projectBilleables; track trackById($index,
                               projectBilleable)) {
-                              <option [ngValue]="projectBilleable.id" *ngIf="projectBilleable.status === 1">{{ projectBilleable.name }}</option>
+                              <option [ngValue]="projectBilleable.id" *ngIf="projectBilleable.status === 1">{{
+                                 projectBilleable.name }}</option>
                               }
                            </select>
                         </td>
@@ -129,7 +148,7 @@
                         <td>
                            <select id="master-project-product" class="form-select form-select-sm" name="productId"
                               [(ngModel)]="formModel.productId" required>
-                          
+
                               @for (product of products; track trackById($index, product)) {
                               <option [ngValue]="product.id" *ngIf="product.status === 1">{{ product.name }}</option>
                               }
@@ -215,7 +234,8 @@
                                  <tbody>
                                     @for (user of users; track user.id; let i = $index) {
                                     <tr>
-                                       <td class="text-center" (click)=" user.readonly == false ?  user.checked = !user.checked : null">
+                                       <td class="text-center"
+                                          (click)=" user.readonly == false ?  user.checked = !user.checked : null">
                                           @if (user.checked !== true) {
                                           <i class="bi bi-square"></i>
                                           } @else {
@@ -223,7 +243,8 @@
                                           }
                                        </td>
 
-                                       <td>{{ user.name }} [{{ user.id }}]  <i class="bi bi-lock" *ngIf="user.readonly"></i>  </td>
+                                       <td>{{ user.name }} [{{ user.id }}] <i class="bi bi-lock"
+                                             *ngIf="user.readonly"></i> </td>
                                        <td>{{ user.userAuthLevel }}</td>
 
                                        <td class="text-center" (click)="toggleManager(i)">
@@ -238,9 +259,9 @@
                                  </tbody>
                               </table>
 
-                            
+
                            </div>
-                             my UserId : {{ userId }} 
+                           my UserId : {{ userId }}
                         </td>
                      </tr>
                   </tbody>
@@ -349,7 +370,7 @@
 
 
                   <div class="card-body">
-                   
+
                      <table class="table table-sm table-hover ">
                         <thead class="sticky-top ">
                            <tr>
@@ -377,7 +398,7 @@
             </li>
          </ul>
 
-<div [ngbNavOutlet]="nav" class="mt-2"></div>
+         <div [ngbNavOutlet]="nav" class="mt-2"></div>
 
 
 

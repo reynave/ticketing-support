@@ -39,6 +39,7 @@ interface CaseFormModel {
   category: number | null;
   severityId: number | null;
   productChildId: number | null;
+  
 }
 
 interface TicketStatusOption {
@@ -156,13 +157,13 @@ export class CaseListComponent implements OnInit, OnDestroy {
         firstValueFrom(this.apiService.get('/project', { status: 1 })),
 
         firstValueFrom(
-          this.apiService.get('/ticket-categories', { presence: 1 }),
+          this.apiService.get('/ticket-categories', { status: 1 }),
         ),
         firstValueFrom(
-          this.apiService.get('/master/ticket-severities', { presence: 1 }),
+          this.apiService.get('/master/ticket-severities', { status: 1 }),
         ),
          firstValueFrom(
-            this.apiService.get('/master/status/cases', { presence: 1 }),
+            this.apiService.get('/master/status/cases', { status: 1 }),
           ),
       ]);
 
