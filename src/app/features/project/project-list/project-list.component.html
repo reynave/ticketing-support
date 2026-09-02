@@ -1,11 +1,16 @@
 <div class="container">
+   @if (!canAccessPage) {
+   <div class="alert alert-danger py-2">You do not have access to this module.</div>
+   } @else {
    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div>
          <div class="page-title">Project List</div>
          <div class="page-subtitle">Manage project data from the project table independently.</div>
       </div>
       <div class="d-flex gap-2">
+         @if (canCreate) {
          <button type="button" class="btn btn-primary-sm" (click)="openCreateModal()">Add Project</button>
+         }
       </div>
    </div>
 
@@ -103,4 +108,5 @@
       </div>
       }
    </div>
+   }
 </div>

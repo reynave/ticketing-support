@@ -52,6 +52,21 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private modalService = inject(NgbModal);
     private readonly socketNotificationService : any = inject(SocketNotificationService);
+
+  readonly moduleId = 5005;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
+
   editor1: any = null;
   editor2: any = null;
   editor3: any = null;
@@ -113,6 +128,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   projectId : string = '';
   ticketCategoryOptions : any = [];
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.me = this.authService.decodeToken();
     this.editor1 = new Editor();
     this.editor2 = new Editor();
@@ -285,7 +304,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   startEdit(): void {
-    if (!this.task) {
+    if (!this.task || !this.canUpdate) {
       return;
     }
 
@@ -308,6 +327,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   saveTask() {
+    if (!this.canUpdate) {
+      return;
+    }
+
     if (this.formModel.ticketStatusId >= 900) {
       const confirmed = confirm(`Are you sure close task ${this.taskId}?`);
 
@@ -415,7 +438,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   deleteTask(): void {
-    if (this.deleting || !this.taskId) {
+    if (this.deleting || !this.taskId || !this.canDelete) {
       return;
     }
 

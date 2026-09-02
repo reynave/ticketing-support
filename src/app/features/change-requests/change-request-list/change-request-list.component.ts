@@ -20,7 +20,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 
-interface CaseFormModel {
+interface ChangeRequestFormModel {
   id: string;
   crNoRef: string;
   title: string;
@@ -48,13 +48,13 @@ interface TicketStatusOption {
 }
 
 @Component({
-  selector: 'app-case-list',
+  selector: 'app-change-request-list',
   standalone: true,
   imports: [CommonModule, FormsModule, NgbModalModule, NgbDatepickerModule],
-  templateUrl: './case-list.component.html',
-  styleUrl: './case-list.component.css',
+  templateUrl: './change-request-list.component.html',
+  styleUrl: './change-request-list.component.css',
 })
-export class CaseListComponent implements OnInit, OnDestroy {
+export class ChangeRequestListComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
@@ -66,7 +66,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
 
   private modalRef: NgbModalRef | null = null;
 
-  readonly moduleId = 5006;
+  readonly moduleId = 5007;
 
   get canAccessPage(): boolean {
     return this.authService.hasPermission(this.moduleId, 'r');
@@ -80,7 +80,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
     return this.authService.hasPermission(this.moduleId, 'd');
   }
 
-  readonly taskTypeId = 2;
+  readonly changeRequestTypeId = 3;
   ticketStatusOptions: TicketStatusOption[] = [];
   closed: boolean = false;
   rows: any[] = [];
@@ -102,7 +102,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
   selectedProjectId = '';
   selectedTicketStatusId = '1';
 
-  formModel: CaseFormModel = this.defaultForm();
+  formModel: ChangeRequestFormModel = this.defaultForm();
   payload: any = null;
   private reloadSubscription?: Subscription;
   constructor() {}
@@ -133,7 +133,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     const query: any = {
-      ticketTypeId: this.taskTypeId,
+      ticketTypeId: this.changeRequestTypeId,
       closed: 0,
     };
     query['closed'] = this.closed;
@@ -149,7 +149,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       query['ticketStatusId'] = Number(this.selectedTicketStatusId);
     }
 
-    this.apiService.get('/cases', query).subscribe({
+    this.apiService.get('/change-requests', query).subscribe({
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
@@ -326,7 +326,7 @@ modules : any[] = [];
 
     const payload = {
       id: this.formModel.id.trim() || undefined,
-      ticketTypeId: this.taskTypeId,
+      ticketTypeId: this.changeRequestTypeId,
       //  crNoRef: this.formModel.crNoRef.trim(),
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
@@ -353,7 +353,7 @@ modules : any[] = [];
     this.errorMessage = '';
     this.message = '';
 
-    this.apiService.post('/cases', payload).subscribe({
+    this.apiService.post('/change-requests', payload).subscribe({
       next: (response) => {
         this.saving = false;
         this.closeModal();
@@ -362,16 +362,16 @@ modules : any[] = [];
         const id = String(response?.data?.id || '').trim();
 
         if (id) {
-          void this.router.navigate(['/cases', id]);
+          void this.router.navigate(['/change-requests', id]);
           return;
         }
 
-        this.message = response?.message || 'Case created.';
+        this.message = response?.message || 'Change Request created.';
         this.loadCases();
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to create case.';
+        this.errorMessage = error?.error?.message || 'Failed to create change request.';
       },
     });
   }
@@ -383,7 +383,7 @@ modules : any[] = [];
       return;
     }
 
-    void this.router.navigate(['/cases', id]);
+    void this.router.navigate(['/change-requests', id]);
   }
 
   deleteCase(row: any): void {
@@ -397,7 +397,7 @@ modules : any[] = [];
       return;
     }
 
-    const confirmed = confirm(`Delete case ${id}?`);
+    const confirmed = confirm(`Delete change request ${id}?`);
 
     if (!confirmed) {
       return;
@@ -406,15 +406,15 @@ modules : any[] = [];
     this.deletingId = id;
     this.errorMessage = '';
 
-    this.apiService.delete(`/cases/${id}`).subscribe({
+    this.apiService.delete(`/change-requests/${id}`).subscribe({
       next: (response) => {
         this.deletingId = null;
-        this.message = response?.message || 'Case deleted.';
+        this.message = response?.message || 'Change Request deleted.';
         this.loadCases();
       },
       error: (error) => {
         this.deletingId = null;
-        this.errorMessage = error?.error?.message || 'Failed to delete case.';
+        this.errorMessage = error?.error?.message || 'Failed to delete change request.';
       },
     });
   }

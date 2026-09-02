@@ -1,4 +1,7 @@
 <div class="container py-1 task-detail-page">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
   <div class="d-flex  mb-1 flex-wrap gap-2 mb-3">
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
     <div>
@@ -44,13 +47,17 @@
             </button>
             }
             @if (formMode === 'view') {
+            @if (canUpdate) {
             <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+            }
+            @if (canDelete) {
+            <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
+              {{ deleting ? 'Deleting...' : 'Delete' }}
+            </button>
+            }
             } @else {
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
             }
-            <!-- <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
-              {{ deleting ? 'Deleting...' : 'Delete' }}
-            </button> -->
           </div>
         </div>
 
@@ -508,3 +515,5 @@
     </div>
 
   </ng-template>
+  }
+</div>

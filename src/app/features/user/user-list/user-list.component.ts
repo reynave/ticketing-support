@@ -3,6 +3,7 @@ import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 interface UserFormModel {
@@ -30,6 +31,25 @@ export class UserListComponent implements OnInit {
 
   private readonly apiService = inject(ApiService);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2004;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   rows: any[] = [];
   loading = false;
@@ -40,11 +60,16 @@ export class UserListComponent implements OnInit {
 
   selectedUserTypeFilter :any = '1';
   selectedStatusFilter = '';
-accessRightOptions : any = [];
+  accessRightOptions : any = [];
   userForm: UserFormModel = this.defaultForm();
   modalRef: NgbModalRef | null = null;
 
   ngOnInit(): void {
+  console.log(  this.authService.getAccessRights())
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadUsers();
     this.loadAccessRightOptions()
   }
@@ -77,6 +102,10 @@ accessRightOptions : any = [];
   }
 
   openCreateModal(): void {
+    if (!this.canCreate) {
+      return;
+    }
+
     this.userForm = this.defaultForm();
     this.message = '';
     this.errorMessage = '';
@@ -99,7 +128,7 @@ accessRightOptions : any = [];
   }
 
   saveUser(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canCreate) {
       return;
     }
 
@@ -149,6 +178,10 @@ accessRightOptions : any = [];
   }
 
   deleteUser(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
     const id = String(row?.id || '').trim();
 
     if (!id) {

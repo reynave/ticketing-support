@@ -1,4 +1,7 @@
 <div class="container">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <div class="page-title">Master Product</div>
@@ -6,7 +9,9 @@
     </div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-secondary btn-sm" routerLink="/master">Back to Master</a>
+      @if (canCreate) {
       <button type="button" class="btn btn-sm btn-primary" (click)="openNewParentModal()">New Product</button>
+      }
       <button type="button" class="btn btn-sm btn-outline-primary" (click)="loadRows()" [disabled]="loading">
         {{ loading ? 'Refreshing...' : 'Refresh' }}
       </button>
@@ -84,7 +89,9 @@
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
             <td class="text-end">
               @if (isParentRow(row)) {
+              @if (canCreate) {
               <button type="button" class="btn btn-sm btn-outline-success me-2" (click)="openNewChildModal(row)">Create Child</button>
+              }
               }
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
             </td>
@@ -108,6 +115,7 @@
     </div>
     }
   </div>
+  }
 </div>
 
 <ng-template #productFormModal>

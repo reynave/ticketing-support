@@ -29,12 +29,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     { path: '/home', label: 'Home', icon: 'home' , badge: '' },
     { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '', moduleId: 5005 },
     { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '', moduleId: 5006 },
-    // {
-    //   path: '/change-requests',
-    //   label: 'Change Requests',
-    //   icon: 'change_circle',
-    //   badge: '',
-    // },
+    { path: '/change-requests', label: 'Change Requests', icon: 'change_circle', badge: '', moduleId: 5007 },
 
     { path: '/projects', label: 'Projects', icon: 'workspaces', moduleId: 2001 },
     { path: '/clients', label: 'Clients', icon: 'apartment', moduleId: 2002 },
@@ -175,7 +170,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   private filterMenusByAccess(menus: any[]): any[] {
     return menus.filter(
-      (menu) => !menu.moduleId || this.authService.hasModuleAccess(menu.moduleId),
+      (menu) => !menu.moduleId || this.authService.hasPermission(menu.moduleId, 'r'),
     );
   }
 

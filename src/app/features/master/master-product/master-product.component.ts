@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface ProductCreateForm {
   name: string;
@@ -23,6 +24,17 @@ export class MasterProductComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1002;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
 
   @ViewChild('productFormModal') productFormModal?: TemplateRef<unknown>;
   private modalRef: NgbModalRef | null = null;
@@ -43,6 +55,10 @@ export class MasterProductComponent {
   formModel: ProductCreateForm = this.defaultForm();
 
   constructor() {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     void this.loadParentOptions();
     this.loadRows();
   }
@@ -95,7 +111,7 @@ export class MasterProductComponent {
   }
 
   openNewParentModal(): void {
-    if (!this.productFormModal) {
+    if (!this.productFormModal || !this.canCreate) {
       return;
     }
 
@@ -112,7 +128,7 @@ export class MasterProductComponent {
   }
 
   openNewChildModal(parentRow: any): void {
-    if (!this.productFormModal || !this.isParentRow(parentRow)) {
+    if (!this.productFormModal || !this.isParentRow(parentRow) || !this.canCreate) {
       return;
     }
 
@@ -137,7 +153,7 @@ export class MasterProductComponent {
   }
 
   saveProduct(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canCreate) {
       return;
     }
 

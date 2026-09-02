@@ -1,4 +1,4 @@
-<div class="container py-3 user-detail-page">
+<div class="container-fluid py-3 user-detail-page">
   <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <div>
       <h5 class="fw-bold mb-0">User Detail</h5>
@@ -6,6 +6,10 @@
     </div>
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
   </div>
+
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2 mb-3">You do not have access to this module.</div>
+  } @else {
 
   @if (message) {
   <div class="alert alert-success py-2 mb-3">{{ message }}</div>
@@ -36,11 +40,15 @@
           </button>
           }
           @if (formMode === 'view') {
+          @if (canUpdate) {
           <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+          }
+          @if (canDelete) {
+          <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteUser()">Delete</button>
+          }
           } @else {
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
           }
-          <!-- <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteUser()">Delete</button> -->
         </div>
       </div>
 
@@ -141,14 +149,16 @@
 
           <div class="col-6">
             <div class="form-group" *ngIf="userForm.userTypeId === 1">
+
               <label class="form-label small fw-semibold" for="detail-edit-userAuthLevelId">Access Rules <span
-                  class="text-danger">*</span></label>
+                  class="text-danger">*</span>
+              </label>
+
               <select id="detail-edit-userAuthLevelId" class="form-select form-select-sm" name="userAuthLevelId"
                 [(ngModel)]="userForm.userAuthLevelId" [disabled]="formMode === 'view'" required>
-
                 <option *ngFor="let option of accessRightOptions" [ngValue]="option.id">{{ option.name}}</option>
-
               </select>
+              <div><a href="javascript:;" [routerLink]="['/master/user-access-right']" [queryParams]="{ authLevelId: userForm.userAuthLevelId }">Go to setting</a></div>
             </div>
 
 
@@ -191,5 +201,6 @@
 
     </div>
   </form>
+  }
   }
 </div>

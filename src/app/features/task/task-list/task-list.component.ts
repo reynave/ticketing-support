@@ -59,6 +59,20 @@ export class TaskListComponent implements OnInit, OnDestroy {
 
   private modalRef: NgbModalRef | null = null;
 
+  readonly moduleId = 5005;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
+
   readonly taskTypeId = 1;
   ticketStatusOptions: any[] = [];
   closed: boolean = false;
@@ -85,6 +99,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
   private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     console.log(this.activeRouter.snapshot.queryParams, this.closed);
     this.payload = this.authService.decodeToken();
     this.reloadSubscription = this.socketNotificationService
@@ -203,7 +221,7 @@ modules : any = [];
   }
 
   openCreateModal(): void {
-    if (!this.createTaskModal) {
+    if (!this.createTaskModal || !this.canCreate) {
       return;
     }
 
@@ -224,7 +242,7 @@ modules : any = [];
   }
 
   saveTask(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canCreate) {
       return;
     }
 
@@ -299,6 +317,10 @@ modules : any = [];
   }
 
   deleteTask(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
     const id = String(row?.id || '').trim();
 
     if (!id) {

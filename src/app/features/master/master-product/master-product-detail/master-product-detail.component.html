@@ -1,4 +1,7 @@
 <div class="container">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <div class="page-title">Product Detail</div>
@@ -71,10 +74,13 @@
 
       <div class="d-flex justify-content-end gap-2 mt-3">
         <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
+        @if (canUpdate) {
         <button type="submit" class="btn btn-primary" [disabled]="saving || productForm.invalid">
           {{ saving ? 'Saving...' : 'Save Changes' }}
         </button>
+        }
       </div>
     </form>
   </div>
+  }
 </div>

@@ -31,7 +31,7 @@ import { CountdownComponent } from './countdown.component';
 import { CaseCreateTaskModalComponent } from '../../../core/components/case-create-task-modal/case-create-task-modal.component';
 import { SocketNotificationService } from '../../../core/services/socket-notification.service';
 @Component({
-  selector: 'app-case-detail',
+  selector: 'app-change-request-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,10 +42,10 @@ import { SocketNotificationService } from '../../../core/services/socket-notific
     CaseCreateTaskModalComponent,
     RouterLink
   ],
-  templateUrl: './case-detail.component.html',
-  styleUrl: './case-detail.component.css',
+  templateUrl: './change-request-detail.component.html',
+  styleUrl: './change-request-detail.component.css',
 })
-export class CaseDetailComponent implements OnInit, OnDestroy {
+export class ChangeRequestDetailComponent implements OnInit, OnDestroy {
   // Listens for Ctrl + S globally on the document
   @HostListener('document:keydown.control.s', ['$event'])
   onKeydownHandler(event: KeyboardEvent) {
@@ -64,7 +64,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   private modalService = inject(NgbModal);
     private readonly socketNotificationService : any = inject(SocketNotificationService);
 
-  readonly moduleId = 5006;
+  readonly moduleId = 5007;
 
   get canAccessPage(): boolean {
     return this.authService.hasPermission(this.moduleId, 'r');
@@ -92,7 +92,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     ['text_color', 'background_color'],
     ['align_left', 'align_center', 'align_right', 'align_justify'],
   ];
-  readonly taskTypeId = 2;
+  readonly changeRequestTypeId = 3;
   ticketStatusOptions: any = [];
   ticketSeverities: any = [];
   taskId = '';
@@ -156,7 +156,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.taskId = String(this.route.snapshot.paramMap.get('id') || '').trim();
 
     if (!this.taskId) {
-      void this.router.navigate(['/cases']);
+      void this.router.navigate(['/change-requests']);
       return;
     }
 
@@ -182,7 +182,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.apiService.get(`/cases/${this.taskId}`).subscribe({
+    this.apiService.get(`/change-requests/${this.taskId}`).subscribe({
       next: (response) => {
         this.loading = false;
         this.task = response?.data || null;
@@ -192,9 +192,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.assignTo = this.task.assignTo;
         this.projectId = this.task.projectId;
         this.ticketBased = this.task.ticketBased;
-        if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
+        if (Number(this.task?.ticketTypeId) !== this.changeRequestTypeId) {
           this.task = null;
-          this.errorMessage = 'Data ini bukan case (ticketTypeId bukan 2).';
+          this.errorMessage = 'Data ini bukan change request (ticketTypeId bukan 3).';
           return;
         }
         this.remainingTime = this.task.submitDate;
@@ -207,7 +207,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.task = null;
         this.errorMessage =
-          error?.error?.message || 'Failed to load case detail.';
+          error?.error?.message || 'Failed to load change request detail.';
       },
     });
   }
@@ -215,7 +215,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.apiService.get(`/cases/${this.taskId}/logs`).subscribe({
+    this.apiService.get(`/change-requests/${this.taskId}/logs`).subscribe({
       next: (response) => {
         this.loading = false;
         this.taskLogs = response?.data || [];
@@ -224,7 +224,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.task = null;
         this.errorMessage =
-          error?.error?.message || 'Failed to load case detail.';
+          error?.error?.message || 'Failed to load change request detail.';
       },
     });
   }
@@ -322,7 +322,7 @@ ticketBalance : number = 0;
   loadRelatedTasks(): void {
     this.loadingRelatedTasks = true;
 
-    this.apiService.get(`/cases/${this.taskId}/tasks`).subscribe({
+    this.apiService.get(`/change-requests/${this.taskId}/tasks`).subscribe({
       next: (response) => {
         this.loadingRelatedTasks = false;
         this.relatedTasks = Array.isArray(response?.data) ? response.data : [];
@@ -392,7 +392,7 @@ ticketBalance : number = 0;
     }
 
     if (this.formModel.ticketStatusId >= 900) {
-      const confirmed = confirm(`Are you sure close case ${this.taskId}?`);
+      const confirmed = confirm(`Are you sure close change request ${this.taskId}?`);
 
       if (!confirmed) {
         return;
@@ -452,7 +452,7 @@ ticketBalance : number = 0;
       String(deadlineDate.getSeconds()).padStart(2, '0');
 
     const payload = {
-      ticketTypeId: this.taskTypeId,
+      ticketTypeId: this.changeRequestTypeId,
       title: this.formModel.title.trim(),
       description: this.formModel.description.trim(),
       projectId: this.formModel.projectId,
@@ -481,10 +481,10 @@ ticketBalance : number = 0;
     this.message = '';
     this.errorMessage = '';
 
-    this.apiService.put(`/cases/${this.taskId}`, payload).subscribe({
+    this.apiService.put(`/change-requests/${this.taskId}`, payload).subscribe({
       next: (response) => {
         this.saving = false;
-        this.message = response?.message || 'Case updated.';
+        this.message = response?.message || 'Change Request updated.';
         this.formMode = 'view';
         this.loadTaskDetail();
         this.loadTaskDetailLog();
@@ -492,7 +492,7 @@ ticketBalance : number = 0;
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to update case.';
+        this.errorMessage = error?.error?.message || 'Failed to update change request.';
       },
     });
   }
@@ -511,17 +511,17 @@ ticketBalance : number = 0;
     this.message = '';
     this.errorMessage = '';
 
-    this.apiService.put(`/cases/${this.taskId}/submitRate`, payload).subscribe({
+    this.apiService.put(`/change-requests/${this.taskId}/submitRate`, payload).subscribe({
       next: (response) => {
         this.saving = false;
-        this.message = response?.message || 'Case updated.';
+        this.message = response?.message || 'Change Request updated.';
         this.formMode = 'view';
         this.loadTaskDetail();
         this.loadTaskDetailLog();
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to update case.';
+        this.errorMessage = error?.error?.message || 'Failed to update change request.';
       },
     });
   }
@@ -531,7 +531,7 @@ ticketBalance : number = 0;
       return;
     }
 
-    const confirmed = confirm(`Delete case ${this.taskId}?`);
+    const confirmed = confirm(`Delete change request ${this.taskId}?`);
 
     if (!confirmed) {
       return;
@@ -540,14 +540,14 @@ ticketBalance : number = 0;
     this.deleting = true;
     this.errorMessage = '';
 
-    this.apiService.delete(`/cases/${this.taskId}`).subscribe({
+    this.apiService.delete(`/change-requests/${this.taskId}`).subscribe({
       next: () => {
         this.deleting = false;
         history.back();
       },
       error: (error) => {
         this.deleting = false;
-        this.errorMessage = error?.error?.message || 'Failed to delete case.';
+        this.errorMessage = error?.error?.message || 'Failed to delete change request.';
       },
     });
   }
@@ -769,7 +769,7 @@ ticketBalance : number = 0;
 
     // Kirim sekaligus — text fields + files dalam 1 request
     this.http
-      .post(`${environment.apiBaseUrl}/cases/log/${this.taskId}`, formData, {
+      .post(`${environment.apiBaseUrl}/change-requests/log/${this.taskId}`, formData, {
         reportProgress: true,
         observe: 'events',
       })

@@ -308,6 +308,9 @@ body {
 }
 
 @media (max-width: 992px) {
+	body{
+		margin-top: 30px;
+	}
 	.sidebar {
 		display: none;
 	}
@@ -476,3 +479,27 @@ i {
     border-top: 2px solid #212529 !important;
     border-bottom: 1px solid #212529 !important;
 }
+
+
+/* 1. Wrap the table to limit height and enable the vertical scrollbar */
+.table-container {
+  max-height: 400px;          /* Set your desired visible height */
+  overflow-y: auto;          /* Show vertical scrollbar only when needed */
+ 
+}
+
+/* 2. Style the table structure */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse; /* Keeps borders aligned nicely */
+}
+
+/* 3. The trick: Make the table headers stick to the top of the container */
+.table-container th {
+  position: sticky;
+  top: 0;                    /* Keep at the absolute top of the container */
+  z-index: 2;                /* Keep headers stacked above scrolling row data */
+   
+}
+
+ 

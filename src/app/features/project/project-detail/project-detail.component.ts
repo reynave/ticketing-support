@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { NgbDatepickerModule, NgbModal, NgbModalModule, NgbModalRef, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { AddContactModalComponent, AddContactModalResult } from '../../../core/components/add-contact-modal/add-contact-modal.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface ProjectFormModel {
   name: string;
@@ -48,6 +49,21 @@ export class ProjectDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2001;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   @ViewChild('ticketBalanceModal') ticketBalanceModal?: TemplateRef<unknown>;
   private ticketBalanceModalRef: NgbModalRef | null = null;
@@ -92,6 +108,10 @@ active = 1;
 
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.projectId = String(this.route.snapshot.paramMap.get('id') || '').trim();
 
     if (!this.projectId) {
@@ -216,7 +236,7 @@ active = 1;
 
   }
   startEdit(): void {
-    if (!this.project) {
+    if (!this.project || !this.canUpdate) {
       return;
     }
 
@@ -233,7 +253,7 @@ active = 1;
   }
 
   saveProject(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canUpdate) {
       return;
     }
 
@@ -276,7 +296,7 @@ active = 1;
   }
 
   deleteProject(): void {
-    if (this.deleting || !this.projectId) {
+    if (this.deleting || !this.projectId || !this.canDelete) {
       return;
     }
 

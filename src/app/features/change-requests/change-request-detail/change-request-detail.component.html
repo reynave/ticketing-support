@@ -5,7 +5,7 @@
   <div class="d-flex  mb-1 flex-wrap gap-2 mb-3">
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
     <div>
-      <h5 class="fw-bold mb-0">Case {{ taskId }}</h5>
+      <h5 class="fw-bold mb-0">Change Request {{ taskId }}</h5>
     </div>
 
     <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
@@ -31,16 +31,16 @@
 
     @if (loading) {
     <div class="card border shadow-sm">
-      <div class="card-body text-muted">Loading case detail...</div>
+      <div class="card-body text-muted">Loading change request detail...</div>
     </div>
     } @else if (!task) {
     <div class="card border shadow-sm">
-      <div class="card-body text-muted">Case not found.</div>
+      <div class="card-body text-muted">Change Request not found.</div>
     </div>
     } @else {
 
     <div class="alert alert-warning" *ngIf="taskCount > 0">
-      <strong>Note:</strong> This case has {{ taskCount }} related task(s). You cannot close this case until all related
+      <strong>Note:</strong> This change request has {{ taskCount }} related task(s). You cannot close this change request until all related
       tasks are completed.
     </div>
 
@@ -50,7 +50,7 @@
       <div class="card border shadow-sm mb-3">
         <div
           class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
-          <span class="fw-semibold small">Case Form</span>
+          <span class="fw-semibold small">Change Request Form</span>
           <div class="d-flex gap-2" *ngIf="task.ratesBy == '' && task.ticketStatusId <900">
 
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
@@ -81,7 +81,7 @@
             <table class="table table-sm align-middle task-form-table mb-0">
               <tbody>
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Case ID</label>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Change Request ID</label>
                   </td>
                   <td>
                     {{ task.id }}
@@ -191,7 +191,7 @@
               <tbody>
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Change Request Status
                       <span class="text-danger">*</span></label>
                   </td>
                   <td>
@@ -360,7 +360,7 @@
               <div class="alert alert-warning">
                 <div class="mb-2"><strong>Note:</strong> Please fill in the ticket estimation cost, title and
                   description before saving the
-                  case.
+                  change request.
                   <div>
                     <b> {{ticketBalance}}</b> remaining balance for this project.
                   </div>
@@ -401,7 +401,7 @@
         <div class="card-body">
 
           <div class="mb-3">
-            <label class="form-label small fw-semibold" for="detail-task-solution">Case Solution</label>
+            <label class="form-label small fw-semibold" for="detail-task-solution">Change Request Solution</label>
 
             @if (formMode === 'view' ) {
             <div class="form-control" [innerHtml]="formModel.taskSolution" style="min-height: 100px;"></div>
@@ -437,7 +437,7 @@
       @if (loadingRelatedTasks) {
       <div class="card-body text-muted">Loading task list...</div>
       } @else if (relatedTasks.length === 0) {
-      <div class="card-body text-muted">No task in this Case.</div>
+      <div class="card-body text-muted">No task in this Change Request.</div>
       } @else {
       <div class="table-responsive">
         <table class="table table-sm table-striped align-middle mb-0">

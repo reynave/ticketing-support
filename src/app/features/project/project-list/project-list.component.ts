@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-project-list',
@@ -15,6 +16,21 @@ import { ApiService } from '../../../core/services/api.service';
 export class ProjectListComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2001;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   rows: any[] = [];
   clients: any[] = [];
@@ -35,6 +51,10 @@ export class ProjectListComponent {
   selectedProjectTypeId = '';
 
   constructor() {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadProjects();
     void this.loadOptions();
   }
@@ -112,6 +132,10 @@ export class ProjectListComponent {
   }
  
   openCreateModal(): void {
+    if (!this.canCreate) {
+      return;
+    }
+
     this.errorMessage = '';
     this.message = '';
     void this.router.navigate(['/project/create']);
@@ -128,6 +152,10 @@ export class ProjectListComponent {
   }
 
   deleteProject(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
     const id = String(row?.id || '').trim();
 
     if (!id) {

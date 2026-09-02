@@ -14,6 +14,7 @@ import {
   NgbModalRef,
 } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface ClientFormModel {
   code: string;
@@ -48,6 +49,25 @@ export class ClientDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2002;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   @ViewChild('clientFormModal') clientFormModal?: TemplateRef<unknown>;
   @ViewChild('clientUserFormModal') clientUserFormModal?: TemplateRef<unknown>;
@@ -80,6 +100,10 @@ export class ClientDetailComponent implements OnInit {
 
   projects: any = [];
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.route.paramMap.subscribe((params) => {
       const id = Number(params.get('id'));
 
@@ -224,7 +248,7 @@ export class ClientDetailComponent implements OnInit {
   }
 
   openUpdateClientModal(): void {
-    if (!this.client) {
+    if (!this.client || !this.canUpdate) {
       return;
     }
 
@@ -242,6 +266,14 @@ export class ClientDetailComponent implements OnInit {
 
   saveClient(form: NgForm): void {
     if (form.invalid || this.savingClient) {
+      return;
+    }
+
+    if (this.clientFormMode === 'create' && !this.canCreate) {
+      return;
+    }
+
+    if (this.clientFormMode === 'update' && !this.canUpdate) {
       return;
     }
 
@@ -290,7 +322,7 @@ export class ClientDetailComponent implements OnInit {
   }
 
   deleteClient(): void {
-    if (!this.clientId || this.deletingClient) {
+    if (!this.clientId || this.deletingClient || !this.canDelete) {
       return;
     }
 
@@ -318,13 +350,17 @@ export class ClientDetailComponent implements OnInit {
   }
 
   openCreateUserModal(): void {
+    if (!this.canCreate) {
+      return;
+    }
+
     this.userForm = this.defaultUserForm();
     this.editingUserId = null;
     this.openUserModal();
   }
 
   saveUser(form: NgForm): void {
-    if (form.invalid || this.savingUser || !this.clientId) {
+    if (form.invalid || this.savingUser || !this.clientId || !this.canCreate) {
       return;
     }
 
@@ -370,6 +406,10 @@ export class ClientDetailComponent implements OnInit {
   }
 
   deleteUser(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
     const userId = String(row?.id || '').trim();
 
     if (!userId) {

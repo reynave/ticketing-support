@@ -35,6 +35,13 @@ export class ProjectCreateComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   modalService = inject(NgbModal);
+
+  readonly moduleId = 2001;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
   active : number = 1;
   clients: any[] = [];
   projectTypes: any[] = [];
@@ -58,6 +65,10 @@ export class ProjectCreateComponent {
     // tolong ambil userId yang di simpan di localStorage 8tt_auth_token dalam bentuk jwt token
    
       this.userId = this.authService.currentUser?.id || '';
+
+    if (!this.canAccessPage) {
+      return;
+    }
 
     void this.loadOptions();
   }
@@ -171,7 +182,7 @@ export class ProjectCreateComponent {
   }
 
   saveProject(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canAccessPage) {
       return;
     }
 

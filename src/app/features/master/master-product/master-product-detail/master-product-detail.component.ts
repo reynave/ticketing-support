@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface ProductFormModel {
   name: string;
@@ -22,6 +23,17 @@ export class MasterProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1002;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
 
   productId = 0;
   product: any = null;
@@ -36,6 +48,10 @@ export class MasterProductDetailComponent implements OnInit {
   formModel: ProductFormModel = this.defaultForm();
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.productId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
     if (!this.productId) {
@@ -79,7 +95,7 @@ export class MasterProductDetailComponent implements OnInit {
   }
 
   save(form: NgForm): void {
-    if (form.invalid || this.saving || !this.productId) {
+    if (form.invalid || this.saving || !this.productId || !this.canUpdate) {
       return;
     }
 

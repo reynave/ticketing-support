@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface ClientFormModel {
   code: string;
@@ -24,6 +25,21 @@ export class ClientListComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2002;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   @ViewChild('createClientModal') createClientModal?: TemplateRef<unknown>;
 
@@ -40,6 +56,10 @@ export class ClientListComponent {
   formModel: ClientFormModel = this.defaultForm();
 
   constructor() {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadClients();
     this.loadIndustries();
   }
@@ -77,7 +97,7 @@ export class ClientListComponent {
   }
 
   openCreateModal(): void {
-    if (!this.createClientModal) {
+    if (!this.createClientModal || !this.canCreate) {
       return;
     }
 
@@ -96,7 +116,7 @@ export class ClientListComponent {
   }
 
   saveClient(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canCreate) {
       return;
     }
 
@@ -143,6 +163,10 @@ export class ClientListComponent {
   }
 
   deleteClient(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
     const id = Number(row?.id);
 
     if (!id) {

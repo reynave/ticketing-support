@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface UserFormModel {
   email: string;
@@ -19,7 +20,7 @@ interface UserFormModel {
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.css',
 })
@@ -27,6 +28,21 @@ export class UserDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 2004;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   userId: string | null = null;
   user: any = null;
@@ -44,6 +60,10 @@ export class UserDetailComponent implements OnInit {
   accessRightOptions: any[] = [];
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadAccessRightOptions();
     this.userId = this.route.snapshot.paramMap.get('id');
     if (this.userId) {
@@ -84,7 +104,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   startEdit(): void {
-    if (!this.user) {
+    if (!this.user || !this.canUpdate) {
       return;
     }
 
@@ -101,7 +121,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   saveUser(form: NgForm): void {
-    if (form.invalid || this.saving || !this.userId) {
+    if (form.invalid || this.saving || !this.userId || !this.canUpdate) {
       return;
     }
 
@@ -137,7 +157,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   changePassword(): void {
-    if (!this.userId || this.changingPassword) {
+    if (!this.userId || this.changingPassword || !this.canUpdate) {
       return;
     }
 
@@ -183,7 +203,7 @@ export class UserDetailComponent implements OnInit {
   }
 
   deleteUser(): void {
-    if (!this.userId) {
+    if (!this.userId || !this.canDelete) {
       return;
     }
 

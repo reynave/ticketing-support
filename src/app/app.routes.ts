@@ -24,6 +24,8 @@ import { TaskListComponent } from './features/task/task-list/task-list.component
 import { TaskDetailComponent } from './features/task/task-detail/task-detail.component';
 import { CaseListComponent } from './features/cases/case-list/case-list.component';
 import { CaseDetailComponent } from './features/cases/case-detail/case-detail.component';
+import { ChangeRequestListComponent } from './features/change-requests/change-request-list/change-request-list.component';
+import { ChangeRequestDetailComponent } from './features/change-requests/change-request-detail/change-request-detail.component';
 import { RatingListComponent } from './features/rating/rating-list/rating-list.component';
 import { TaskReportComponent } from './features/reports/task-report/task-report.component';
 import { CaseReportComponent } from './features/reports/case-report/case-report.component';
@@ -109,6 +111,14 @@ export const routes: Routes = [
 			{
 				path: 'cases/:id',
 				component: CaseDetailComponent,
+			},
+			{
+				path: 'change-requests',
+				component: ChangeRequestListComponent,
+			},
+			{
+				path: 'change-requests/:id',
+				component: ChangeRequestDetailComponent,
 			},
 			{
 				path: 'rating',

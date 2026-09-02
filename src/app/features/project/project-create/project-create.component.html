@@ -1,4 +1,7 @@
 <div class="container py-3">
+   @if (!canAccessPage) {
+   <div class="alert alert-danger py-2">You do not have access to create a project.</div>
+   } @else {
    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
       <div>
          <div class="page-title">New Project</div>
@@ -447,4 +450,5 @@
          </button>
       </div>
    </form>
+   }
 </div>

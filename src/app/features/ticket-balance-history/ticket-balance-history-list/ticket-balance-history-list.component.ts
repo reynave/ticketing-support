@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -13,12 +14,23 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class TicketBalanceHistoryListComponent implements OnInit {
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 6001;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
 
   rows: any[] = [];
   loading = false;
   errorMessage = '';
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadHistory();
   }
 

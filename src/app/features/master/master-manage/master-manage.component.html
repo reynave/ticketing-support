@@ -16,6 +16,8 @@
 
   @if (!config) {
   <div class="alert alert-warning">Unknown master key: {{ masterKey }}</div>
+  } @else if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
   } @else {
   <div class="stat-card mb-3">
     <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -57,9 +59,9 @@
       </button>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive table-container">
       <table class="table table-hover align-middle mb-0">
-        <thead>
+        <thead >
           <tr>
             <th>Module</th>
             <th class="text-center">
@@ -184,12 +186,13 @@
                 </button>
                 }
 
+                @if (canUpdate) {
                 <button class="btn btn-sm btn-outline-primary" type="button" (click)="openEdit(row)">
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                 
+                }
 
-                @if (!isUpdateOnly) {
+                @if (!isUpdateOnly && canDelete) {
                 <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteRow(row)"
                   [disabled]="deletingId === row.id">
                   <i class="bi bi-trash"></i>

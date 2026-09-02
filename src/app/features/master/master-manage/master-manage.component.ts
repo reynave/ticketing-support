@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { firstValueFrom } from 'rxjs';
 
 interface MasterFieldConfig {
@@ -38,6 +39,38 @@ export class MasterManageComponent implements OnInit {
   private readonly apiService = inject(ApiService);
   private readonly modalService = inject(NgbModal);
    private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  // Only keys with an official moduleId are access-controlled; unmapped keys stay visible.
+  readonly masterModuleIds: Record<string, number> = {
+    industry: 1001,
+    product: 1002,
+    'project-type': 1003,
+    'project-billeable': 1004,
+    'ticket-categories': 1005,
+    'user-auth-level': 1006,
+    'global-setting': 1007,
+  };
+
+  get moduleId(): number | null {
+    return this.masterModuleIds[this.masterKey] ?? null;
+  }
+
+  get canAccessPage(): boolean {
+    return this.moduleId === null || this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.moduleId === null || this.authService.hasPermission(this.moduleId, 'c');
+  }
+
+  get canUpdate(): boolean {
+    return this.moduleId === null || this.authService.hasPermission(this.moduleId, 'u');
+  }
+
+  get canDelete(): boolean {
+    return this.moduleId === null || this.authService.hasPermission(this.moduleId, 'd');
+  }
   
 
   @ViewChild('masterFormModal') masterFormModal?: TemplateRef<unknown>;
@@ -184,6 +217,12 @@ export class MasterManageComponent implements OnInit {
     this.selectedStatus = '';
     this.selectedAuthLevelId = this.parseSelectedAuthLevelId();
 
+    if (!this.canAccessPage) {
+      this.rows = [];
+      this.columns = [];
+      return;
+    }
+
     if (this.isAccessRightPage) {
       this.loadAccessRightMatrix();
       return;
@@ -242,7 +281,7 @@ export class MasterManageComponent implements OnInit {
   }
 
   openCreate(): void {
-    if (!this.config || this.isUpdateOnly) {
+    if (!this.config || this.isUpdateOnly || !this.canCreate) {
       return;
     }
 
@@ -260,7 +299,7 @@ export class MasterManageComponent implements OnInit {
   }
 
   openEdit(row: any): void {
-    if (!row?.id || !this.config) {
+    if (!row?.id || !this.config || !this.canUpdate) {
       return;
     }
 
@@ -293,6 +332,10 @@ export class MasterManageComponent implements OnInit {
       return;
     }
 
+    if (this.isEditMode ? !this.canUpdate : !this.canCreate) {
+      return;
+    }
+
     const payload = this.buildPayload(this.formModel);
     this.saving = true;
     this.errorMessage = '';
@@ -317,7 +360,7 @@ export class MasterManageComponent implements OnInit {
   }
 
   deleteRow(row: any): void {
-    if (!row?.id || this.isUpdateOnly) {
+    if (!row?.id || this.isUpdateOnly || !this.canDelete) {
       return;
     }
 
@@ -357,7 +400,7 @@ export class MasterManageComponent implements OnInit {
   }
 
   canShowCreateButton(): boolean {
-    return !this.isUpdateOnly && !this.isAccessRightPage;
+    return !this.isUpdateOnly && !this.isAccessRightPage && this.canCreate;
   }
 
   showAccessRightButton(): boolean {

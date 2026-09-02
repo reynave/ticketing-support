@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface TemplateFormModel {
   name: string;
@@ -21,6 +22,17 @@ export class MasterTemplateDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1010;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
 
   templateId = 0;
   template: any = null;
@@ -33,6 +45,10 @@ export class MasterTemplateDetailComponent implements OnInit {
   formModel: TemplateFormModel = this.defaultForm();
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.templateId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
     if (!this.templateId) {
@@ -62,7 +78,7 @@ export class MasterTemplateDetailComponent implements OnInit {
   }
 
   save(form: NgForm): void {
-    if (form.invalid || this.saving || !this.templateId) {
+    if (form.invalid || this.saving || !this.templateId || !this.canUpdate) {
       return;
     }
 

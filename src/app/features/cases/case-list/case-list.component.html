@@ -1,10 +1,15 @@
 <div class="container-fluid">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <div class="page-title">Case List</div>
       <div class="page-subtitle">Kelola case operasional dari data API ticket (ticketTypeId = 2).</div>
     </div>
+    @if (canCreate) {
     <button type="button" class="btn btn-primary-sm" (click)="openCreateModal()">Create New Case</button>
+    }
   </div>
 
   @if (message) {
@@ -71,7 +76,7 @@
             <th>Category</th>
             <th>Target Date</th>
             <th>TASK</th>
-            <!-- <th class="text-end">Action</th> -->
+            <th *ngIf="canDelete" class="text-end">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -97,13 +102,12 @@
               <div *ngIf="row.taskCount" class="fw-semibold text-success">{{ row.taskCount }}</div>
               <div *ngIf="!row.taskCount" class="fw-semibold text-danger">No Task</div>
             </td>
-            <!-- <td class="text-end action-buttons">
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToDetail(row)">Detail</button>
+            <td *ngIf="canDelete" class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteCase(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td> -->
+            </td>
           </tr>
           }
         </tbody>
@@ -111,6 +115,7 @@
     </div>
     }
   </div>
+  }
 </div>
 
 <ng-template #createCaseModal>

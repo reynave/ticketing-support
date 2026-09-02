@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-master-template',
@@ -14,6 +15,17 @@ import { ApiService } from '../../../core/services/api.service';
 export class MasterTemplateComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1010;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'd');
+  }
 
   rows: any[] = [];
   loading = false;
@@ -21,6 +33,10 @@ export class MasterTemplateComponent {
   deleting = false;
 
   constructor() {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.loadRows();
   }
 
@@ -68,7 +84,7 @@ export class MasterTemplateComponent {
   }
 
   async deleteSelected(): Promise<void> {
-    if (this.deleting) {
+    if (this.deleting || !this.canDelete) {
       return;
     }
 
@@ -121,6 +137,6 @@ export class MasterTemplateComponent {
 
   private updateDeleteState(): void {
     this.disabledDelete =
-      this.deleting || !this.rows.some((row) => Boolean(row?.checked));
+      this.deleting || !this.canDelete || !this.rows.some((row) => Boolean(row?.checked));
   }
 }

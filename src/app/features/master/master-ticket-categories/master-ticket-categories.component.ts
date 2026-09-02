@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface TicketCategoryCreateForm {
   name: string;
@@ -24,6 +25,17 @@ export class MasterTicketCategoriesComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1005;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'c');
+  }
 
   @ViewChild('categoryFormModal') categoryFormModal?: TemplateRef<unknown>;
   private modalRef: NgbModalRef | null = null;
@@ -44,6 +56,10 @@ export class MasterTicketCategoriesComponent {
   formModel: TicketCategoryCreateForm = this.defaultForm();
 
   constructor() {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     void this.loadParentOptions();
     this.loadRows();
   }
@@ -95,7 +111,7 @@ export class MasterTicketCategoriesComponent {
   }
 
   openNewParentModal(): void {
-    if (!this.categoryFormModal) {
+    if (!this.categoryFormModal || !this.canCreate) {
       return;
     }
 
@@ -112,7 +128,7 @@ export class MasterTicketCategoriesComponent {
   }
 
   openNewChildModal(parentRow: any): void {
-    if (!this.categoryFormModal || !this.isParentRow(parentRow)) {
+    if (!this.categoryFormModal || !this.isParentRow(parentRow) || !this.canCreate) {
       return;
     }
 
@@ -137,7 +153,7 @@ export class MasterTicketCategoriesComponent {
   }
 
   saveCategory(form: NgForm): void {
-    if (form.invalid || this.saving) {
+    if (form.invalid || this.saving || !this.canCreate) {
       return;
     }
 

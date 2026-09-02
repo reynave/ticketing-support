@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface TicketCategoryFormModel {
   name: string;
@@ -24,6 +25,17 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 1005;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
+  get canUpdate(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'u');
+  }
 
   categoryId = 0;
   category: any = null;
@@ -38,6 +50,10 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
   formModel: TicketCategoryFormModel = this.defaultForm();
 
   ngOnInit(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     this.categoryId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
     if (!this.categoryId) {
@@ -81,7 +97,7 @@ export class MasterTicketCategoryDetailComponent implements OnInit {
   }
 
   save(form: NgForm): void {
-    if (form.invalid || this.saving || !this.categoryId) {
+    if (form.invalid || this.saving || !this.categoryId || !this.canUpdate) {
       return;
     }
 

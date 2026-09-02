@@ -210,4 +210,12 @@ export class AuthService {
       (accessRight) => Number(accessRight.moduleId) === Number(moduleId),
     );
   }
+
+  hasPermission(moduleId: number, action: 'c' | 'r' | 'u' | 'd'): boolean {
+    const accessRight = this.getAccessRights().find(
+      (right) => Number(right.moduleId) === Number(moduleId),
+    );
+
+    return !!accessRight && Number(accessRight[action]) === 1;
+  }
 }

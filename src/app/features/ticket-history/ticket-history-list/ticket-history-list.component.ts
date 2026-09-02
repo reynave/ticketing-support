@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -16,6 +17,14 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 export class TicketHistoryListComponent {
   private readonly apiService = inject(ApiService);
 	private modalService = inject(NgbModal);
+  private readonly authService = inject(AuthService);
+
+  readonly moduleId = 6002;
+
+  get canAccessPage(): boolean {
+    return this.authService.hasPermission(this.moduleId, 'r');
+  }
+
   searchText = '';
   rows: any[] = [];
   loading = false;
@@ -23,6 +32,10 @@ export class TicketHistoryListComponent {
   hasSearched = false;
 
   search(): void {
+    if (!this.canAccessPage) {
+      return;
+    }
+
     const keyword = this.searchText.trim();
 
     if (!keyword) {

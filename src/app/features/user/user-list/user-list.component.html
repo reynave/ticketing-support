@@ -1,4 +1,7 @@
-<div class="container">
+<div class="container-fluid">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
   <div class="page-header">
     <div>
       <div class="page-title">Global Users</div>
@@ -25,7 +28,9 @@
           <option value="2">External</option>
         </select>
          
+        @if (canCreate) {
         <button type="button" class="btn btn-primary-sm" [disabled]="selectedUserTypeFilter == '2'" style="width: 200px;" (click)="openCreateModal()">New User</button>
+        }
        
       </div>
     </div>
@@ -40,22 +45,24 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Email</th>
             <th>Name</th>
+            <th>Rules</th>
+            <th>Email</th>
+         
             <th>division</th>
             <th>Position</th> 
             <th *ngIf="selectedUserTypeFilter == '2'">ClientId</th>
-            <th>Status</th>
-         
+            <th >Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr>
             <td> <a href="javascript:;" [routerLink]="['/users', row.id]">{{ row.id }}</a> </td>
-            <td>{{ row.email }}</td>
-            <td>{{ row.firstName }} {{ row.lastName }}</td>
-
+             <td>{{ row.firstName }} {{ row.lastName }}</td>
+            <td>{{ row.userAuthLevel }}</td>
+            <td>{{ row.email }}</td> 
             <td>{{ row.division }}</td>
             <td>{{ row.position }}</td>
 
@@ -65,13 +72,15 @@
                 row.clientName }}</a> 
             </td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <!-- <td class="text-end action-buttons">
-              <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/users', row.id]">Edit</a>
+            <td class="text-end "> 
+             
+              @if (canDelete) {
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteUser(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td> -->
+              }
+            </td>
           </tr>
           }
         </tbody>
@@ -79,6 +88,7 @@
     </div>
     }
   </div>
+  }
 </div>
 
 <!-- Create Modal -->
