@@ -169,7 +169,7 @@ active = 1;
         firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })), 
         firstValueFrom(this.apiService.get('/ticket', {  projectId: this.projectId, closed : false })),
         firstValueFrom(this.apiService.get('/cases', {   projectId: this.projectId, closed : false })),
-        firstValueFrom(this.apiService.get('/ticket', {   projectId: this.projectId , closed : false})),
+        firstValueFrom(this.apiService.get('/change-requests', {   projectId: this.projectId , closed : false})),
         firstValueFrom(this.apiService.get('/ticket-categories',  { status: 1 ,parentId :0})),
          firstValueFrom(this.apiService.get(`/ticket-balance/project/${this.projectId}`)),
         

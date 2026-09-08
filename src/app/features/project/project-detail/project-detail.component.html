@@ -411,21 +411,23 @@
               <th>Status</th>
               <th>Priority</th>
               <th>Created At</th>
-              <td>AssignTo</td>
+              <th>AssignTo</th>
             </tr>
           </thead>
           <tbody>
             @for (group of groupedFilteredCr; track group.id) {
               @if(group.data.length > 0) {
             <tr class="table-light">
-              <td colspan="6" class="fw-semibold">
+              <td colspan="7" class="fw-semibold">
                 {{ group.name }} ({{ group.data.length }})
               </td>
             </tr>
 
             @for (t of group.data; track t.id) {
             <tr>
-              <td>{{ t.id }}</td>
+              <td>
+                <a [routerLink]="['/change-requests', t.id]" class="text-decoration-none">{{ t.id }}</a>
+              </td>
               <td>{{ t.title }}</td>
               <td>{{ t.ticketTypeName }}</td>
               <td>{{ t.ticketStatusName }}</td>
