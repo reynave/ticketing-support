@@ -21,9 +21,11 @@ export class HomeComponent implements OnInit {
 
   tasks: any[] = [];
   cases: any[] = [];
+  changeRequests: any[] = [];
 
   totalOpenTasks = 0;
   totalOpenCases = 0;
+  totalOpenChangeRequests = 0;
 
   ngOnInit(): void {
     console.log('Access rights:', this.authService.getAccessRights());
@@ -35,21 +37,28 @@ export class HomeComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const [taskResponse, caseResponse] = await Promise.all([
+      const [taskResponse, caseResponse, changeRequestResponse] = await Promise.all([
         firstValueFrom(this.apiService.get('/ticket', { ticketTypeId: 1 })),
         firstValueFrom(this.apiService.get('/cases')),
+        firstValueFrom(this.apiService.get('/change-requests', { ticketTypeId: 3 })),
       ]);
 
       this.tasks = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
       this.cases = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
+      this.changeRequests = Array.isArray(changeRequestResponse?.data)
+        ? changeRequestResponse.data
+        : [];
 
       this.totalOpenTasks = this.tasks.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
       this.totalOpenCases = this.cases.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
+      this.totalOpenChangeRequests = this.changeRequests.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
     } catch (error: any) {
       this.tasks = [];
       this.cases = [];
+      this.changeRequests = [];
       this.totalOpenTasks = 0;
       this.totalOpenCases = 0;
+      this.totalOpenChangeRequests = 0;
       this.errorMessage = error?.error?.message || 'Failed to load home dashboard data.';
     } finally {
       this.loading = false;

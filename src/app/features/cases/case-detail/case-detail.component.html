@@ -64,11 +64,11 @@
             @if (canUpdate) {
             <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
             }
-            @if (canDelete) {
+            <!-- @if (canDelete) {
             <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
               {{ deleting ? 'Deleting...' : 'Delete' }}
             </button>
-            }
+            } -->
             } @else {
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
             }

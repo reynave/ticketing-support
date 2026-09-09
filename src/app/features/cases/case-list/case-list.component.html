@@ -76,7 +76,7 @@
             <th>Category</th>
             <th>Target Date</th>
             <th>TASK</th>
-            <th *ngIf="canDelete" class="text-end">Action</th>
+            <!-- <th *ngIf="canDelete" class="text-end">Action</th> -->
           </tr>
         </thead>
         <tbody>
@@ -102,12 +102,12 @@
               <div *ngIf="row.taskCount" class="fw-semibold text-success">{{ row.taskCount }}</div>
               <div *ngIf="!row.taskCount" class="fw-semibold text-danger">No Task</div>
             </td>
-            <td *ngIf="canDelete" class="text-end action-buttons">
+            <!-- <td *ngIf="canDelete" class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteCase(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td>
+            </td> -->
           </tr>
           }
         </tbody>

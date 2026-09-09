@@ -1,72 +1,139 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Subscription } from 'rxjs';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
+import { Subscription, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { SocketNotificationService } from '../../core/services/socket-notification.service';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule, NgForm } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { buildInfo } from '../../../environments/build-info';
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, FormsModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    FormsModule,
+  ],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css',
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
-
   private readonly apiService = inject(ApiService);
   private readonly authService = inject(AuthService);
-  private readonly socketNotificationService = inject(SocketNotificationService);
+  private readonly socketNotificationService = inject(
+    SocketNotificationService,
+  );
   private readonly router = inject(Router);
   private readonly modalService = inject(NgbModal);
   private socketSubscription?: Subscription;
 
   ngBuildCode: string = buildInfo.buildCode; // auto-generated on each build
-  readonly moduleMenus = [ 
-    { path: '/home', label: 'Home', icon: 'home' , badge: '' },
-    { path: '/tasks', label: 'Tasks', icon: 'task_alt' , badge: '', moduleId: 5005 },
-    { path: '/cases', label: 'Cases', icon: 'report_problem', badge: '', moduleId: 5006 },
-    { path: '/change-requests', label: 'Change Requests', icon: 'change_circle', badge: '', moduleId: 5007 },
+  readonly moduleMenus = [
+    { path: '/home', label: 'Home', icon: 'home', badge: '' },
+    {
+      path: '/tasks',
+      label: 'Tasks',
+      icon: 'task_alt',
+      badge: '',
+      moduleId: 5005,
+    },
+    {
+      path: '/cases',
+      label: 'Cases',
+      icon: 'report_problem',
+      badge: '',
+      moduleId: 5006,
+    },
+    {
+      path: '/change-requests',
+      label: 'Change Requests',
+      icon: 'change_circle',
+      badge: '',
+      moduleId: 5007,
+    },
 
-    { path: '/projects', label: 'Projects', icon: 'workspaces', moduleId: 2001 },
+    {
+      path: '/projects',
+      label: 'Projects',
+      icon: 'workspaces',
+      moduleId: 2001,
+    },
     { path: '/clients', label: 'Clients', icon: 'apartment', moduleId: 2002 },
-  //  { path: '/contact', label: 'Contact', icon: 'group' },
+    //  { path: '/contact', label: 'Contact', icon: 'group' },
     { path: '/users', label: 'Users', icon: 'account_circle', moduleId: 2004 },
 
-    { path: '/rating', label: 'Rating', icon: 'star', badge: '', moduleId: 2005 },
-    
+    {
+      path: '/rating',
+      label: 'Rating',
+      icon: 'star',
+      badge: '',
+      moduleId: 2005,
+    },
   ];
 
-
-
-  readonly reportMenus = [ 
-    { path: '/report/task', label: 'Task History', icon: 'task_alt', moduleId: 5005 },
-    { path: '/report/cases', label: 'Cases History', icon: 'report_problem', moduleId: 5006 },
-  //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
-    
+  readonly reportMenus = [
+    {
+      path: '/report/task',
+      label: 'Task History',
+      icon: 'task_alt',
+      moduleId: 5005,
+    },
+    {
+      path: '/report/cases',
+      label: 'Cases History',
+      icon: 'report_problem',
+      moduleId: 5006,
+    },
+    //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
   ];
 
-    readonly auditMenus = [ 
-      { path: '/user-login-history', label: 'Login History', icon: 'search_activity', moduleId: 6000 },
-      { path: '/ticket-balance-history', label: 'Ticket Balance', icon: 'fact_check', moduleId: 6001 },
-  //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
-    
+  readonly auditMenus = [
+    {
+      path: '/user-login-history',
+      label: 'Login History',
+      icon: 'search_activity',
+      moduleId: 6000,
+    },
+    {
+      path: '/ticket-balance-history',
+      label: 'Ticket Balance',
+      icon: 'fact_check',
+      moduleId: 6001,
+    },
+    //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
   ];
 
   readonly masterMenus = [
     { key: 'industry', label: 'Industry', icon: 'domain', moduleId: 1001 },
-     {
+    {
       key: 'master-product',
       label: 'Product',
       icon: 'inventory_2',
       route: '/master-product',
       moduleId: 1002,
     },
-    { key: 'project-type', label: 'Project Type', icon: 'schema', moduleId: 1003 },
-    { key: 'project-billeable', label: 'Project Billeable', icon: 'payments', moduleId: 1004 },
+    {
+      key: 'project-type',
+      label: 'Project Type',
+      icon: 'schema',
+      moduleId: 1003,
+    },
+    {
+      key: 'project-billeable',
+      label: 'Project Billeable',
+      icon: 'payments',
+      moduleId: 1004,
+    },
     // {
     //   key: 'project-categories',
     //   label: 'Project Categories',
@@ -80,9 +147,20 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       moduleId: 1005,
     },
 
-    { key: 'template', label: 'Template', icon: 'description', route: '/master-template', moduleId: 1010 },
-   
-    { key: 'user-auth-level', label: 'User Auth Level', icon: 'verified_user', moduleId: 1006 },
+    {
+      key: 'template',
+      label: 'Template',
+      icon: 'description',
+      route: '/master-template',
+      moduleId: 1010,
+    },
+
+    {
+      key: 'user-auth-level',
+      label: 'User Auth Level',
+      icon: 'verified_user',
+      moduleId: 1006,
+    },
     //{ key: 'user-type', label: 'User Type', icon: 'groups' },
     {
       key: 'global-setting',
@@ -121,8 +199,20 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     return this.authService.initials(this.userName);
   }
 
-  searchText : string = '';
+  searchText: string = '';
   mobileMenuOpen = false;
+  profileForm = {
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    division: '',
+    position: '',
+  };
+  profileLoading = false;
+  profileSaving = false;
+  profileError = '';
   ngOnInit(): void {
     this.loadbBadge();
 
@@ -134,25 +224,25 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         });
         this.loadbBadge();
       });
-
-
   }
 
   ngOnDestroy(): void {
     this.socketSubscription?.unsubscribe();
-
   }
-  loadbBadge(){
+  loadbBadge() {
     this.apiService.get('/master/loadbBadge').subscribe({
       next: (response) => {
         const badgeData = response.data;
-        this.moduleMenus[1].badge = badgeData.find((b: { name: string; }) => b.name === 'task')?.total || '';
-        this.moduleMenus[2].badge = badgeData.find((b: { name: string; }) => b.name === 'issue')?.total || '';
-        this.moduleMenus[3].badge = badgeData.find((b: { name: string; }) => b.name === 'cr')?.total || '';
+        this.moduleMenus[1].badge =
+          badgeData.find((b: { name: string }) => b.name === 'task')?.total ||
+          '';
+        this.moduleMenus[2].badge =
+          badgeData.find((b: { name: string }) => b.name === 'issue')?.total ||
+          '';
+        this.moduleMenus[3].badge =
+          badgeData.find((b: { name: string }) => b.name === 'cr')?.total || '';
       },
-      error: () => {
-       
-      },
+      error: () => {},
     });
   }
 
@@ -170,37 +260,112 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   private filterMenusByAccess(menus: any[]): any[] {
     return menus.filter(
-      (menu) => !menu.moduleId || this.authService.hasPermission(menu.moduleId, 'r'),
+      (menu) =>
+        !menu.moduleId || this.authService.hasPermission(menu.moduleId, 'r'),
     );
   }
 
   logout(): void {
     this.authService.logout();
   }
-    searchResults : any = []; // Clear previous search results
-  searchBox(content:any): void {
-
+  searchResults: any = []; // Clear previous search results
+  searchBox(content: any): void {
     // jika this.searchText lenght < 6 maka warning "Search text must be at least 6 characters long" dan return
     if (this.searchText.length < 6) {
       alert('Search text must be at least 6 characters long');
       return;
     }
 
-
     this.modalService.open(content, { size: 'xl' });
-   console.log('Search text:', this.searchText);
-   this.apiService.get('/master/searchTickets', { searchText: this.searchText }).subscribe({
+    console.log('Search text:', this.searchText);
+    this.apiService
+      .get('/master/searchTickets', { searchText: this.searchText })
+      .subscribe({
+        next: (response) => {
+          const searchResults = response.data;
+          console.log('Search results:', searchResults);
+          this.searchResults = searchResults; // Update the search results to be displayed in the modal
+        },
+        error: (error) => {
+          console.error('Error searching tickets:', error);
+          // Handle the error as needed, e.g., show an error message to the user
+        },
+      });
+    // this.router.navigate(['/tasks'], { queryParams: { query: this.searchText } });
+    // Implement your search logic here, e.g., navigate to a search results page or filter data
+  }
+
+  openProfile(content: any): void {
+    const userId = this.authService.currentUser?.id;
+    this.profileLoading = true;
+    this.profileError = '';
+    this.profileForm = {
+      email: '', password: '', confirmPassword: '', firstName: '', lastName: '', division: '', position: '',
+    };
+    this.modalService.open(content, { size: 'lg' });
+
+    if (!userId) {
+      this.profileLoading = false;
+      this.profileError = 'User session not found.';
+      return;
+    }
+
+    this.apiService.get(`/user/${userId}`).subscribe({
       next: (response) => {
-        const searchResults = response.data;
-        console.log('Search results:', searchResults);
-        this.searchResults = searchResults; // Update the search results to be displayed in the modal
+        const user = response?.data || {};
+        this.profileForm = {
+          email: user.email || '', password: '', confirmPassword: '',
+          firstName: user.firstName || '', lastName: user.lastName || '',
+          division: user.division || '', position: user.position || '',
+        };
+        this.profileLoading = false;
       },
       error: (error) => {
-        console.error('Error searching tickets:', error);
-        // Handle the error as needed, e.g., show an error message to the user
+        this.profileLoading = false;
+        this.profileError = error?.error?.message || 'Failed to load profile.';
       },
     });
-   // this.router.navigate(['/tasks'], { queryParams: { query: this.searchText } });
-    // Implement your search logic here, e.g., navigate to a search results page or filter data
+  }
+
+  saveProfile(form: NgForm, modal: any): void {
+    const userId = this.authService.currentUser?.id;
+    if (form.invalid || this.profileSaving || !userId) {
+      return;
+    }
+
+    if (this.profileForm.password !== this.profileForm.confirmPassword) {
+      this.profileError = 'Password confirmation does not match.';
+      return;
+    }
+
+    const profilePayload = {
+      email: this.profileForm.email.trim(),
+      firstName: this.profileForm.firstName.trim(),
+      lastName: this.profileForm.lastName.trim(),
+      division: this.profileForm.division.trim(),
+      position: this.profileForm.position.trim(),
+    };
+    const passwordPayload = {
+      password: this.profileForm.password,
+      confirmPassword: this.profileForm.confirmPassword,
+    };
+
+    this.profileSaving = true;
+    this.profileError = '';
+    this.apiService.put(`/user/${userId}`, profilePayload).pipe(
+      switchMap(() => this.profileForm.password
+        ? this.apiService.put(`/user/${userId}/password`, passwordPayload)
+        : of(null)),
+      switchMap(() => this.authService.fetchMe()),
+    ).subscribe({
+      next: () => {
+        this.profileSaving = false;
+        modal.close();
+      },
+      error: (error) => {
+        this.profileSaving = false;
+        this.profileError = error?.error?.message || 'Failed to update profile.';
+      },
+    });
   }
 }

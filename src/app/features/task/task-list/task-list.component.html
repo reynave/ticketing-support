@@ -75,7 +75,7 @@
             <th>Category</th>
              <th>Submit Date</th>
              <th>Assign Id</th>
-            <th *ngIf="canDelete" class="text-end">Action</th>
+            <!-- <th *ngIf="canDelete" class="text-end">Action</th> -->
           </tr>
         </thead>
         <tbody>
@@ -102,12 +102,12 @@
                 <span class="text-muted">Not assigned</span>
               </ng-template>
              </td>
-            <td *ngIf="canDelete" class="text-end action-buttons">
+            <!-- <td *ngIf="canDelete" class="text-end action-buttons">
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteTask(row)">
                 {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
               </button>
-            </td>
+            </td> -->
           </tr>
           }
         </tbody>

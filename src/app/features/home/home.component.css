@@ -1,8 +1,109 @@
-.table-responsive {
-  max-height: 520px;
-  overflow: auto;
-}
-
 h6 {
   font-weight: 700;
+}
+
+.kanban-board {
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid #dfe5e8;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(25, 48, 57, 0.06);
+}
+
+.kanban-board-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #dfe5e8;
+}
+
+.kanban-board-header h6 {
+  margin: 0.15rem 0 0;
+  color: #193039;
+  font-size: 1.05rem;
+}
+
+.kanban-kicker {
+  color: #687a80;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kanban-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.75rem;
+ 
+  padding-top: 0.85rem;
+}
+
+.kanban-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+ 
+  padding: 0.75rem;
+  border: 1px solid #e2e8e8;
+  border-left: 3px solid #2c7a7b;
+  border-radius: 7px;
+  background: #fafafa;
+  color: #000;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(25, 48, 57, 0.06);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.kanban-card:hover {
+  border-color: #2c7a7b;
+  color: #193039;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(25, 48, 57, 0.12);
+}
+
+.kanban-card-id,
+.kanban-card-meta {
+  color: #718288;
+  font-size: 0.7rem;
+}
+
+.kanban-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.35;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.kanban-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+ 
+  text-overflow: ellipsis;
+}
+
+.kanban-empty {
+  display: grid;
+  min-height: 250px;
+  place-items: center;
+  color: #718288;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 575.98px) {
+  .kanban-board {
+    padding: 0.8rem;
+  }
+
+  .kanban-columns {
+    grid-template-columns: 1fr;
+  }
 }

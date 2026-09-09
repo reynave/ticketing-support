@@ -14,11 +14,11 @@
     <div class="search-wrapper">
       <i class="bi bi-search"></i>
       <input type="text" class="form-control" name="searchText" placeholder="Search by ticket Id / ticket subject"
-        [(ngModel)]="searchText" (keyup.enter)="searchBox(content)" />
+        [(ngModel)]="searchText" (keyup.enter)="searchBox(searchContent)" />
     </div>
   </div>
 
-  <ng-template #content let-modal>
+  <ng-template #searchContent let-modal>
     <div class="modal-header">
       <strong>Search : <em>{{searchText}}</em></strong>
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
@@ -59,13 +59,104 @@
 
 
   <div class="navbar-actions">
-    <button type="button" class="btn-icon" title="Back" (click)="back()">
-      <i class="bi bi-arrow-left"></i>
-    </button>
 
 
 
-    <div class="avatar" title="User">{{ userInitials }}</div>
+
+    <div class="avatar" (click)="openProfile(profileContent)" title="User">{{ userInitials }}</div>
+    <a href="javascript:;" (click)="openProfile(profileContent)">{{ userName }}</a>
+
+
+    <ng-template #profileContent let-modal>
+      <div class="modal-header">
+        <strong class="modal-title">Update User {{ userName }}</strong>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+      </div>
+      <form #profileFormRef="ngForm" (ngSubmit)="saveProfile(profileFormRef, modal)" novalidate>
+        <div class="modal-body">
+          <div *ngIf="profileLoading" class="text-muted">Loading profile...</div>
+          <div *ngIf="profileError" class="alert alert-danger py-2">{{ profileError }}</div>
+          <div class="row g-3" *ngIf="!profileLoading">
+
+            <div class="col-md-6 col-12">
+              <div class="row">
+                <div class="col-12 mb-3">
+                  <label class="form-label" for="profile-email">Email</label>
+                  <input id="profile-email" class="form-control" type="email" name="email"
+                    [(ngModel)]="profileForm.email" required email />
+                </div>
+
+                <div class="col-12 mb-3">
+                  <div class="row g-1">
+                    <div class="col-md-6">
+                      <label class="form-label" for="profile-first-name">First Name</label>
+                      <input id="profile-first-name" class="form-control" name="firstName"
+                        [(ngModel)]="profileForm.firstName" required />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="profile-last-name">Last Name</label>
+                      <input id="profile-last-name" class="form-control" name="lastName"
+                        [(ngModel)]="profileForm.lastName" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div class="col-md-6 col-12">
+
+              <div class="row">
+                <div class="col-12 mb-3">
+                  <label class="form-label" for="profile-division">Division</label>
+                  <input id="profile-division" class="form-control" name="division"
+                    [(ngModel)]="profileForm.division" />
+                </div>
+                <div class="col-12 mb-3">
+                  <label class="form-label" for="profile-position">Position</label>
+                  <input id="profile-position" class="form-control" name="position"
+                    [(ngModel)]="profileForm.position" />
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>
+          <div class="col-6 mt-3">
+            <div class="alert alert-warning">
+              <div class="mb-3">
+                <label class="form-label" for="profile-password">Password</label>
+                <input id="profile-password" class="form-control" type="password" name="password"
+                  [(ngModel)]="profileForm.password" autocomplete="new-password" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="profile-confirm-password">Confirm Password</label>
+                <input id="profile-confirm-password" class="form-control" type="password" name="confirmPassword"
+                  [(ngModel)]="profileForm.confirmPassword" autocomplete="new-password" />
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('Cancel')">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="profileLoading || profileSaving">
+            {{ profileSaving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    </ng-template>
+
 
     <button type="button" class="btn btn-sm btn-outline-danger" (click)="logout()">
       <i class="bi bi-box-arrow-right me-1"></i> Logout

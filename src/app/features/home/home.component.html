@@ -16,95 +16,106 @@
   }
 
   <div class="row g-3 mb-3">
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-4">
       <div class="stat-card h-100">
         <div class="stat-label">Total Task not Close (ticketStatusId &lt; 900)</div>
         <div class="stat-value">{{ totalOpenTasks }}</div>
       </div>
     </div>
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-4">
       <div class="stat-card h-100">
         <div class="stat-label">Total Case not Close (ticketStatusId &lt; 900)</div>
         <div class="stat-value">{{ totalOpenCases }}</div>
       </div>
     </div>
+    <div class="col-12 col-md-4">
+      <div class="stat-card h-100">
+        <div class="stat-label">Total Change Request not Close (ticketType = 3)</div>
+        <div class="stat-value">{{ totalOpenChangeRequests }}</div>
+      </div>
+    </div>
   </div>
 
   <div class="row g-3">
-    <div class="col-12 col-xl-6">
-      <div class="stat-card h-100">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="m-0">List Task (all)</h6>
-          <a routerLink="/tasks" class="btn btn-link btn-sm p-0">View task page</a>
+    <div class="col-12 col-xl-4">
+      <section class="kanban-board" aria-labelledby="task-board-title">
+        <div class="kanban-board-header">
+          <div>
+            <span class="kanban-kicker">Work queue</span>
+            <h6 id="task-board-title">Tasks</h6>
+          </div>
+          <a routerLink="/tasks" class="btn btn-link btn-sm p-0">View all</a>
         </div>
-
         @if (loading) {
-        <div class="text-muted">Loading task list...</div>
+        <div class="kanban-empty">Loading task list...</div>
         } @else if (!tasks.length) {
-        <div class="text-muted">No task data.</div>
+        <div class="kanban-empty">No task data.</div>
         } @else {
-        <div class="table-responsive">
-          <table class="table table-sm table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Project</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of tasks; track trackById($index, row)) {
-              <tr>
-                <td><a [routerLink]="['/tasks', row.id]">{{ row.id }}</a></td>
-                <td>{{ row.title }}</td>
-                <td>{{ row.projectName || '-' }}</td>
-                <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+        <div class="kanban-columns">
+          @for (row of tasks; track trackById($index, row)) {
+            <a class="kanban-card" [routerLink]="['/tasks', row.id]">
+              <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled task' }}</span>
+              <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
+            </a>
+          }
         </div>
         }
-      </div>
+      </section>
     </div>
 
-    <div class="col-12 col-xl-6">
-      <div class="stat-card h-100">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="m-0">List Case (all)</h6>
-          <a routerLink="/cases" class="btn btn-link btn-sm p-0">View case page</a>
+    <div class="col-12 col-xl-4">
+      <section class="kanban-board" aria-labelledby="case-board-title">
+        <div class="kanban-board-header">
+          <div>
+            <span class="kanban-kicker">Incident queue</span>
+            <h6 id="case-board-title">Cases</h6>
+          </div>
+          <a routerLink="/cases" class="btn btn-link btn-sm p-0">View all</a>
         </div>
-
         @if (loading) {
-        <div class="text-muted">Loading case list...</div>
+        <div class="kanban-empty">Loading case list...</div>
         } @else if (!cases.length) {
-        <div class="text-muted">No case data.</div>
+        <div class="kanban-empty">No case data.</div>
         } @else {
-        <div class="table-responsive">
-          <table class="table table-sm table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Project</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of cases; track trackById($index, row)) {
-              <tr>
-                <td><a [routerLink]="['/cases', row.id]">{{ row.id }}</a></td>
-                <td>{{ row.title }}</td>
-                <td>{{ row.projectName || '-' }}</td>
-                <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+        <div class="kanban-columns">
+          @for (row of cases; track trackById($index, row)) {
+            <a class="kanban-card" [routerLink]="['/cases', row.id]">
+              <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled case' }}</span>
+              <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
+            </a>
+          }
         </div>
         }
-      </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <section class="kanban-board" aria-labelledby="change-board-title">
+        <div class="kanban-board-header">
+          <div>
+            <span class="kanban-kicker">Delivery queue</span>
+            <h6 id="change-board-title">Change Requests</h6>
+          </div>
+          <a routerLink="/change-requests" class="btn btn-link btn-sm p-0">View all</a>
+        </div>
+        @if (loading) {
+        <div class="kanban-empty">Loading change request list...</div>
+        } @else if (!changeRequests.length) {
+        <div class="kanban-empty">No change request data.</div>
+        } @else {
+        <div class="kanban-columns">
+          @for (row of changeRequests; track trackById($index, row)) {
+            <a class="kanban-card" [routerLink]="['/change-requests', row.id]">
+              <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled change request' }}</span>
+              <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
+            </a>
+          }
+        </div>
+        }
+      </section>
     </div>
   </div>
 </div>
