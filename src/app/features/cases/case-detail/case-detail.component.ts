@@ -261,7 +261,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       },
     );
   }
-ticketBalance : number = 0;
+  ticketBalance : number = 0;
   async loadOptions(): Promise<void> {
     this.loadingOptions = true;
 

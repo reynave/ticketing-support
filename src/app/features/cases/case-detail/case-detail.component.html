@@ -452,8 +452,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let row of relatedTasks">
-              <td>{{ row.id }}</td>
-              <td>{{ row.title }}</td>
+              <td>{{ row.id }}   
+                <strong *ngIf="row.ticketStatusId < 900 " ><i class="bi bi-exclamation-diamond-fill"></i> </strong> 
+              </td>
+              <td>{{ row.title }} </td>
               <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>
               <td>{{ row.targetCompletionDate | date:'mediumDate' }}</td>
               <td class="text-end">
