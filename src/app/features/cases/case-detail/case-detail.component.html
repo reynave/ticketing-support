@@ -431,6 +431,7 @@
           [ticketCategories]="ticketCategories" [internalUsers]="internalUsers"
           [ticketCategoryId]="task?.ticketCategoryId || ''" [productChildId]="task?.productChildId || ''"
           [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()"
+          [title]="this.task?.title || ''"  [origin]="'Cases'"
           (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
       </div>
 

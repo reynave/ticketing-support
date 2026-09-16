@@ -28,7 +28,7 @@
           placeholder="Cari id / title / CR / issue" />
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-6">
         <label class="form-label small" for="task-project-filter">Project</label>
         <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
           (change)="loadTasks()">
@@ -39,7 +39,7 @@
         </select>
       </div>
 
-      <div class="col-12 col-md-2">
+      <!-- <div class="col-12 col-md-2">
         <label class="form-label small" for="task-status-filter">Status</label>
         <select id="task-status-filter" class="form-select form-select-sm" [(ngModel)]="selectedTicketStatusId"
           (change)="loadTasks()">
@@ -47,7 +47,7 @@
           <option [value]="status.id">{{ status.name }}</option>
           }
         </select>
-      </div>
+      </div> -->
 
 
       <div class="col-12 col-md-2 d-flex gap-2">

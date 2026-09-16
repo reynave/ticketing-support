@@ -48,6 +48,7 @@
             <th>Name</th>
             <th>Rules</th>
             <th>Email</th>
+         <th>Phone</th>
          
             <th>division</th>
             <th>Position</th> 
@@ -63,6 +64,12 @@
              <td>{{ row.firstName }} {{ row.lastName }}</td>
             <td>{{ row.userAuthLevel }}</td>
             <td>{{ row.email }}</td> 
+            <td>
+              @if(row.phone){
+ <a href="https://api.whatsapp.com/send?phone={{ row.phone }}" target="_blank"><i class="bi bi-whatsapp"></i> {{ row.phone }}</a>
+             
+              }
+               </td>
             <td>{{ row.division }}</td>
             <td>{{ row.position }}</td>
 

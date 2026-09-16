@@ -41,9 +41,10 @@ export class CaseCreateTaskModalComponent {
   @Input() buttonLabel = 'New Task';
   @Input() ticketCategoryId = '';
   @Input() productChildId = '';
+  @Input() title = '';
   @Output() created = new EventEmitter<void>();
   @Output() failed = new EventEmitter<string>();
-
+  @Input() origin = '';
   private modalRef: NgbModalRef | null = null;
 
   savingRelatedTask = false;
@@ -58,9 +59,9 @@ export class CaseCreateTaskModalComponent {
     this.relatedTaskForm.assignTo =
       Number(this.assignTo || 0) > 0 ? Number(this.assignTo) : null;
     this.relatedTaskForm.caseId = String(this.caseId || '');
-    this.relatedTaskForm.title = `Task of ${this.caseId}`;
+    this.relatedTaskForm.title = this.title;
     this.relatedTaskForm.description = `Follow up from case ${this.caseId}`;
-
+    this.relatedTaskForm.origin = this.origin;
     this.modalRef = this.modalService.open(this.createTaskModal, {
       size: 'lg',
       centered: true,
@@ -92,7 +93,14 @@ export class CaseCreateTaskModalComponent {
 
     this.savingRelatedTask = true;
 
-    this.apiService.post(`/cases/${this.caseId}/tasks`, payload).subscribe({
+   
+
+    let controller  = 'cases';
+    if(this.origin === 'Change Requests'){
+      controller = 'change-requests';
+    }
+
+    this.apiService.post(`/${controller}/${this.caseId}/tasks`, payload).subscribe({
       next: () => {
         this.savingRelatedTask = false;
         this.modalRef?.close();

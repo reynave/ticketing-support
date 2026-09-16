@@ -180,6 +180,9 @@ active = 1;
       this.projectBilleables = Array.isArray(projectBilleableResponse?.data) ? projectBilleableResponse.data : [];
       this.products = Array.isArray(productResponse?.data) ? productResponse.data : []; 
       const task = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
+
+      console.log(task);
+
       const caseRows = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
       const crRowsRaw = Array.isArray(crResponse?.data) ? crResponse.data : [];
       const crRows = crRowsRaw.filter((row: any) => this.isChangeRequestTicket(row));

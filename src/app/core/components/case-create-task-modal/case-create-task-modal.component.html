@@ -16,6 +16,7 @@
   <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)" novalidate>
     <div class="modal-body">
       <div class="row g-2">
+      
         <div class="col-12 col-md-6">
           <label class="form-label" for="related-task-title"
             >Title <span class="text-danger">*</span></label
@@ -34,7 +35,7 @@
 
          <div class="col-12 col-md-6">
           <label class="form-label" for="related-task-case-id"
-            >Case Id <span class="text-danger">*</span></label
+            >  {{ relatedTaskForm.origin }} Id <span class="text-danger">*</span></label
           >
           <input
             readonly
