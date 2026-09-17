@@ -59,34 +59,34 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Title</th>
             <th>Client</th>
-            <th>Project</th>
-            <th>Status</th>
-            <th>Category</th>
+            <th>Title</th>
+            
+            <th>Project</th> 
             <th>Submit Date</th>
-            <th>Closed Date</th>
-            <th>Assigned</th>
-            <th>Rating</th>
+            <th class="text-end">Ticket</th>
+            <th class="text-end">Hours</th>
+            <th class="text-end">Rating</th>
           </tr>
         </thead>
         <tbody>
           @for (row of rows; track trackById($index, row)) {
           <tr>
             <td> <a href="javascript:;" (click)="open(content, row.id)">{{ row.id }}</a> </td>
+             <td>{{ row.clientName }}</td>
             <td>
               <div class="fw-semibold">{{ row.title }}</div>
             </td>
-            <td>{{ row.clientName }}</td>
-            <td>{{ row.projectName }}</td>
-            <td>{{ row.ticketStatusName }}</td>
-            <td>{{ row.ticketCategoryName }}</td>
-            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
-            <td>{{ row.actualCompletionDate | date: 'mediumDate' }}</td>
-            <td>
-              {{ row.assignToName }}
+           
+            <td> 
+              <div> {{ row.projectName }}</div> 
+               <small class="text-muted">{{ row.ticketCategoryName }}</small>
             </td>
-            <td>{{ row.rating }}</td>
+           
+            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+            <td class="text-end">{{ row.ticketEstimationCost }}</td>
+            <td class="text-end">{{ row.hours }} </td>
+            <td class="text-end">{{ row.rating }}</td>
           </tr>
           }
         </tbody>

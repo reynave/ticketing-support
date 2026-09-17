@@ -6,8 +6,10 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <span class="countdown" *ngIf="isValid; else invalidTpl">
-      <span *ngIf="days !== '00'">{{ days }} day{{ days !== '01' ? 's' : '' }}</span>
+   
+    <span class="countdown" [class.overdue]="isOverdue" *ngIf="isValid; else invalidTpl">
+      <span *ngIf="isOverdue">+</span>
+      <span *ngIf="days !== '00'">{{ days }} day{{ days !== '01' ? 's' : '' }} </span>
       <span>{{ hours }}</span>:<span>{{ minutes }}</span>:<span>{{ seconds }}</span>
     </span>
     <ng-template #invalidTpl>
@@ -17,6 +19,9 @@ import { CommonModule } from '@angular/common';
   styles: [`
     .countdown { 
       font-family: monospace;
+    }
+    .countdown.overdue {
+      color: #d33;
     }
     .countdown-invalid { 
       color: #999;
@@ -31,6 +36,7 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
 
   remaining: number = 0;
   isValid: boolean = false;
+  isOverdue: boolean = false;
   days: string = '00';
   hours: string = '00';
   minutes: string = '00';
@@ -39,13 +45,13 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
   private intervalId: any = null;
   private targetTime: number = 0;
   private isDateMode: boolean = false;
+  private hasFinished: boolean = false;
 
   ngOnInit(): void {
     this.setup();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // reset & setup ulang tiap kali targetDate/totalSeconds berubah
     if (changes['targetDate'] || changes['totalSeconds']) {
       this.setup();
     }
@@ -54,6 +60,8 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
   private setup(): void {
     this.stop();
     this.isValid = false;
+    this.isOverdue = false;
+    this.hasFinished = false;
 
     if (this.targetDate) {
       const parsed = new Date(this.targetDate);
@@ -70,7 +78,6 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
       this.isDateMode = false;
       this.remaining = this.totalSeconds;
     } else {
-      // belum ada input yang valid, tunggu ngOnChanges berikutnya
       return;
     }
 
@@ -87,15 +94,14 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
         this.remaining--;
       }
 
-      if (this.remaining <= 0) {
-        this.remaining = 0;
-        this.updateDisplay();
-        this.stop();
+      if (this.remaining <= 0 && !this.hasFinished) {
+        this.hasFinished = true;
         this.finished.emit();
-        return;
       }
 
+      this.isOverdue = this.remaining <= 0;
       this.updateDisplay();
+      // interval TIDAK di-stop, biar terus jalan hitung kelebihannya
     }, 1000);
   }
 
@@ -107,7 +113,7 @@ export class CountdownComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private updateDisplay(): void {
-    const total = this.remaining < 0 ? 0 : this.remaining;
+    const total = Math.abs(this.remaining);
 
     const d = Math.floor(total / 86400);
     const h = Math.floor((total % 86400) / 3600);
