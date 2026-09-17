@@ -121,11 +121,10 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-ticket-categories">Ticket Categories <span
-                class="text-danger">*</span></label>
+            <label class="form-label small fw-semibold" for="detail-project-ticket-categories">Ticket Categories  </label>
 
             <select id="detail-project-ticket-categories" class="form-select form-select-sm"
-              name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" [disabled]="true"
+              name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" disabled
               required>
 
               @for (ticketCategory of ticketCategories; track ticketCategory.id) {
@@ -160,10 +159,9 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-billeable">Project Billeable <span
-                class="text-danger">*</span></label>
+            <label class="form-label small fw-semibold" for="detail-project-billeable">Project Billeable</label>
             <select id="detail-project-billeable" class="form-select form-select-sm" name="projectBilleableId"
-              [(ngModel)]="formModel.projectBilleableId" [disabled]="formMode === 'view'" required>
+              [(ngModel)]="formModel.projectBilleableId" disabled  >
 
               @for (projectBilleable of projectBilleables; track projectBilleable.id) {
               <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
@@ -172,10 +170,9 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-product">Product <span
-                class="text-danger">*</span></label>
+            <label class="form-label small fw-semibold" for="detail-project-product">Product</label>
             <select id="detail-project-product" class="form-select form-select-sm" name="productId"
-              [(ngModel)]="formModel.productId" [disabled]="formMode === 'view'" required>
+              [(ngModel)]="formModel.productId" disabled  >
 
               @for (product of products; track product.id) {
               <option [ngValue]="product.id">{{ product.name }}</option>
