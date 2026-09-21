@@ -30,7 +30,13 @@ import { SocketNotificationService } from '../../../core/services/socket-notific
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule, NgbDatepickerModule, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgxEditorModule,
+    NgbDatepickerModule,
+    RouterLink,
+  ],
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.css',
 })
@@ -51,7 +57,9 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly http = inject(HttpClient);
   private modalService = inject(NgbModal);
-    private readonly socketNotificationService : any = inject(SocketNotificationService);
+  private readonly socketNotificationService: any = inject(
+    SocketNotificationService,
+  );
 
   readonly moduleId = 5005;
 
@@ -125,8 +133,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   ticketStatusId: number = 0;
   assignTo: string = '';
   me: any = {};
-  projectId : string = '';
-  ticketCategoryOptions : any = [];
+  projectId: string = '';
+  ticketCategoryOptions: any = [];
   ngOnInit(): void {
     if (!this.canAccessPage) {
       return;
@@ -144,7 +152,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     }
 
     this.loadTaskDetail();
-    this.loadTaskDetailLog(); 
+    this.loadTaskDetailLog();
   }
   ngOnDestroy(): void {
     this.editor1.destroy();
@@ -161,6 +169,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
     this.apiService.get(`/ticket/${this.taskId}`).subscribe({
       next: (response) => {
+        console.log(response);
         this.loading = false;
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
@@ -174,8 +183,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
         this.populateFormFromTask();
 
-        
-    this.loadOptions();
+        this.loadOptions();
       },
       error: (error) => {
         this.loading = false;
@@ -247,12 +255,18 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     try {
       const [projectResponse, ticketCategoryResponse, ticketStatusResponse] =
         await Promise.all([
-          firstValueFrom(this.apiService.get('/project', { status: 1 , id: this.projectId})),
+          firstValueFrom(
+            this.apiService.get('/project', { status: 1, id: this.projectId }),
+          ),
           // firstValueFrom(
           //   this.apiService.get('/user', { presence: 1, status: 1 }),
           // ),
-            firstValueFrom(
-            this.apiService.get('/ticket-categories', { presence: 1 , status: 1, parentId: this.task?.ticketCategoriesParentId }),
+          firstValueFrom(
+            this.apiService.get('/ticket-categories', {
+              presence: 1,
+              status: 1,
+              parentId: this.task?.ticketCategoriesParentId,
+            }),
           ),
           firstValueFrom(
             this.apiService.get('/master/status/task', { presence: 1 }),
@@ -381,7 +395,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       wasTicketStatusId: this.ticketStatusId,
       wasAssignTo: this.assignTo,
       updateBy: this.formModel.submitBy,
-      ticketCategoryId : Number(this.formModel.ticketCategoryId)
+      ticketCategoryId: Number(this.formModel.ticketCategoryId),
     };
     console.log('saveTask payload', payload);
 
@@ -397,7 +411,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         this.loadTaskDetail();
         this.loadTaskDetailLog();
 
-         this.socketNotificationService.emitReloadAction();
+        this.socketNotificationService.emitReloadAction();
       },
       error: (error) => {
         this.saving = false;
@@ -483,26 +497,34 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       rating: 0,
       ratesBy: 0,
       issueNo: '',
-      ticketCategoryId : 0
+      ticketCategoryId: 0,
+    };
+  }
+
+  private parseDateParts(dateStr: string | null | undefined): {
+    year: number;
+    month: number;
+    day: number;
+  } {
+    if (!dateStr) {
+      return { year: 0, month: 0, day: 0 }; // atau null kalau form model kamu terima null
+    }
+
+    const [yyyy, mm, dd] = dateStr.split('T')[0].split('-');
+
+    return {
+      year: Number(yyyy),
+      month: Number(mm),
+      day: Number(dd),
     };
   }
 
   private populateFormFromTask(): void {
-    let [yyyy, mm, dd] =
-      this.task?.targetCompletionDate.split('T')[0].split('-') || [];
-    const targetCompletionDate = {
-      year: Number(yyyy),
-      month: Number(mm),
-      day: Number(dd),
-    };
+    console.log('populateFormFromTask', this.task.targetCompletionDate);
 
-    [yyyy, mm, dd] =
-      this.task?.actualCompletionDate.split('T')[0].split('-') || [];
-    const actualCompletionDate = {
-      year: Number(yyyy),
-      month: Number(mm),
-      day: Number(dd),
-    };
+    const targetCompletionDate = this.parseDateParts(this.task?.targetCompletionDate);
+    const actualCompletionDate = this.parseDateParts(this.task?.actualCompletionDate);
+
 
     this.formModel = {
       crNoRef: String(this.task?.crNoRef || ''),
@@ -519,7 +541,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       rating: Number(this.task?.rating ?? 0),
       ratesBy: Number(this.task?.ratesBy ?? 0),
       issueNo: String(this.task?.issueNo || ''),
-      ticketCategoryId : Number(this.task?.ticketCategoryId ?? 0)
+      ticketCategoryId: Number(this.task?.ticketCategoryId ?? 0),
     };
   }
 

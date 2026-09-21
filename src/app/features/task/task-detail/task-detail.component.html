@@ -89,17 +89,22 @@
                   <td class="label-col"><label class="form-label small fw-semibold " for="detail-task-cr">CR No
                       Ref</label></td>
                   <td>
-                    {{task.crNoRef}}
+                    <a href="javascript:;" [routerLink]="['/change-requests', task.crNoRef]" routerLinkActive="router-link-active" > 
+                      <span class="badge text-bg-info"> {{task.crNoRef}} </span>
+                     </a>
                   </td>
                 </tr>
                 }
                 @if(task.issueNo !== ''){
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold text-danger"
-                      for="detail-task-issue">Issue
-                      No</label></td>
+                  <td class="label-col"><strong class="form-label small text-danger"
+                      for="detail-task-issue">ISSUE NO</strong></td>
                   <td>
-                    {{task.issueNo}}
+                    <a href="javascript:;" [routerLink]="['/cases', task.issueNo]" routerLinkActive="router-link-active" >
+                      <span class="badge text-bg-warning"> {{task.issueNo}} </span>
+                    </a>
+                   
+                    <!-- {{task.issueNo}} -->
                   </td>
                 </tr>
                 }
