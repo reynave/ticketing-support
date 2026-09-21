@@ -153,17 +153,7 @@
             }
           </div>
 
-          <div class="mb-2">
-            <label class="form-label" for="task-severity">Severity <span class="text-danger">*</span></label>
-            <select id="task-severity" (change)="getHours()" class="form-select" name="severityId" [(ngModel)]="formModel.severityId"
-              [disabled]="loadingOptions" required>
-              <option [ngValue]="null" disabled>Select severity</option>
-              @for (severity of ticketSeverities; track trackById($index, severity)) {
-              <option [ngValue]="severity.id">{{ severity.name }} ({{ severity.duration }} hour{{ severity.duration > 1
-                ? 's' : '' }})</option>
-              }
-            </select>
-          </div>
+          
 
           <div class="mb-2">
             <label class="form-label" for="task-submit-date">Submit Date <span class="text-danger">*</span></label>

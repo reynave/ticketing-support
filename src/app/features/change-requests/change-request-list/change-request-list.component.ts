@@ -36,8 +36,7 @@ interface ChangeRequestFormModel {
   rating: number;
   ratesBy: number;
   issueNo: string;
-  category: number | null;
-  severityId: number | null;
+  category: number | null; 
   productChildId: number | null;
   
 }
@@ -278,17 +277,9 @@ modules : any[] = [];
   }
   addHour: number = 0; // Add 3 hours to the current time
 
-  getHours() {
- 
-    // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
-    const severity = this.ticketSeverities.find(
-      (s : any) => s.id === this.formModel.severityId,
-    );
-    if (severity) {
-      this.addHour = severity.duration || 0;
-    } else {
-      this.addHour = 0;
-    }
+  getHours() { 
+    // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId 
+    this.addHour = 0; 
   }
   saveCase(form: NgForm): void {
     if (!this.canCreate) {
@@ -298,7 +289,7 @@ modules : any[] = [];
     const hasRequiredSelections =
       !!String(this.formModel.projectId || '').trim() &&
       this.formModel.category !== null &&
-      this.formModel.severityId !== null &&
+      
       this.formModel.productChildId !== null &&
       !!String(this.formModel.assignTo || '').trim() &&
       !!String(this.formModel.title || '').trim() &&
@@ -341,8 +332,7 @@ modules : any[] = [];
 
       ticketStatusId: Number(this.formModel.ticketStatusId),
       //  rating: Number(this.formModel.rating),
-      //  ratesBy: Number(this.formModel.ratesBy),
-      severityId: Number(this.formModel.severityId),
+      //  ratesBy: Number(this.formModel.ratesBy), 
       ticketCategoryId: Number(this.formModel.category),
       deadlineDateTime: deadlineDateTime,
       productChildId: Number(this.formModel.productChildId),
@@ -457,8 +447,7 @@ modules : any[] = [];
       rating: 0,
       ratesBy: 0,
       issueNo: '',
-      category: null,
-      severityId: null,
+      category: null, 
       productChildId: null,
     };
   }

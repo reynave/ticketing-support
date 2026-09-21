@@ -8,13 +8,13 @@
       <h5 class="fw-bold mb-0">Change Request {{ taskId }}</h5>
     </div>
 
-    <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
+    <!-- <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
       <h5 class="fw-semibold mb-0 font-monospace"> Remaining Time :
 
         <app-countdown [targetDate]="deadlineDateTime" (finished)="onFinished()"> </app-countdown>
        
       </h5>
-    </div>
+    </div> -->
 
   </div>
 
@@ -255,20 +255,7 @@
                 </tr>
 
 
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity
-                    </label>
-                  </td>
-                  <td>
-                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
-                      name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
-                      required>
-                      <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                        severity.duration }} hours)
-                      </option>
-                    </select>
-                  </td>
-                </tr>
+                
 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
