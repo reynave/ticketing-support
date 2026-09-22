@@ -32,6 +32,7 @@ import { CaseReportComponent } from './features/reports/case-report/case-report.
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { NotFoundComponent } from './layout/not-found/not-found.component';
 import { ReloginComponent } from './features/auth/relogin/relogin.component';
+import { CrReportComponent } from './features/reports/cr-report/cr-report.component';
  
 export const routes: Routes = [
 	{
@@ -131,6 +132,10 @@ export const routes: Routes = [
 			{
 				path: 'report/cases',
 				component: CaseReportComponent,
+			},
+			{
+				path: 'report/change-requests',
+				component: CrReportComponent,
 			},
 
 			{

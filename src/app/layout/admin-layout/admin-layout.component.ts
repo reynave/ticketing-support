@@ -84,15 +84,22 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   readonly reportMenus = [
     {
       path: '/report/task',
-      label: 'Task History',
+      label: 'Tasks',
       icon: 'task_alt',
       moduleId: 5005,
     },
+
     {
       path: '/report/cases',
-      label: 'Cases History',
+      label: 'Cases',
       icon: 'report_problem',
       moduleId: 5006,
+    },
+    {
+      path: '/report/change-requests',
+      label: 'Change Requests',
+      icon: 'change_circle',
+      moduleId: 5007,
     },
     //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
   ];
@@ -300,7 +307,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.profileLoading = true;
     this.profileError = '';
     this.profileForm = {
-      email: '', password: '', confirmPassword: '', firstName: '', lastName: '', division: '', position: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      division: '',
+      position: '',
     };
     this.modalService.open(content, { size: 'lg' });
 
@@ -314,9 +327,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       next: (response) => {
         const user = response?.data || {};
         this.profileForm = {
-          email: user.email || '', password: '', confirmPassword: '',
-          firstName: user.firstName || '', lastName: user.lastName || '',
-          division: user.division || '', position: user.position || '',
+          email: user.email || '',
+          password: '',
+          confirmPassword: '',
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          division: user.division || '',
+          position: user.position || '',
         };
         this.profileLoading = false;
       },
@@ -352,20 +369,26 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
     this.profileSaving = true;
     this.profileError = '';
-    this.apiService.put(`/user/${userId}`, profilePayload).pipe(
-      switchMap(() => this.profileForm.password
-        ? this.apiService.put(`/user/${userId}/password`, passwordPayload)
-        : of(null)),
-      switchMap(() => this.authService.fetchMe()),
-    ).subscribe({
-      next: () => {
-        this.profileSaving = false;
-        modal.close();
-      },
-      error: (error) => {
-        this.profileSaving = false;
-        this.profileError = error?.error?.message || 'Failed to update profile.';
-      },
-    });
+    this.apiService
+      .put(`/user/${userId}`, profilePayload)
+      .pipe(
+        switchMap(() =>
+          this.profileForm.password
+            ? this.apiService.put(`/user/${userId}/password`, passwordPayload)
+            : of(null),
+        ),
+        switchMap(() => this.authService.fetchMe()),
+      )
+      .subscribe({
+        next: () => {
+          this.profileSaving = false;
+          modal.close();
+        },
+        error: (error) => {
+          this.profileSaving = false;
+          this.profileError =
+            error?.error?.message || 'Failed to update profile.';
+        },
+      });
   }
 }
