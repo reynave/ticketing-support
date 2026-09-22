@@ -98,75 +98,254 @@
 
 
 <ng-template #content let-modal>
-	<div class="modal-header">
-		<p class="modal-title" id="modal-basic-title">Task Detail</p>
-		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-	</div>
-	<div class="modal-body">
-		@if (!selectedTaskDetail) {
-		<div class="text-muted">Loading detail...</div>
-		} @else {
-		<dl class="row mb-0 small">
-			<dt class="col-4">ID</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.id }}</dd>
+  <div class="modal-header">
+    <p class="modal-title" id="modal-basic-title">Task Detail</p>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    @if (!selectedTaskDetail) {
+    <div class="text-muted text-center py-4">
+      <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+      Loading detail...
+    </div>
+    } @else {
 
-			<dt class="col-4">Title</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.title }}</dd>
+    <!-- ===== Header: ID + Status ===== -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <div class="text-muted small fw-semibold">{{ selectedTaskDetail.detail?.id }}</div>
+        <h6 class="mb-0 fw-bold">{{ selectedTaskDetail.detail?.title }}</h6>
+      </div>
+      <span
+        class="badge rounded-pill status-badge"
+        [ngClass]="{
+          'status-closed': selectedTaskDetail.detail?.ticketStatusName === 'Closed',
+          'status-open': selectedTaskDetail.detail?.ticketStatusName === 'Open',
+          'status-progress': selectedTaskDetail.detail?.ticketStatusName === 'In Progress'
+        }"
+      >
+        {{ selectedTaskDetail.detail?.ticketStatusName }}
+      </span>
+    </div>
 
-			<dt class="col-4">Client</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.clientName }}</dd>
+    <!-- ===== Reference chips ===== -->
+    <div class="ref-chips mb-3">
+      <span class="ref-chip" *ngIf="selectedTaskDetail.detail?.issueNo">
+        <span class="ref-chip-label">Issue No</span> {{ selectedTaskDetail.detail?.issueNo }}
+      </span>
+      <span class="ref-chip" *ngIf="selectedTaskDetail.detail?.crNoRef">
+        <span class="ref-chip-label">CR Ref</span> {{ selectedTaskDetail.detail?.crNoRef }}
+      </span>
+      <span class="ref-chip" *ngIf="selectedTaskDetail.detail?.projectId">
+        <span class="ref-chip-label">Project ID</span> {{ selectedTaskDetail.detail?.projectId }}
+      </span>
+      <span class="ref-chip" *ngIf="selectedTaskDetail.detail?.productChildId">
+        <span class="ref-chip-label">Product</span> {{ selectedTaskDetail.detail?.productChildId }}
+      </span>
+    </div>
 
-			<dt class="col-4">Project</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.projectName }}</dd>
+    <!-- ===== Info Grid ===== -->
+    <div class="detail-grid mb-3">
+      <div class="detail-item">
+        <span class="detail-label">Client</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.clientName || '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Project</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.projectName || '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Category</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.ticketCategoryName || '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Ticket Type</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.ticketTypeId ?? '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Severity</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.ticketSeverityId ?? '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Submit By</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.submitBy || '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Assigned To</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.assignToName || selectedTaskDetail.detail?.assignTo || '-' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Estimation Cost</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.ticketEstimationCost ?? 0 | number }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Hours</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.hours ?? 0 }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Submit Date</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.submitDate | date: 'medium' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Deadline</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.deadlineDateTime | date: 'medium' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Target Completion</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Actual Completion</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.actualCompletionDate | date: 'mediumDate' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Overall Rating</span>
+        <span class="detail-value">
+          <span class="stars-inline">
+            @for (s of [1,2,3,4,5]; track s) {
+            <i class="bi" [ngClass]="s <= (selectedTaskDetail.detail?.rating || 0) ? 'bi-star-fill' : 'bi-star'"></i>
+            }
+          </span>
+          <span class="text-muted small ms-1">{{ selectedTaskDetail.detail?.rating }}/5</span>
+        </span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Rated By</span>
+        <span class="detail-value">{{ selectedTaskDetail.detail?.ratesBy || '-' }}</span>
+      </div>
+    </div>
 
-			<dt class="col-4">Category</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.ticketCategoryName }}</dd>
+    <!-- ===== Description ===== -->
+    @if (selectedTaskDetail.detail?.description) {
+    <div class="content-block mb-3">
+      <p class="fw-semibold mb-1 small text-uppercase text-muted">Description</p>
+      <div class="rich-text small" [innerHTML]="selectedTaskDetail.detail?.description"></div>
+    </div>
+    }
 
-			<dt class="col-4">Status</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.ticketStatusName }}</dd>
+    <!-- ===== Task Solution ===== -->
+    @if (selectedTaskDetail.detail?.taskSolution) {
+    <div class="content-block mb-3">
+      <p class="fw-semibold mb-1 small text-uppercase text-muted">Task Solution</p>
+      <div class="rich-text small" [innerHTML]="selectedTaskDetail.detail?.taskSolution"></div>
+    </div>
+    }
 
-			<dt class="col-4">Assigned To</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.assignToName }}</dd>
+    <hr class="my-3" />
 
-			<dt class="col-4">Submit Date</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.submitDate | date: 'medium' }}</dd>
+    <!-- ===== Rating Detail Table ===== -->
+    <p class="fw-semibold mb-2 small text-uppercase text-muted">Rating Detail</p>
 
-			<dt class="col-4">Target Completion</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</dd>
+    @if (!selectedTaskDetail.rating?.length) {
+    <div class="text-muted small mb-3">No rating data.</div>
+    } @else {
+    <div class="table-responsive rating-table-wrap mb-3">
+      <table class="table table-sm rating-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th class="text-center" style="width: 160px;">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of selectedTaskDetail.rating; track item.id) {
+          <tr>
+            <td class="small">{{ item.ratingName }}</td>
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1">
+                @for (s of [1,2,3,4,5]; track s) {
+                <i class="bi" [ngClass]="s <= item.value ? 'bi-star-fill text-warning' : 'bi-star text-secondary'"></i>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
 
-			<dt class="col-4">Actual Completion</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.actualCompletionDate | date: 'mediumDate' }}</dd>
+    <hr class="my-3" />
 
-			<dt class="col-4">Rating</dt>
-			<dd class="col-8">{{ selectedTaskDetail.detail?.rating }} / 5</dd>
-		</dl>
+    <!-- ===== Activity Log ===== -->
+    <p class="fw-semibold mb-2 small text-uppercase text-muted">
+      Activity Log
+      <span class="badge bg-light text-secondary fw-normal ms-1">{{ selectedTaskDetail.activities?.length || 0 }}</span>
+    </p>
 
-		<hr />
+    @if (!selectedTaskDetail.activities?.length) {
+    <div class="text-muted small mb-3">No activity recorded.</div>
+    } @else {
+    <div class="activity-timeline mb-3">
+      @for (act of selectedTaskDetail.activities; track act.id) {
+      <div class="activity-item mb-3">
+        <div class="activity-dot"></div>
+        <div class="activity-content">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+            <span class="activity-user">{{ act.inputBy }}</span>
+            <span class="activity-date">
+              {{ act.starDateTime | date: 'dd MMM yyyy, HH:mm' }}
+              @if (act.closeDateTime && act.closeDateTime !== act.starDateTime) {
+              <span class="text-muted"> &ndash; {{ act.closeDateTime | date: 'HH:mm' }}</span>
+              }
+            </span>
+          </div>
 
-		<p class="fw-semibold mb-2">Rating Detail</p>
-		@if (!selectedTaskDetail.rating?.length) {
-		<div class="text-muted small">No rating data.</div>
-		} @else {
-		<table class="table table-sm">
-			<thead>
-				<tr>
-					<th>Question</th>
-					<th class="text-center">Value</th>
-				</tr>
-			</thead>
-			<tbody>
-				@for (item of selectedTaskDetail.rating; track item.id) {
-				<tr>
-					<td class="small">{{ item.ratingName }}</td>
-					<td class="text-center">{{ item.value }}</td>
-				</tr>
-				}
-			</tbody>
-		</table>
-		}
-		}
-	</div>
-	<div class="modal-footer">
-		<button type="button" class="btn btn-outline-secondary" (click)="modal.close('Close')">Close</button>
-	</div>
+          <div class="activity-desc small" [innerHTML]="act.description"></div>
+
+          @if (act.attachment?.length) {
+          <div class="attachment-row">
+            @for (file of act.attachment; track file.id) {
+            <a class="attachment-thumb mx-3" [href]="file.url" target="_blank" rel="noopener" [title]="file.originalName">
+                <i class="bi bi-file-earmark"></i>  {{ file.originalName }}
+            </a>
+            }
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ===== System Info (collapsible) ===== -->
+    <div class="system-info">
+      <button
+        class="system-info-toggle btn btn-sm btn-dark"
+        type="button"
+        (click)="showSystemInfo = !showSystemInfo"
+      >
+        <i class="bi" [ngClass]="showSystemInfo ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+        System Info
+      </button>
+      @if (showSystemInfo) {
+      <div class="detail-grid detail-grid-sm mt-2">
+        <div class="detail-item">
+          <span class="detail-label">Input By</span>
+          <span class="detail-value">{{ selectedTaskDetail.detail?.inputBy || '-' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Input Date</span>
+          <span class="detail-value">{{ selectedTaskDetail.detail?.inputDate | date: 'medium' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Update By</span>
+          <span class="detail-value">{{ selectedTaskDetail.detail?.updateBy || '-' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Update Date</span>
+          <span class="detail-value">{{ selectedTaskDetail.detail?.updateDate | date: 'medium' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Presence</span>
+          <span class="detail-value">{{ selectedTaskDetail.detail?.presence === 1 ? 'Active' : 'Inactive' }}</span>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.close('Close')">Close</button>
+  </div>
 </ng-template>

@@ -101,6 +101,7 @@ export class CrReportComponent implements OnInit {
 
   selectedCaseDetail: any = null;
   selectedCaseId: any = null;
+  showSystemInfo = false;
   open(content: any, caseId: any): void {
     this.modalService.open(content, { size: 'lg' });
     this.selectedCaseId = caseId;

@@ -98,10 +98,13 @@ export class TaskReportComponent implements OnInit {
   }
   selectedTaskDetail :any = null;
   selectedTaskId : any = null
+showSystemInfo = false;
+
   open(content: any, taskId: any): void {
     this.modalService.open(content, { size: 'lg' });
     this.selectedTaskId = taskId;
     this.selectedTaskDetail = null;
+    
     this.apiService.get('/adminReport/task/detail', { id: this.selectedTaskId }).subscribe({
       next: (response) => {
         this.selectedTaskDetail = response.data;
