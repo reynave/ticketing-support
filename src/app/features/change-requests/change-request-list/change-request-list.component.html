@@ -22,12 +22,12 @@
 
   <div class="stat-card mb-3">
     <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-10">
         <label class="form-label small" for="task-keyword">Keyword</label>
         <input id="task-keyword" class="form-control form-control-sm" [(ngModel)]="keyword" (keyup.enter)="loadCases()"
           placeholder="Cari id / title / CR / issue" />
       </div>
-
+<!-- 
       <div class="col-12 col-md-6">
         <label class="form-label small" for="task-project-filter">Project</label>
         <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
@@ -37,7 +37,7 @@
           <option [value]="project.id">{{ project.id }} - {{ project.clientName }}</option>
           }
         </select>
-      </div>
+      </div> -->
 
       <!-- <div class="col-12 col-md-2">
         <label class="form-label small" for="task-status-filter">Status</label>
