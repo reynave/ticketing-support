@@ -116,16 +116,17 @@
         <div class="text-muted small fw-semibold">{{ selectedCaseDetail.detail?.id }}</div>
         <h6 class="mb-0 fw-bold">{{ selectedCaseDetail.detail?.title }}</h6>
       </div>
-      <span
-        class="badge rounded-pill status-badge"
-        [ngClass]="{
-          'status-closed': selectedCaseDetail.detail?.ticketStatusName === 'Closed',
-          'status-open': selectedCaseDetail.detail?.ticketStatusName === 'Open',
-          'status-progress': selectedCaseDetail.detail?.ticketStatusName === 'In Progress'
-        }"
-      >
-        {{ selectedCaseDetail.detail?.ticketStatusName }}
-      </span>
+      <div>
+        <span class="detail-label mx-3">Overall Rating : </span>
+        <span class="stars-inline">
+          @for (s of [1,2,3,4,5]; track s) {
+          <i class="bi" [ngClass]="s <= (selectedCaseDetail.detail?.rating || 0) ? 'bi-star-fill' : 'bi-star'"></i>
+          }
+        </span>
+        <span class="text-muted small ms-1">{{ selectedCaseDetail.detail?.rating }}/5</span>
+
+
+      </div>
     </div>
 
     <!-- ===== Reference chips ===== -->
@@ -144,92 +145,72 @@
       </span>
     </div>
 
-    <!-- ===== Info Grid ===== -->
-    <div class="detail-grid mb-3">
-      <div class="detail-item">
-        <span class="detail-label">Client</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.clientName || '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Project</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.projectName || '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Category</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.ticketCategoryName || '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Ticket Type</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.ticketTypeId ?? '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Severity</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.ticketSeverityId ?? '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Submit By</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.submitBy || '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Assigned To</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.assignToName || selectedCaseDetail.detail?.assignTo || '-' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Estimation Cost</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.ticketEstimationCost ?? 0 | number }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Hours</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.hours ?? 0 }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Submit Date</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.submitDate | date: 'medium' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Deadline</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.deadlineDateTime | date: 'medium' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Target Completion</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Actual Completion</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.actualCompletionDate | date: 'mediumDate' }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Overall Rating</span>
-        <span class="detail-value">
-          <span class="stars-inline">
-            @for (s of [1,2,3,4,5]; track s) {
-            <i class="bi" [ngClass]="s <= (selectedCaseDetail.detail?.rating || 0) ? 'bi-star-fill' : 'bi-star'"></i>
-            }
-          </span>
-          <span class="text-muted small ms-1">{{ selectedCaseDetail.detail?.rating }}/5</span>
-        </span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Rated By</span>
-        <span class="detail-value">{{ selectedCaseDetail.detail?.ratesBy || '-' }}</span>
-      </div>
+    <!-- ===== Info Table ===== -->
+    <div class="table-responsive detail-table-wrap mb-3">
+      <table class="table table-sm detail-table mb-0">
+        <tbody>
+          <tr>
+            <td class="detail-label">Client</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.clientName || '-' }}</td>
+            <td class="detail-label">Project</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.projectName || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Category</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.ticketCategory || '-' }}</td>
+            <td class="detail-label">Ticket Type</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.ticketTypeName ?? '-' }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Severity</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.ticketSeverityName ?? '-' }}</td>
+            <td class="detail-label">Submit By</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.submitBy || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Assigned To</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.assignToName || selectedCaseDetail.detail?.assignTo
+              || '-' }}</td>
+            <td class="detail-label">Estimation Cost</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.ticketEstimationCost ?? 0 | number }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Hours</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.hours ?? 0 }}</td>
+            <td class="detail-label">Submit Date</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.submitDate | date: 'medium' }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Deadline</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.deadlineDateTime | date: 'medium' }}</td>
+            <td class="detail-label">Target Completion</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</td>
+          </tr>
+          <tr>
+            <td class="detail-label">Actual Completion</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.actualCompletionDate | date: 'mediumDate' }}</td>
+            <td class="detail-label">Rated By</td>
+            <td class="detail-value">{{ selectedCaseDetail.detail?.ratesBy || '-' }}</td>
+          </tr>
+
+        </tbody>
+      </table>
     </div>
 
-    <!-- ===== Description ===== -->
-    @if (selectedCaseDetail.detail?.description) {
     <div class="content-block mb-3">
       <p class="fw-semibold mb-1 small text-uppercase text-muted">Description</p>
-      <div class="rich-text small" [innerHTML]="selectedCaseDetail.detail?.description"></div>
+      <div class="p-3 bg-light border rounded">
+        <div class="rich-text small" [innerHTML]="selectedCaseDetail.detail?.description"></div>
+      </div>
     </div>
-    }
 
-    <!-- ===== Task Solution ===== -->
-    @if (selectedCaseDetail.detail?.taskSolution) {
     <div class="content-block mb-3">
       <p class="fw-semibold mb-1 small text-uppercase text-muted">Task Solution</p>
-      <div class="rich-text small" [innerHTML]="selectedCaseDetail.detail?.taskSolution"></div>
+      <div class="p-3 bg-light border rounded">
+        <div class="rich-text small" [innerHTML]="selectedCaseDetail.detail?.taskSolution"></div>
+      </div>
     </div>
-    }
+
 
     <hr class="my-3" />
 
@@ -296,8 +277,9 @@
           @if (act.attachment?.length) {
           <div class="attachment-row">
             @for (file of act.attachment; track file.id) {
-            <a class="attachment-thumb mx-3" [href]="file.url" target="_blank" rel="noopener" [title]="file.originalName">
-                <i class="bi bi-file-earmark"></i>  {{ file.originalName }}
+            <a class="attachment-thumb mx-3" [href]="file.url" target="_blank" rel="noopener"
+              [title]="file.originalName">
+              <i class="bi bi-file-earmark"></i> {{ file.originalName }}
             </a>
             }
           </div>
@@ -310,11 +292,7 @@
 
     <!-- ===== System Info (collapsible) ===== -->
     <div class="system-info">
-      <button
-        class="system-info-toggle btn btn-sm btn-dark"
-        type="button"
-        (click)="showSystemInfo = !showSystemInfo"
-      >
+      <button class="system-info-toggle btn btn-sm btn-dark" type="button" (click)="showSystemInfo = !showSystemInfo">
         <i class="bi" [ngClass]="showSystemInfo ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
         System Info
       </button>
@@ -336,10 +314,7 @@
           <span class="detail-label">Update Date</span>
           <span class="detail-value">{{ selectedCaseDetail.detail?.updateDate | date: 'medium' }}</span>
         </div>
-        <div class="detail-item">
-          <span class="detail-label">Presence</span>
-          <span class="detail-value">{{ selectedCaseDetail.detail?.presence === 1 ? 'Active' : 'Inactive' }}</span>
-        </div>
+
       </div>
       }
     </div>
