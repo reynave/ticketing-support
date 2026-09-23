@@ -22,32 +22,24 @@
 
   <div class="stat-card mb-3">
     <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-10">
+      <div class="col-12 col-md-7">
         <label class="form-label small" for="task-keyword">Keyword</label>
         <input id="task-keyword" class="form-control form-control-sm" [(ngModel)]="keyword" (keyup.enter)="loadTasks()"
           placeholder="Cari id / title / CR / issue" />
       </div>
 
-      <!-- <div class="col-12 col-md-6">
-        <label class="form-label small" for="task-project-filter">Project</label>
-        <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
+      <div class="col-12 col-md-3">
+        <label class="form-label small" for="task-client-filter">Clients</label>
+        <select id="task-client-filter" class="form-select form-select-sm" [(ngModel)]="selectedClientId"
           (change)="loadTasks()">
-          <option value="">All project</option>
-          @for (project of projects; track trackById($index, project)) {
-          <option [value]="project.id">{{ project.name }}</option>
+          <option value="">All clients</option>
+          @for (client of clients; track trackById($index, client)) {
+          <option [value]="client.id">{{ client.name }}</option>
           }
         </select>
-      </div> -->
-
-      <!-- <div class="col-12 col-md-2">
-        <label class="form-label small" for="task-status-filter">Status</label>
-        <select id="task-status-filter" class="form-select form-select-sm" [(ngModel)]="selectedTicketStatusId"
-          (change)="loadTasks()">
-          @for (status of ticketStatusOptions; track status.id) {
-          <option [value]="status.id">{{ status.name }}</option>
-          }
-        </select>
-      </div> -->
+      </div>
+       
+      
 
 
       <div class="col-12 col-md-2 d-flex gap-2">

@@ -740,4 +740,17 @@ active = 1;
     });
   }
 
+  openTicketDetail(t: any): void {  
+    let ticketType = 'tasks';
+    
+    if(t.ticketTypeId == '2'){
+      ticketType = 'cases';
+    }
+    if(t.ticketTypeId == '3'){
+      ticketType = 'change-requests';
+    }
+
+    this.router.navigate([ ticketType, t.ticketId]);
+  }
+
 }

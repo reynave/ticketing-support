@@ -80,7 +80,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
   projects: any[] = [];
   internalUsers: any[] = [];
   ticketCategories: any[] = [];
-
+selectedClientId : string = '';
   loading = false;
   loadingOptions = false;
   saving = false;
@@ -96,6 +96,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
 
   formModel: TaskFormModel = this.defaultForm();
   payload: any = null;
+  clients : any[] = [];
   private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
@@ -133,8 +134,8 @@ export class TaskListComponent implements OnInit, OnDestroy {
       query['keyword'] = this.keyword.trim();
     }
 
-    if (this.selectedProjectId !== '') {
-      query['projectId'] = this.selectedProjectId;
+    if (this.selectedClientId !== '') {
+      query['clientId'] = this.selectedClientId;
     }
 
     if (this.selectedTicketStatusId !== '') {
@@ -160,7 +161,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
     try {
       const [projectResponse, ticketCategoriesResponse, ticketStatusResponse] =
         await Promise.all([
-          firstValueFrom(this.apiService.get('/project', { status: 1 })),
+          firstValueFrom(this.apiService.get('/client', { status: 1 })),
          
           firstValueFrom(
             this.apiService.get('/ticket-categories', { status: 1 }),
@@ -170,7 +171,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
           ),
         ]);
 
-      this.projects = Array.isArray(projectResponse?.data)
+      this.clients = Array.isArray(projectResponse?.data)
         ? projectResponse.data
         : [];
 
@@ -182,7 +183,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
         ? ticketStatusResponse.data
         : [];
     } catch {
-      this.projects = [];
+      this.clients = [];
       this.internalUsers = [];
       this.ticketCategories = [];
       this.ticketStatusOptions = [];
@@ -215,7 +216,7 @@ modules : any = [];
 
   resetFilter(): void {
     this.keyword = '';
-    this.selectedProjectId = '';
+    this.selectedClientId = '';
     this.selectedTicketStatusId = '';
     this.loadTasks();
   }

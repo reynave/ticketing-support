@@ -100,7 +100,8 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
   keyword = '';
   selectedProjectId = '';
   selectedTicketStatusId = '1';
-
+  selectedClientId = '';
+  clients: any[] = [];
   formModel: ChangeRequestFormModel = this.defaultForm();
   payload: any = null;
   private reloadSubscription?: Subscription;
@@ -140,8 +141,8 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
       query['keyword'] = this.keyword.trim();
     }
 
-    if (this.selectedProjectId !== '') {
-      query['projectId'] = this.selectedProjectId;
+    if (this.selectedClientId !== '') {
+      query['clientId'] = this.selectedClientId;
     }
 
     if (this.selectedTicketStatusId !== '') {
@@ -171,7 +172,7 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
         ticketSeveritiesResponse,
         ticketStatusResponse,
       ] = await Promise.all([
-        firstValueFrom(this.apiService.get('/project', { status: 1 })),
+        firstValueFrom(this.apiService.get('/client', { status: 1 })),
 
         firstValueFrom(
           this.apiService.get('/ticket-categories', { status: 1 }),
@@ -188,7 +189,7 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
         ? ticketStatusResponse.data
         : []; 
         
-      this.projects = Array.isArray(projectResponse?.data)
+      this.clients = Array.isArray(projectResponse?.data)
         ? projectResponse.data
         : [];
 
@@ -200,9 +201,11 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
         ? ticketSeveritiesResponse.data
         : [];
     } catch {
-      this.projects = [];
+      this.clients = [];
       this.internalUsers = [];
       this.ticketCategories = [];
+      this.ticketSeverities = [];
+      this.ticketStatusOptions = [];
     } finally {
       this.loadingOptions = false;
     }
@@ -210,7 +213,7 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
 
   resetFilter(): void {
     this.keyword = '';
-    this.selectedProjectId = '';
+    this.selectedClientId = '';
     this.selectedTicketStatusId = '';
     this.loadCases();
   }

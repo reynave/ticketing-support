@@ -506,7 +506,12 @@
             @for (t of ticketBalance; track t.id; let i = $index) {
             <tr>
               <td>{{ t.date}}</td>
-              <td>{{ t.title }} {{ t.note }}</td>
+              <td>
+                <a href="javascript:;" (click)="openTicketDetail(t)">
+                  {{ t.ticketId }}
+                </a>
+              <div> <small> {{ t.title }} {{ t.note }} </small></div>
+              </td>
               <td class="text-end text-primary"><strong>{{ t.ticketIn > 0 ? (t.ticketIn | number) : '-' }}</strong></td>
               <td class="text-end text-danger"><strong>{{ t.ticketOut > 0 ? (t.ticketOut | number) : '-' }}</strong>
               </td>
