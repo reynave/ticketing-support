@@ -159,9 +159,10 @@ selectedClientId : string = '';
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, ticketCategoriesResponse, ticketStatusResponse] =
+      const [projectResponse, clientsResponse, ticketCategoriesResponse, ticketStatusResponse] =
         await Promise.all([
-          firstValueFrom(this.apiService.get('/client', { status: 1 })),
+          firstValueFrom(this.apiService.get('/project', { status: 1 })),
+         firstValueFrom(this.apiService.get('/client', { status: 1 })),
          
           firstValueFrom(
             this.apiService.get('/ticket-categories', { status: 1 }),
@@ -171,8 +172,14 @@ selectedClientId : string = '';
           ),
         ]);
 
-      this.clients = Array.isArray(projectResponse?.data)
+          this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
+        : [];
+
+
+
+      this.clients = Array.isArray(clientsResponse?.data)
+        ? clientsResponse.data
         : [];
 
       

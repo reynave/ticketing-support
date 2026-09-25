@@ -169,10 +169,12 @@ export class CaseListComponent implements OnInit, OnDestroy {
     try {
       const [
         projectResponse,
+        clientResponse,
         ticketCategoriesResponse,
         ticketSeveritiesResponse,
         ticketStatusResponse,
       ] = await Promise.all([
+        firstValueFrom(this.apiService.get('/project', { status: 1,})),
         firstValueFrom(this.apiService.get('/client', { status: 1 })),
 
         firstValueFrom(
@@ -185,13 +187,18 @@ export class CaseListComponent implements OnInit, OnDestroy {
             this.apiService.get('/master/status/cases', { status: 1 }),
           ),
       ]);
+      //console.log(projectResponse, this.authService.currentUser.id);
+      this.projects =  Array.isArray(projectResponse?.data)
+        ? projectResponse.data
+        : []; 
+
 
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : []; 
         
-      this.clients = Array.isArray(projectResponse?.data)
-        ? projectResponse.data
+      this.clients = Array.isArray(clientResponse?.data)
+        ? clientResponse.data
         : [];
 
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
