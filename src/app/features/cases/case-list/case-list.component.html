@@ -149,20 +149,12 @@
               [disabled]="loadingOptions" required>
               <option [ngValue]="null" disabled>Select severity</option>
               @for (severity of ticketSeverities; track trackById($index, severity)) {
-              <option [ngValue]="severity.id">{{ severity.name }} ({{ severity.duration }} hour{{ severity.duration > 1
-                ? 's' : '' }})</option>
+              <option [ngValue]="severity.id">{{ severity.name }} ({{ severity.days }}) </option>
               }
             </select>
           </div>
 
-          <div class="mb-2">
-            <label class="form-label" for="task-submit-date">Submit Date <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <input id="project-end-date" class="form-control" type="text" name="submitDate" ngbDatepicker
-                #e1="ngbDatepicker" readonly [(ngModel)]="formModel.submitDate" required />
-              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e1.toggle()" type="button"></button>
-            </div>
-          </div>
+         
         </div>
 
         <div class="col-12 col-md-6">
@@ -196,7 +188,7 @@
             }
           </div>
 
-          <div class="mb-2">
+          <!-- <div class="mb-2">
             <label class="form-label" for="task-target-date">Target Completion <span
                 class="text-danger">*</span></label>
             <div class="input-group">
@@ -204,10 +196,26 @@
                 #e2="ngbDatepicker" readonly [(ngModel)]="formModel.targetCompletionDate" required />
               <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
             </div>
+          </div> -->
+           <div class="mb-2">
+            <label class="form-label" for="task-submit-date">Submit Date <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input id="project-end-date" class="form-control" type="text" name="submitDate" ngbDatepicker
+                #e1="ngbDatepicker" readonly [(ngModel)]="formModel.submitDate" required  (ngModelChange)="onSubmitDateChange($event)"/>
+              <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e1.toggle()" type="button"></button>
+            </div>
+          </div>
+          <input type="hidden" name="ticketStatusId" [ngModel]="100" /> <!-- 100 =  OPEN -->
+        </div>
+
+        <div>
+          <label class="form-label" >Target Completion</label>
+          <div class="form-control bg-light">
+            {{curDateTime | date:'medium' }}
           </div>
 
-          <input type="hidden" name="ticketStatusId" [ngModel]="100" />
         </div>
+
 
         <div class="col-12">
           <label class="form-label" for="task-title">Title <span class="text-danger">*</span></label>

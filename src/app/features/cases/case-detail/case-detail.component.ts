@@ -273,7 +273,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           firstValueFrom(
             this.apiService.get('/master/status/cases', { presence: 1 }),
           ),
-          
+
           firstValueFrom(
             this.apiService.get('/master/ticketSeverity', { presence: 1 }),
           ),
@@ -285,8 +285,8 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         ? ticketStatusResponse.data
         : [];
 
-  
-      this.projects =projectResponse.data; 
+
+      this.projects =projectResponse.data;
         this.ticketBalance = Number(projectResponse.data?.ticketBalance?.balance || 0);
 
       this.internalUsers = projectResponse.data?.users || [];
@@ -295,7 +295,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         ? ticketSeverityResponse.data
         : [];
 
-     
+
         this.ticketCategoryOptions = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
         : [];
@@ -370,22 +370,43 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   }
 
   onStatusChange(event: Event): void {
-   
+     
     const value = (event.target as HTMLSelectElement).value;
-    console.log('selected value:', value);
-    console.log('dari ngModel:', this.formModel.ticketStatusId);
+  //  console.log('selected value:', value);
+   // console.log('dari ngModel:', this.formModel.ticketStatusId);
+
+  }
+
+  getHours() {
 
     // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
     const severity = this.ticketSeverities.find(
-      (s: any) => Number(s.id) === Number(this.formModel.ticketSeverityId),
+      (s: any) => s.id === this.formModel.ticketSeverityId,
     );
+
     if (severity) {
-      this.addHour = Number(severity.duration || 0);
+      this.addHour = severity.duration || 0;
     } else {
       this.addHour = 0;
     }
+ 
+    const newDate = new Date(this.formModel.submitDate);
+    newDate.setTime(newDate.getTime() + this.addHour * 60 * 60 * 1000);
+
+    // kalau mau balik ke format string yang sama ('YYYY-MM-DDTHH:mm')
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    this.formModel.targetCompletionDate =
+      `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}T${pad(newDate.getHours())}:${pad(newDate.getMinutes())}`;
+
+
+    // this.calculateCurDateTime();
+    console.log( this.formModel.targetCompletionDate);
+
+
   }
 
+
+ 
   saveCase() {
     if (!this.canUpdate) {
       return;

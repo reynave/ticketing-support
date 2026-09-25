@@ -56,7 +56,7 @@
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
               Activity</button>
             @if (formMode === 'edit') {
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || saving">
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
               {{ saving ? 'Saving...' : 'Save' }}
             </button>
             }
@@ -256,15 +256,14 @@
 
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity
-                    </label>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity  </label>
                   </td>
                   <td>
-                    <select id="detail-task-status" (change)="onStatusChange($event)" class="form-select form-select-sm"
+                    <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
                       name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
                       required>
                       <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                        severity.duration }} hours)
+                        severity.duration > 24 ?  severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
                       </option>
                     </select>
                   </td>
@@ -284,30 +283,16 @@
                   </td>
                   <td>
                     {{formModel.targetCompletionDate | date:'medium'}}
-                    <!-- <div class="input-group">
-                      <input id="detail-task-target-date" class="form-control form-control-sm" type="text" readonly
-                        name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" ngbDatepicker
-                        #d="ngbDatepicker" [readonly]="formMode === 'view'" required />
-
-                      <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
-                        (click)="d.toggle()" type="button"></button>
-                    </div> -->
+                  
                   </td>
                 </tr>
 
-                <tr>
+                <tr *ngIf="task.ticketStatusId >= 900">
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
                       Completion Date</label></td>
                   <td>
                     {{formModel.actualCompletionDate | date:'medium'}}
-                    <!-- <div class="input-group">
-                      <input id="detail-task-actual-date" class="form-control form-control-sm" type="text" readonly
-                        name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate" ngbDatepicker
-                        #d2="ngbDatepicker" [readonly]="formMode === 'view'" required />
-
-                      <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
-                        (click)="d2.toggle()" type="button"></button>
-                    </div> -->
+                   
                   </td>
                 </tr>
 
@@ -336,6 +321,10 @@
                       [readonly]="formMode === 'view'"
                       (change)="formModel.ticketEstimationCost < 0 ? formModel.ticketEstimationCost = 0 : formModel.ticketEstimationCost"
                       required style="width: 200px;" />
+                    @if(formMode !== 'view'){
+                        <label *ngIf="formModel.ticketEstimationCost <= 0" class="text-danger"> Ticket Cost is requirement</label>
+                    }
+                     
                   </td>
                 </tr>
 
@@ -413,8 +402,9 @@
                 [placeholder]="'Type here...'"></ngx-editor>
             </div>
             }
-
-
+ 
+            <label *ngIf="formModel.taskSolution == '' " class="text-danger">Solution is requirement*</label>
+              
           </div>
         </div>
       </div>

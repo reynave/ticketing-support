@@ -50,6 +50,7 @@ export class MasterManageComponent implements OnInit {
     'ticket-categories': 1005,
     'user-auth-level': 1006,
     'global-setting': 1007,
+    'ticket-severity' : 1008,
   };
 
   get moduleId(): number | null {
@@ -159,6 +160,17 @@ export class MasterManageComponent implements OnInit {
         { key: 'name', label: 'Name', type: 'text', required: true },
         { key: 'weight', label: 'Weight', type: 'number', required: true }, 
          { key: 'status', label: 'Status', type: 'number' },
+      ],
+      hasStatusFilter: false,
+      updateOnly: true,
+    },
+
+    'ticket-severity': {
+      label: 'Ticket Serverity',
+      fields: [
+        { key: 'name', label: 'Name', type: 'text', required: true },
+        { key: 'duration', label: 'Duration', type: 'number', required: true }, 
+         { key: 'color', label: 'Color Class', type: 'text' },
       ],
       hasStatusFilter: false,
       updateOnly: true,

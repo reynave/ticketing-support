@@ -409,12 +409,12 @@ ticketBalance : number = 0;
     //   return;
     // }
 
-    // const targetCompletionDate =
-    //   this.formModel.targetCompletionDate['year'] +
-    //   '-' +
-    //   String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
-    //   '-' +
-    //   String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
+    const targetCompletionDate =
+      this.formModel.targetCompletionDate['year'] +
+      '-' +
+      String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
+      '-' +
+      String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
 
     // const actualCompletionDate =
     //   this.formModel.actualCompletionDate['year'] +
@@ -458,7 +458,7 @@ ticketBalance : number = 0;
       projectId: this.formModel.projectId,
       submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
-      // targetCompletionDate: targetCompletionDate,
+     targetCompletionDate: targetCompletionDate,
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
       // actualCompletionDate: actualCompletionDate,
@@ -600,7 +600,7 @@ ticketBalance : number = 0;
       projectId: String(this.task?.projectId || ''),
       submitBy: this.task?.submitBy,
       submitDate: this.toDateTimeLocalInput(this.task?.submitDate),
-      targetCompletionDate: this.task?.targetCompletionDate,
+      targetCompletionDate: targetCompletionDate,
       assignTo: this.task?.assignTo,
       taskSolution: String(this.task?.taskSolution || ''),
       actualCompletionDate: this.task?.actualCompletionDate,

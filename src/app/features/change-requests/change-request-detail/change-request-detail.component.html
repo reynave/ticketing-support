@@ -270,31 +270,22 @@
                       Completion</label>
                   </td>
                   <td>
-                    {{formModel.targetCompletionDate | date:'medium'}}
-                    <!-- <div class="input-group">
+               
+                  <div class="input-group">
                       <input id="detail-task-target-date" class="form-control form-control-sm" type="text" readonly
                         name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" ngbDatepicker
                         #d="ngbDatepicker" [readonly]="formMode === 'view'" required />
 
                       <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
                         (click)="d.toggle()" type="button"></button>
-                    </div> -->
+                    </div>
                   </td>
                 </tr>
 
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
-                      Completion Date</label></td>
+                 <tr *ngIf="task.ticketStatusId >= 900">
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual Completion Date</label></td>
                   <td>
-                    {{formModel.actualCompletionDate | date:'medium'}}
-                    <!-- <div class="input-group">
-                      <input id="detail-task-actual-date" class="form-control form-control-sm" type="text" readonly
-                        name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate" ngbDatepicker
-                        #d2="ngbDatepicker" [readonly]="formMode === 'view'" required />
-
-                      <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
-                        (click)="d2.toggle()" type="button"></button>
-                    </div> -->
+                    {{formModel.actualCompletionDate | date:'medium'}} 
                   </td>
                 </tr>
 

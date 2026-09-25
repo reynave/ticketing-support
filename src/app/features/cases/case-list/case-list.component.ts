@@ -19,6 +19,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SocketNotificationService } from '../../../core/services/socket-notification.service';
+import { FuncService } from '../../../core/services/func.service';
 
 interface CaseFormModel {
   id: string;
@@ -39,7 +40,6 @@ interface CaseFormModel {
   category: number | null;
   severityId: number | null;
   productChildId: number | null;
-  
 }
 
 interface TicketStatusOption {
@@ -60,7 +60,10 @@ export class CaseListComponent implements OnInit, OnDestroy {
   private readonly modalService = inject(NgbModal);
   private readonly authService = inject(AuthService);
   private readonly activeRouter = inject(ActivatedRoute);
-  private readonly socketNotificationService = inject(SocketNotificationService);
+  private readonly funcSerivce = inject(FuncService)
+  private readonly socketNotificationService = inject(
+    SocketNotificationService,
+  );
 
   @ViewChild('createCaseModal') createCaseModal?: TemplateRef<unknown>;
 
@@ -141,7 +144,6 @@ export class CaseListComponent implements OnInit, OnDestroy {
       query['keyword'] = this.keyword.trim();
     }
 
- 
     if (this.selectedClientId !== '') {
       query['clientId'] = this.selectedClientId;
     }
@@ -174,7 +176,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
         ticketSeveritiesResponse,
         ticketStatusResponse,
       ] = await Promise.all([
-        firstValueFrom(this.apiService.get('/project', { status: 1,})),
+        firstValueFrom(this.apiService.get('/project', { status: 1 })),
         firstValueFrom(this.apiService.get('/client', { status: 1 })),
 
         firstValueFrom(
@@ -183,20 +185,19 @@ export class CaseListComponent implements OnInit, OnDestroy {
         firstValueFrom(
           this.apiService.get('/master/ticket-severities', { status: 1 }),
         ),
-         firstValueFrom(
-            this.apiService.get('/master/status/cases', { status: 1 }),
-          ),
+        firstValueFrom(
+          this.apiService.get('/master/status/cases', { status: 1 }),
+        ),
       ]);
       //console.log(projectResponse, this.authService.currentUser.id);
-      this.projects =  Array.isArray(projectResponse?.data)
+      this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
-        : []; 
-
+        : [];
 
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
-        : []; 
-        
+        : [];
+
       this.clients = Array.isArray(clientResponse?.data)
         ? clientResponse.data
         : [];
@@ -208,6 +209,14 @@ export class CaseListComponent implements OnInit, OnDestroy {
       this.ticketSeverities = Array.isArray(ticketSeveritiesResponse?.data)
         ? ticketSeveritiesResponse.data
         : [];
+
+      this.ticketSeverities.forEach((el) => {
+        el.days =
+          el.duration > 24
+            ? el.duration / 24 + ' days'
+            : el.duration + ' Hours';
+      });
+      console.log(this.ticketSeverities);
     } catch {
       this.clients = [];
       this.internalUsers = [];
@@ -240,7 +249,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       backdrop: 'static',
     });
   }
-modules : any[] = [];
+  modules: any[] = [];
   selectCaseCategory(): void {
     const selectedProject = this.projects.find(
       (project) => project.id === this.formModel.projectId,
@@ -251,8 +260,6 @@ modules : any[] = [];
     );
 
     this.selectChildCategory = selectedTicketCategories[0]?.children || [];
-
-  
 
     const hasSelectedCategory = this.selectChildCategory.some(
       (category) => String(category.id) === String(this.formModel.category),
@@ -287,17 +294,48 @@ modules : any[] = [];
   addHour: number = 0; // Add 3 hours to the current time
 
   getHours() {
- 
     // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
     const severity = this.ticketSeverities.find(
-      (s : any) => s.id === this.formModel.severityId,
+      (s: any) => s.id === this.formModel.severityId,
     );
+
     if (severity) {
       this.addHour = severity.duration || 0;
     } else {
       this.addHour = 0;
     }
+    this.calculateCurDateTime();
+    console.log(this.curDateTime, this.formModel.submitDate);
   }
+
+  onSubmitDateChange(value: any): void {
+    this.formModel.submitDate = value;
+    this.calculateCurDateTime();
+  }
+  private calculateCurDateTime(): void {
+    const submitDate = this.formModel.submitDate;
+    const now = new Date();
+
+    if (!submitDate) {
+      this.curDateTime = null;
+      return;
+    }
+
+    const dateObj = new Date(
+      submitDate.year,
+      submitDate.month - 1,
+      submitDate.day,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    );
+    this.curDateTime = new Date(
+      dateObj.getTime() + this.addHour * 60 * 60 * 1000,
+    );
+  }
+
+  curDateTime: any = new Date();
+
   saveCase(form: NgForm): void {
     if (!this.canCreate) {
       return;
@@ -319,18 +357,8 @@ modules : any[] = [];
       this.errorMessage = 'Please complete all required fields.';
       return;
     }
-    const today = new Date();
 
-    // saya mau hhiiss ditambah 3 jam
-    const addHour = this.addHour;
-    const threeHoursLater = new Date(
-      today.getTime() + addHour * 60 * 60 * 1000,
-    );
-    const hhiissPlus = threeHoursLater.toTimeString().split(' ')[0];
-    const deadlineDateTime =
-      `${this.formModel.submitDate['year']}-${this.formModel.submitDate['month']}-${this.formModel.submitDate['day']}` +
-      ' ' +
-      hhiissPlus;
+    this.calculateCurDateTime();
 
     const payload = {
       id: this.formModel.id.trim() || undefined,
@@ -341,9 +369,7 @@ modules : any[] = [];
       projectId: this.formModel.projectId,
       submitBy: this.payload?.id || '', // Use the decoded token's user ID or default to 1
       submitDate: this.toApiDateTimeNow(this.formModel.submitDate),
-      targetCompletionDate: this.toApiDateTimeNow(
-        this.formModel.targetCompletionDate,
-      ),
+      targetCompletionDate: this.funcSerivce.toMySQLDateTime(this.curDateTime),
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
 
@@ -352,7 +378,7 @@ modules : any[] = [];
       //  ratesBy: Number(this.formModel.ratesBy),
       severityId: Number(this.formModel.severityId),
       ticketCategoryId: Number(this.formModel.category),
-      deadlineDateTime: deadlineDateTime,
+      deadlineDateTime: this.funcSerivce.toMySQLDateTime(this.curDateTime),
       productChildId: Number(this.formModel.productChildId),
     };
     console.log('Payload:', payload);
@@ -383,6 +409,8 @@ modules : any[] = [];
       },
     });
   }
+
+ 
 
   goToDetail(row: any): void {
     const id = String(row?.id || '').trim();
@@ -471,14 +499,6 @@ modules : any[] = [];
     };
   }
 
-  private toApiDateTime(input: string): string {
-    if (!input) {
-      return '';
-    }
-
-    return input.replace('T', ' ') + ':00';
-  }
-
   private toApiDateTimeNow(dateModel: any): string {
     if (!dateModel) {
       return '';
@@ -501,12 +521,5 @@ modules : any[] = [];
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  private toDateTimeInputValue(date: Date): string {
-    const yyyyMmDd = this.toDateInputValue(date);
-    const hour = String(date.getHours()).padStart(2, '0');
-    const minute = String(date.getMinutes()).padStart(2, '0');
-    return `${yyyyMmDd}T${hour}:${minute}`;
   }
 }

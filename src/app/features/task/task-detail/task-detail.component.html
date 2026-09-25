@@ -221,17 +221,9 @@
                 </tr>
 
                 <tr *ngIf="task.ticketStatusId >= 900">
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual
-                      Completion Date</label></td>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual Completion Date</label></td>
                   <td>
-                    <div class="input-group">
-                      <input id="detail-task-actual-date" class="form-control form-control-sm" type="text" readonly
-                        name="actualCompletionDate" [(ngModel)]="formModel.actualCompletionDate" ngbDatepicker
-                        #d2="ngbDatepicker" [readonly]="formMode === 'view'" required />
-
-                      <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
-                        (click)="d2.toggle()" type="button"></button>
-                    </div>
+                    {{formModel.actualCompletionDate | date:'medium'}} 
                   </td>
                 </tr>
 

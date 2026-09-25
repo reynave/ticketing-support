@@ -170,11 +170,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     },
     //{ key: 'user-type', label: 'User Type', icon: 'groups' },
     {
-      key: 'global-setting',
-      label: 'Global Setting',
-      icon: 'settings_applications',
-      route: '/master-global-setting',
-      moduleId: 1007,
+      key: 'ticket-severity',
+      label: 'Ticket Severity',
+      icon: 'emergency_home', 
+      moduleId: 1008,
     },
   ];
 
