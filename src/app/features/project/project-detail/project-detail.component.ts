@@ -126,7 +126,7 @@ active = 1;
     this.loading = true;
     this.errorMessage = '';
 
-    this.apiService.get(`/project/${this.projectId}`).subscribe({
+    this.apiService.get(`/project/detail/${this.projectId}`).subscribe({
       next: (response) => {
     
         this.project = response?.data || null;
@@ -167,9 +167,9 @@ active = 1;
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
         firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })), 
-        firstValueFrom(this.apiService.get('/ticket', {  projectId: this.projectId, closed : false })),
-        firstValueFrom(this.apiService.get('/cases', {   projectId: this.projectId, closed : false })),
-        firstValueFrom(this.apiService.get('/change-requests', {   projectId: this.projectId , closed : false})),
+        firstValueFrom(this.apiService.get('/project/ticketList', {  projectId: this.projectId, ticketTypeId : 1, closed : false })),
+        firstValueFrom(this.apiService.get('/project/ticketList', {  projectId: this.projectId, ticketTypeId : 2, closed : false })),
+         firstValueFrom(this.apiService.get('/project/ticketList', {  projectId: this.projectId, ticketTypeId : 3, closed : false })),
         firstValueFrom(this.apiService.get('/ticket-categories',  { status: 1 ,parentId :0})),
          firstValueFrom(this.apiService.get(`/ticket-balance/project/${this.projectId}`)),
         
@@ -228,6 +228,7 @@ active = 1;
           this.loading = false;
     }
   }
+  
  toggleManager(index: number): void {
     for (let i = 0; i < this.users.length; i++) { 
         this.users[i].asManager = false;

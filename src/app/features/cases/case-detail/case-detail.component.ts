@@ -268,7 +268,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     try {
       const [projectResponse, ticketStatusResponse, ticketSeverityResponse, ticketCategoriesResponse] =
         await Promise.all([
-          firstValueFrom(this.apiService.get(`/project/${this.projectId}`)),
+          firstValueFrom(this.apiService.get(`/project/detail/${this.projectId}`)),
 
           firstValueFrom(
             this.apiService.get('/master/status/cases', { presence: 1 }),
