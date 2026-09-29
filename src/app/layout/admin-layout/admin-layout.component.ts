@@ -148,7 +148,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     // },
     {
       key: 'ticket-categories',
-      label: 'Ticket Categories',
+      label: 'Group Phase',
       icon: 'category',
       route: '/master-ticket-categories',
       moduleId: 1005,
@@ -171,9 +171,16 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     //{ key: 'user-type', label: 'User Type', icon: 'groups' },
     {
       key: 'ticket-severity',
-      label: 'Ticket Severity',
+      label: 'Respond Time',
       icon: 'emergency_home', 
       moduleId: 1008,
+    },
+
+     {
+      key: 'ticket-solution-time',
+      label: 'Solution Time',
+      icon: 'info', 
+      moduleId: 1009,
     },
   ];
 

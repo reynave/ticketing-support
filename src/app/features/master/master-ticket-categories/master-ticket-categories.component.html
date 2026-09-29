@@ -4,13 +4,13 @@
   } @else {
   <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
-      <div class="page-title">Master Ticket Categories</div>
-      <div class="page-subtitle">Manage ticket category hierarchy with parent category mapping.</div>
+      <div class="page-title">Master Group Phase</div>
+      <div class="page-subtitle">Manage Group Phase hierarchy with parent Group Phase mapping.</div>
     </div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-secondary btn-sm" routerLink="/master">Back to Master</a>
       @if (canCreate) {
-      <button type="button" class="btn btn-sm btn-primary" (click)="openNewParentModal()">New Category</button>
+      <button type="button" class="btn btn-sm btn-primary" (click)="openNewParentModal()">New Group Phase</button>
       }
       <button type="button" class="btn btn-sm btn-outline-primary" (click)="loadRows()" [disabled]="loading">
         {{ loading ? 'Refreshing...' : 'Refresh' }}
@@ -55,7 +55,7 @@
 
       <div class="col-12 col-md-3">
         <div class="small text-muted mb-1">Hierarchy note</div>
-        <div class="small">Rows with `parentId = 0` are root categories.</div>
+        <div class="small">Rows with `parentId = 0` are root Group Phase.</div>
       </div>
 
       <div class="col-12 col-md-2 d-flex gap-2">
@@ -66,9 +66,9 @@
  
   <div class="stat-card">
     @if (loading) {
-    <div class="text-muted">Loading ticket categories...</div>
+    <div class="text-muted">Loading Group Phase...</div>
     } @else if (!rows.length) {
-    <div class="text-muted">No ticket category data available.</div>
+    <div class="text-muted">No Group Phase data available.</div>
     } @else {
     <div class="table-responsive">
       <table class="table table-sm table-hover align-middle">
@@ -124,7 +124,7 @@
 
 <ng-template #categoryFormModal>
   <div class="modal-header">
-    <h5 class="modal-title">{{ formMode === 'parent' ? 'New Parent Category' : 'New Child Category' }}</h5>
+    <h5 class="modal-title">{{ formMode === 'parent' ? 'New Parent Group Phase' : 'New Child Group Phase' }}</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
   </div>
 
@@ -137,7 +137,7 @@
       }
 
       <div>
-        <label class="form-label" for="new-category-name">Category Name <span class="text-danger">*</span></label>
+        <label class="form-label" for="new-category-name">Group Phase Name <span class="text-danger">*</span></label>
         <input id="new-category-name" class="form-control" name="name" [(ngModel)]="formModel.name" required />
       </div>
 
@@ -163,7 +163,7 @@
     <div class="modal-footer">
       <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving || categoryFormNg.invalid">
-        {{ saving ? 'Saving...' : 'Save Category' }}
+        {{ saving ? 'Saving...' : 'Save Group Phase' }}
       </button>
     </div>
   </form>

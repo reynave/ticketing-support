@@ -166,7 +166,19 @@ export class MasterManageComponent implements OnInit {
     },
 
     'ticket-severity': {
-      label: 'Ticket Serverity',
+      label: 'Ticket Duration Respond Time',
+      fields: [
+        { key: 'name', label: 'Name', type: 'text', required: true },
+        { key: 'duration', label: 'Duration', type: 'number', required: true }, 
+         { key: 'color', label: 'Color Class', type: 'text' },
+      ],
+      hasStatusFilter: false,
+      updateOnly: true,
+    },
+
+
+     'ticket-solution-time': {
+      label: 'Ticket Solution Time',
       fields: [
         { key: 'name', label: 'Name', type: 'text', required: true },
         { key: 'duration', label: 'Duration', type: 'number', required: true }, 
