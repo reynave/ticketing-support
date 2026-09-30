@@ -321,6 +321,8 @@ ticketStatusName : string = '';
   responseDateTime : string = '';
   targetCompletationDateTime : string = '';
   lockTime : number = 1;
+  verificationDateTime : string = '';
+  actualWorkingHour : number = 0;
   loadTaskDetail(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -365,7 +367,14 @@ ticketStatusName : string = '';
           ? response.data.ticketSolutionTime
           : [];
         this.onSubmitDateChange();
-      },
+
+        if( this.lockTime === 0) {
+            this.formMode = 'edit';
+        }
+
+        this.verificationDateTime = String(response.data.verificationDateTime ?? '');
+        this.actualWorkingHour = Number(response.data.actualWorkingHour ?? 0).toFixed(2) as unknown as number;
+      },  
       error: (error) => {
         this.loading = false;
         this.task = null;

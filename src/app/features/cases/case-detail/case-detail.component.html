@@ -109,8 +109,8 @@
           </div>
 
           <div class="col-4 border-start border-2">
-            <label class="form-label">Verification</label>
-            <div class="form-control form-control-sm bg-light">-</div>
+            <label class="form-label">Verification DateTime</label>
+            <div class="form-control form-control-sm bg-light">{{ verificationDateTime | date:'yyyy-MM-dd hh:mm:ss a' || 'waiting for verification' }}</div>
           </div>
 
 
@@ -123,6 +123,13 @@
 
         </div>
 
+        <div class="row"  *ngIf="task.ticketStatusId == 400">
+          <div class="col-12">
+            <div class="alert alert-warning mt-2 text-center">
+              <h5>Waiting for Verification from client</h5>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="card-header">
@@ -215,12 +222,13 @@
             <div class="input-group mb-2">
               <input id="task-target-completion" class="form-control form-control-sm" type="text"
                 name="targetCompletationDate" ngbDatepicker #e5="ngbDatepicker" (dateSelect)="onSubmitDateChange()"
-                readonly [(ngModel)]="targetCompletationDate" [minDate]="responseDate" [disabled]="formMode === 'view'"  />
-              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e5.toggle()" [disabled]="formMode === 'view'"
+                readonly [(ngModel)]="targetCompletationDate" [minDate]="responseDate" [disabled]="formMode === 'view'  "  />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e5.toggle()" [disabled]="formMode === 'view'  "
                 type="button"></button>
-              <input type="time" class="form-control form-control-sm" name="targetCompletationTime" [disabled]="formMode === 'view'"
+              <input type="time" class="form-control form-control-sm" name="targetCompletationTime" [disabled]="formMode === 'view'   "
                 (change)="onSubmitDateChange()" [(ngModel)]="targetCompletationTime" />
 
+ 
             </div>
  
               <div class="alert alert-{{solution?.color}} py-1 mb-1">
@@ -244,7 +252,7 @@
             <div>
               <label class="form-label">Actual Working Hour</label>
             </div>
-            <div class="form-control form-control-sm bg-light mb-2"><small>waiting for verification</small></div>
+            <div class="form-control form-control-sm bg-light mb-2"> {{actualWorkingHour >0 ? actualWorkingHour : 'waiting for verification'}} </div>
 
              @if(lockTime == 1   && task.ticketStatusId < 900) {
  
@@ -253,7 +261,7 @@
                       *</span></em> </label>
                 <div class="input-group ">
                   <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
-                    [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions" required>
+                    [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions || task.ticketStatusId != 100" required >
 
                     
                     
@@ -274,8 +282,8 @@
 
                 </div>
 
-
-              <div class="d-grid">
+                
+              <div class="d-grid" *ngIf="task.ticketStatusId == 100">
                 <button class="btn btn-sm btn-primary mt-2" (click)="submitVerification()">Submit Verification</button>
               </div>
               }
