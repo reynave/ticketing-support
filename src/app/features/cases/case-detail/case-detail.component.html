@@ -9,7 +9,7 @@
     </div>
 
     <div class="ms-auto" *ngIf="formModel.ticketStatusId < 900 ">
-      <h5 class="fw-semibold mb-0 font-monospace"> Remaining Time :
+      <h5 class="fw-semibold mb-0 font-monospace">Target Respond Remaining Time :
 
         <app-countdown [targetDate]="deadlineDateTime" (finished)="onFinished()"> </app-countdown>
 
@@ -45,6 +45,170 @@
     </div>
 
 
+    <div class="col-6">
+      <h5>Timeline Target Resolution</h5>
+    </div>
+    <div class="col-6 text-end">
+      <h5>Status : OPEN</h5>
+    </div>
+
+    <div class="card border shadow-sm mb-2">
+
+
+      <div class="card-header">
+        <strong>Client's View</strong>
+      </div>
+      <div class="card-body">
+        <div class="row">
+
+          <div class="col-4">
+       
+              <label class="form-label">Open Case</label>
+              <div class="form-control form-control-sm bg-light mb-1"> {{ formModel.submitDate | date:'yyyy-MM-dd hh:mm:ss a' }}</div>
+
+              <label class="form-label">Duration Respond Time</label>
+              <div>
+                <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
+                  name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
+                  required>
+                  <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
+                    severity.duration > 24 ? severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
+                  </option>
+                </select>
+              </div>
+           
+          </div>
+
+          <div class="col-4">
+            <label class="form-label">Verification</label>
+            <div class="form-control form-control-sm bg-light">-</div>
+          </div>
+
+
+          <div class="col-4">
+            <label class="form-label"><strong>Target Respond</strong></label>
+            <div class="form-control form-control-sm bg-light border-danger border-2"> {{formModel.targetCompletionDate |  date:'yyyy-MM-dd hh:mm:ss a' }}</div>
+          </div>
+
+
+        </div>
+
+      </div>
+
+      <div class="card-header">
+        <strong>Internal Team's View</strong>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-4">
+            <!-- <div>
+              <label class="form-label">Response DateTime</label>
+            </div>
+            <div class="form-control form-control-sm bg-light">9/25/2026 10:20:00</div> -->
+
+
+            <div class="border border-2 border-success shadow-lg p-2 rounded">
+
+              <div class="d-grid ">
+                <label class="form-label" for="task-submit-date"><em>Response DateTime <span class="text-danger">
+                      *</span></em> <sup> <small><em>Start DateTime</em></small> </sup> </label>
+
+
+                <div class="input-group mb-2">
+                  <input id="project-end-date" class="form-control form-control-sm" type="text" name="submitDate"
+                    ngbDatepicker #e1="ngbDatepicker" 
+                      (dateSelect)="onSubmitDateChange()"
+                    readonly  [(ngModel)]="responseDate"   />
+                  <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e1.toggle()"
+                    type="button"></button>
+                  <input type="time" class="form-control form-control-sm" name="responseTime"
+                    (change)="onSubmitDateChange()" [(ngModel)]="responseTime"> 
+                </div>
+ 
+                <label class="form-label" for="task-submit-date"><em>Assign To <span class="text-danger">
+                      *</span></em> </label>
+                <div class="input-group mb-2"> 
+                  <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
+                    [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions" required>
+
+                    @if(formModel.ticketStatusId <= 199) { <ng-container *ngFor="let user of internalUsers">
+                      <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                        {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
+                      </option>
+                      </ng-container>
+                      }
+                      @if(formModel.ticketStatusId == 400) {
+                      <ng-container *ngFor="let user of contacts">
+                        <option [ngValue]="user.userId">
+                          {{ user.name }} [Customer]
+                        </option>
+                      </ng-container>
+                      }
+
+                      @if(formModel.ticketStatusId >= 900) {
+                      <ng-container *ngFor="let user of internalUsers">
+                        <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                          {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
+                        </option>
+                      </ng-container>
+                      <ng-container *ngFor="let user of contacts">
+                        <option [ngValue]="user.userId">
+                          {{ user.name }} [Customer]
+                        </option>
+                      </ng-container>
+                      }
+                  </select> 
+                  <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select
+                        an Assign To</em></small></div>
+
+                </div>
+                <button class="btn btn-sm btn-success mt-2">Submit IN-PROGRESS</button>
+         
+              </div>
+            </div> 
+          </div>
+
+
+          <div class="col-4">
+
+
+            
+                <label class="form-label" for="task-target-completion"><em>Target Completion DateTime <span
+                        class="text-danger">*</span></em> <sup> <small><em>{{ responseTime }} + {{ addHour }} jam</em></small> </sup> </label>
+
+                <div class="input-group mb-2">
+                  <input id="task-target-completion" class="form-control form-control-sm" type="text" name="targetCompletationDate"
+                    ngbDatepicker #e5="ngbDatepicker"
+                    (dateSelect)="onSubmitDateChange()"
+                    readonly [(ngModel)]="targetCompletationDate" [minDate]="responseDate"/>
+                    <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e5.toggle()"
+                    type="button"></button>
+                  <input type="time" class="form-control form-control-sm" name="targetCompletationTime"
+                    (change)="onSubmitDateChange()" [(ngModel)]="targetCompletationTime" />
+                 
+                </div>
+
+            <div>
+              <label class="form-label" for="task-submit-date">Ticket Solution Time </label>
+              <div class="form-control form-control-sm bg-light border-2 border-{{solution.color}}"> {{solution.name}} ({{solution.duration}} Hours)</div>
+         
+            </div>
+
+          </div>
+
+
+          <div class="col-4">
+
+
+            <div>
+              <label class="form-label">Action Working DateTime</label>
+            </div>
+            <div class="form-control form-control-sm bg-light">-</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
 
     <form #taskFormNg="ngForm" (ngSubmit)="saveCase()">
       <div class="card border shadow-sm mb-3">
@@ -56,7 +220,8 @@
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
               Activity</button>
             @if (formMode === 'edit') {
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
+            <button type="submit" class="btn btn-primary btn-sm"
+              [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
               {{ saving ? 'Saving...' : 'Save' }}
             </button>
             }
@@ -256,14 +421,16 @@
 
 
                 <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Ticket Severity  </label>
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Duration
+                      Respond Time
+                    </label>
                   </td>
                   <td>
                     <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
                       name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
                       required>
                       <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                        severity.duration > 24 ?  severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
+                        severity.duration > 24 ? severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
                       </option>
                     </select>
                   </td>
@@ -271,7 +438,7 @@
 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
-                      Date</label></td>
+                      Date / Open Case</label></td>
                   <td>
                     {{ formModel.submitDate | date:'medium' }}
                   </td>
@@ -283,7 +450,7 @@
                   </td>
                   <td>
                     {{formModel.targetCompletionDate | date:'medium'}}
-                  
+
                   </td>
                 </tr>
 
@@ -292,7 +459,7 @@
                       Completion Date</label></td>
                   <td>
                     {{formModel.actualCompletionDate | date:'medium'}}
-                   
+
                   </td>
                 </tr>
 
@@ -322,19 +489,21 @@
                       (change)="formModel.ticketEstimationCost < 0 ? formModel.ticketEstimationCost = 0 : formModel.ticketEstimationCost"
                       required style="width: 200px;" />
                     @if(formMode !== 'view'){
-                        <label *ngIf="formModel.ticketEstimationCost <= 0" class="text-danger"> Ticket Cost is requirement</label>
+                    <label *ngIf="formModel.ticketEstimationCost <= 0" class="text-danger"> Ticket Cost is
+                      requirement</label>
                     }
-                     
+
                   </td>
                 </tr>
 
                 <tr *ngIf="formModel.ticketEstimationCost * projects.ticketBaseHours > 0">
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-estimated-hours"> Estimated Hours</label></td>
-                  <td>  
+                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-estimated-hours">
+                      Estimated Hours</label></td>
+                  <td>
                     <div class="form-control form-control-sm bg-light">
                       {{formModel.ticketEstimationCost * projects.ticketBaseHours}} Hours
                     </div>
-                    
+
 
 
                   </td>
@@ -386,6 +555,8 @@
 
       </div>
 
+
+
       <div class="card border shadow-sm mb-3">
         <div class="card-body">
 
@@ -402,9 +573,9 @@
                 [placeholder]="'Type here...'"></ngx-editor>
             </div>
             }
- 
+
             <label *ngIf="formModel.taskSolution == '' " class="text-danger">Solution is requirement*</label>
-              
+
           </div>
         </div>
       </div>
@@ -420,9 +591,8 @@
           [modules]="projects.modules || []" [assignTo]="task?.assignTo || 0" [submitBy]="me?.id || 0"
           [ticketCategories]="ticketCategories" [internalUsers]="internalUsers"
           [ticketCategoryId]="task?.ticketCategoryId || ''" [productChildId]="task?.productChildId || ''"
-          [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()"
-          [title]="this.task?.title || ''"  [origin]="'Cases'"
-          (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
+          [loadingOptions]="loadingOptions" (created)="onRelatedTaskCreated()" [title]="this.task?.title || ''"
+          [origin]="'Cases'" (failed)="onRelatedTaskFailed($event)"></app-case-create-task-modal>
       </div>
 
       @if (loadingRelatedTasks) {
@@ -443,8 +613,8 @@
           </thead>
           <tbody>
             <tr *ngFor="let row of relatedTasks">
-              <td>{{ row.id }}   
-                <strong *ngIf="row.ticketStatusId < 900 " ><i class="bi bi-exclamation-diamond-fill"></i> </strong> 
+              <td>{{ row.id }}
+                <strong *ngIf="row.ticketStatusId < 900 "><i class="bi bi-exclamation-diamond-fill"></i> </strong>
               </td>
               <td>{{ row.title }} </td>
               <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>

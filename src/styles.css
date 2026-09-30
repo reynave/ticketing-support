@@ -15,7 +15,10 @@
 	--navbar-h: 56px;
 	--sidebar-w: 240px;
 }
-
+ngb-datepicker.dropdown-menu {
+    padding: 0;
+    z-index: 9999 !important;
+}
 body {
 	margin: 0;
 	font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;

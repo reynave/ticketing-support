@@ -40,7 +40,7 @@ import { SocketNotificationService } from '../../../core/services/socket-notific
     NgbDatepickerModule,
     CountdownComponent,
     CaseCreateTaskModalComponent,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './case-detail.component.html',
   styleUrl: './case-detail.component.css',
@@ -62,7 +62,9 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly http = inject(HttpClient);
   private modalService = inject(NgbModal);
-    private readonly socketNotificationService : any = inject(SocketNotificationService);
+  private readonly socketNotificationService: any = inject(
+    SocketNotificationService,
+  );
 
   readonly moduleId = 5006;
 
@@ -143,7 +145,25 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   deadlineDateTime: string = '';
   assignTo: string = '';
   inputDate: string = '';
-   ticketCategoryOptions : any = [];
+  ticketCategoryOptions: any = [];
+
+  /** Jumlah jam SLA yang ditambahkan ke jam sekarang (responseTime -> targetCompletationTime). */
+  addHour: number = 3;
+  ticketSolutionTime: any = [];
+  /** Tanggal hari ini (dipakai ngbDatepicker). */
+  responseDate: NgbDateStruct = this.currentDateStruct();
+
+  /** Jam hari ini yang sedang berjalan, format HH:mm (dipakai <input type="time">). */
+  responseTime: string = this.currentTimeValue();
+
+  /** Tanggal hari ini untuk target completion. */
+  targetCompletationDate: NgbDateStruct = this.currentDateStruct();
+
+  /** Jam target = jam sekarang + addHour jam, format HH:mm. */
+  targetCompletationTime: string = this.currentTimeValue(
+    this.offsetDate(new Date(), this.addHour),
+  );
+
   ngOnInit(): void {
     if (!this.canAccessPage) {
       return;
@@ -175,6 +195,95 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   onFinished() {
     console.log('Countdown selesai!');
   }
+
+  /**
+   * Dipanggil setiap kali Response DateTime / Target Completion DateTime berubah.
+   * Menghitung selisih jam antara Target Completion dan Response DateTime
+   * lalu menyimpannya ke `addHour`.
+   */
+  onSubmitDateChange(): void {
+    const responseDateTime = this.toLocalDateTime(
+      this.responseDate,
+      this.responseTime,
+    );
+    const targetCompletationDateTime = this.toLocalDateTime(
+      this.targetCompletationDate,
+      this.targetCompletationTime,
+    );
+
+    if (!responseDateTime || !targetCompletationDateTime) {
+      this.addHour = 0;
+
+      return;
+    }
+
+    const diffInHours =
+      (targetCompletationDateTime.getTime() - responseDateTime.getTime()) /
+      (1000 * 60 * 60);
+
+    // dibulatkan 2 desimal agar bebas dari noise floating point (mis. 2.9999999999999996)
+    this.addHour = Math.max(0, Math.round(diffInHours * 100) / 100);
+
+    console.log(
+      this.toSqlDateTime(this.responseDate, this.responseTime),
+      this.toSqlDateTime(
+        this.targetCompletationDate,
+        this.targetCompletationTime,
+      ),
+    );
+
+    console.log('selisih jam =', this.addHour);
+    const weekendHours = this.getWeekendHours(
+      responseDateTime,
+      targetCompletationDateTime,
+    );
+
+    // dibulatkan 2 desimal agar bebas dari noise floating point
+    this.addHour = Math.max(
+      0,
+      Math.round((diffInHours - weekendHours) * 100) / 100,
+    );
+    const solution = this.getSolutionTime(this.addHour);
+    console.log(this.addHour, this.ticketSolutionTime, solution);
+    this.solution = solution;
+    // addHour formula Ticket Solution Time
+  }
+  solution: any = {};
+  getSolutionTime(hour: number) {
+    return [...this.ticketSolutionTime]
+      .sort((a, b) => a.duration - b.duration)
+      .find((item) => hour <= item.duration);
+  }
+
+  private getWeekendHours(start: Date, end: Date): number {
+    let total = 0;
+    let cursor = new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate(),
+    );
+
+    while (cursor < end) {
+      const next = new Date(
+        cursor.getFullYear(),
+        cursor.getMonth(),
+        cursor.getDate() + 1,
+      );
+      const day = cursor.getDay(); // 0 = Minggu, 6 = Sabtu
+
+      if (day === 0 || day === 6) {
+        const from = Math.max(cursor.getTime(), start.getTime());
+        const to = Math.min(next.getTime(), end.getTime());
+        if (to > from) {
+          total += (to - from) / (1000 * 60 * 60);
+        }
+      }
+      cursor = next;
+    }
+
+    return total;
+  }
+
   projectId: string = '';
   taskCount: number = 100;
   ticketBased: number = 0;
@@ -192,6 +301,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.assignTo = this.task.assignTo;
         this.projectId = this.task.projectId;
         this.ticketBased = this.task.ticketBased;
+        this.solution = response?.data.ticketSolutionTime;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan case (ticketTypeId bukan 2).';
@@ -202,6 +312,17 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
 
         this.loadOptions();
         this.taskCount = Number(this.task?.taskCount || 0);
+        console.log('data', response.data);
+        this.addHour = response.data.addHour;
+
+        /** Jam target = jam sekarang + addHour jam, format HH:mm. */
+        // this.targetCompletationTime = this.currentTimeValue(
+        //   this.offsetDate(new Date(), this.addHour),
+        // );
+        
+       
+        this.ticketSolutionTime = response.data.ticketSolutionTime;
+         this.onSubmitDateChange();
       },
       error: (error) => {
         this.loading = false;
@@ -261,33 +382,44 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       },
     );
   }
-  ticketBalance : number = 0;
+  ticketBalance: number = 0;
   async loadOptions(): Promise<void> {
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, ticketStatusResponse, ticketSeverityResponse, ticketCategoriesResponse] =
-        await Promise.all([
-          firstValueFrom(this.apiService.get(`/project/detail/${this.projectId}`)),
+      const [
+        projectResponse,
+        ticketStatusResponse,
+        ticketSeverityResponse,
+        ticketCategoriesResponse,
+      ] = await Promise.all([
+        firstValueFrom(
+          this.apiService.get(`/project/detail/${this.projectId}`),
+        ),
 
-          firstValueFrom(
-            this.apiService.get('/master/status/cases', { presence: 1 }),
-          ),
+        firstValueFrom(
+          this.apiService.get('/master/status/cases', { presence: 1 }),
+        ),
 
-          firstValueFrom(
-            this.apiService.get('/master/ticketSeverity', { presence: 1 }),
-          ),
-             firstValueFrom(
-            this.apiService.get('/ticket-categories', { presence: 1 , status: 1, parentId: this.task?.ticketCategoriesParentId }),
-          ),
-        ]);
+        firstValueFrom(
+          this.apiService.get('/master/ticketSeverity', { presence: 1 }),
+        ),
+        firstValueFrom(
+          this.apiService.get('/ticket-categories', {
+            presence: 1,
+            status: 1,
+            parentId: this.task?.ticketCategoriesParentId,
+          }),
+        ),
+      ]);
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : [];
 
-
-      this.projects =projectResponse.data;
-        this.ticketBalance = Number(projectResponse.data?.ticketBalance?.balance || 0);
+      this.projects = projectResponse.data;
+      this.ticketBalance = Number(
+        projectResponse.data?.ticketBalance?.balance || 0,
+      );
 
       this.internalUsers = projectResponse.data?.users || [];
 
@@ -295,8 +427,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         ? ticketSeverityResponse.data
         : [];
 
-
-        this.ticketCategoryOptions = Array.isArray(ticketCategoriesResponse?.data)
+      this.ticketCategoryOptions = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
         : [];
 
@@ -370,43 +501,28 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   }
 
   onStatusChange(event: Event): void {
-     
     const value = (event.target as HTMLSelectElement).value;
-  //  console.log('selected value:', value);
-   // console.log('dari ngModel:', this.formModel.ticketStatusId);
-
+    //  console.log('selected value:', value);
+    // console.log('dari ngModel:', this.formModel.ticketStatusId);
   }
 
   getHours() {
-
     // buatkan function get Id dari ticketSeverities, lalu ambil value hours dari severityId
     const severity = this.ticketSeverities.find(
       (s: any) => s.id === this.formModel.ticketSeverityId,
     );
 
-    if (severity) {
-      this.addHour = severity.duration || 0;
-    } else {
-      this.addHour = 0;
-    }
- 
     const newDate = new Date(this.formModel.submitDate);
     newDate.setTime(newDate.getTime() + this.addHour * 60 * 60 * 1000);
 
     // kalau mau balik ke format string yang sama ('YYYY-MM-DDTHH:mm')
     const pad = (n: number) => n.toString().padStart(2, '0');
-    this.formModel.targetCompletionDate =
-      `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}T${pad(newDate.getHours())}:${pad(newDate.getMinutes())}`;
-
+    this.formModel.targetCompletionDate = `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}T${pad(newDate.getHours())}:${pad(newDate.getMinutes())}`;
 
     // this.calculateCurDateTime();
-    console.log( this.formModel.targetCompletionDate);
-
-
+    console.log(this.formModel.targetCompletionDate);
   }
 
-
- 
   saveCase() {
     if (!this.canUpdate) {
       return;
@@ -424,7 +540,8 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       this.updateTask();
     }
   }
-  addHour: number = 0; // Add 3 hours to the current time
+  // addHour dideklarasikan di bagian atas (default 3) dan dipakai bersama oleh
+  // responseTime / targetCompletationTime serta perhitungan deadline di bawah.
   updateTask(): void {
     // if (form.invalid || this.saving) {
     //   return;
@@ -492,9 +609,14 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       updateBy: this.formModel.submitBy,
       ticketSeverityId: Number(this.formModel.ticketSeverityId),
       deadlineDateTime: deadlineDateTime,
-      ticketEstimationCost : this.formModel.ticketEstimationCost < 0 ? 0 : this.formModel.ticketEstimationCost,
-      ticketCategoryId : Number(this.formModel.ticketCategoryId),
-      hours: Number(this.formModel.ticketEstimationCost) * Number(this.projects.ticketBaseHours || 0)
+      ticketEstimationCost:
+        this.formModel.ticketEstimationCost < 0
+          ? 0
+          : this.formModel.ticketEstimationCost,
+      ticketCategoryId: Number(this.formModel.ticketCategoryId),
+      hours:
+        Number(this.formModel.ticketEstimationCost) *
+        Number(this.projects.ticketBaseHours || 0),
     };
     console.log('saveTask payload', payload);
 
@@ -509,7 +631,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
         this.formMode = 'view';
         this.loadTaskDetail();
         this.loadTaskDetailLog();
-          this.socketNotificationService.emitReloadAction();
+        this.socketNotificationService.emitReloadAction();
       },
       error: (error) => {
         this.saving = false;
@@ -630,8 +752,8 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       ratesBy: Number(this.task?.ratesBy ?? 0),
       issueNo: String(this.task?.issueNo || ''),
       ticketSeverityId: Number(this.task?.ticketSeverityId ?? 0),
-      ticketEstimationCost : Number(this.task?.ticketEstimationCost ?? 0),
-      ticketCategoryId : Number(this.task?.ticketCategoryId ?? 0),
+      ticketEstimationCost: Number(this.task?.ticketEstimationCost ?? 0),
+      ticketCategoryId: Number(this.task?.ticketCategoryId ?? 0),
     };
   }
 
@@ -693,6 +815,46 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     return `${yyyyMmDd}T${hour}:${minute}`;
+  }
+
+  /** Menambah sejumlah jam ke sebuah tanggal. */
+  private offsetDate(date: Date, hours: number): Date {
+    return new Date(date.getTime() + hours * 60 * 60 * 1000);
+  }
+
+  /**
+   * Tanggal hari ini dalam format NgbDateStruct (dipakai ngbDatepicker).
+   */
+  private currentDateStruct(date: Date = new Date()): NgbDateStruct {
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+    };
+  }
+
+  /**
+   * Jam hari ini yang sedang berjalan dalam format HH:mm (dipakai <input type="time">).
+   */
+  private currentTimeValue(date: Date = new Date()): string {
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${hour}:${minute}`;
+  }
+
+  /**
+   * Set ulang response & target completion:
+   * responseTime = jam sekarang, targetCompletationTime = jam sekarang + addHour jam.
+   */
+  setResponseNow(): void {
+    const now = new Date();
+
+    this.responseDate = this.currentDateStruct(now);
+    this.responseTime = this.currentTimeValue(now);
+    this.targetCompletationDate = this.currentDateStruct(now);
+    this.targetCompletationTime = this.currentTimeValue(
+      this.offsetDate(now, this.addHour),
+    );
   }
 
   get allFiles(): File[] {
@@ -757,6 +919,39 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     const safeMinute = String(minute).padStart(2, '0');
 
     return `${year}-${month}-${day} ${safeHour}:${safeMinute}:00`;
+  }
+
+  /**
+   * Mengubah NgbDateStruct + jam ("HH:mm") menjadi objek Date waktu lokal.
+   * Dipakai untuk menghitung selisih jam tanpa bergantung pada parsing
+   * string (yang hasilnya bisa berbeda antar browser).
+   */
+  private toLocalDateTime(
+    value: NgbDateStruct | null,
+    timeValue: string,
+  ): Date | null {
+    if (!value?.year || !value?.month || !value?.day) {
+      return null;
+    }
+
+    const normalizedTime = String(timeValue || '').trim();
+
+    if (!normalizedTime) {
+      return null;
+    }
+
+    const [hour = '0', minute = '0'] = normalizedTime.split(':');
+    const date = new Date(
+      Number(value.year),
+      Number(value.month) - 1,
+      Number(value.day),
+      Number(hour) || 0,
+      Number(minute) || 0,
+      0,
+      0,
+    );
+
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
   submitActivity(): void {
