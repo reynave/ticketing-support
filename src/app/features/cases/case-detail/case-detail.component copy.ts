@@ -109,7 +109,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   saving = false;
   deleting = false;
   loadingRelatedTasks = false;
-ticketStatusName : string = '';
+
   formMode: 'view' | 'edit' = 'view';
   message = '';
 
@@ -202,25 +202,20 @@ ticketStatusName : string = '';
    * lalu menyimpannya ke `addHour`.
    */
   onSubmitDateChange(): void {
-   
+    const responseDateTime = this.toLocalDateTime(
+      this.responseDate,
+      this.responseTime,
+    );
+    const targetCompletationDateTime = this.toLocalDateTime(
+      this.targetCompletationDate,
+      this.targetCompletationTime,
+    );
 
-    
-      const responseDateTime = this.toLocalDateTime(
-        this.responseDate,
-        this.responseTime,
-      );
-      const targetCompletationDateTime = this.toLocalDateTime(
-        this.targetCompletationDate,
-        this.targetCompletationTime,
-      );
-    
-      if (!responseDateTime || !targetCompletationDateTime) {
-        this.addHour = 0;
+    if (!responseDateTime || !targetCompletationDateTime) {
+      this.addHour = 0;
 
-        return;
-      }
-
- 
+      return;
+    }
 
     const diffInHours =
       (targetCompletationDateTime.getTime() - responseDateTime.getTime()) /
@@ -318,16 +313,12 @@ ticketStatusName : string = '';
   projectId: string = '';
   taskCount: number = 100;
   ticketBased: number = 0;
-  responseDateTime : string = '';
-  targetCompletationDateTime : string = '';
-  lockTime : number = 1;
   loadTaskDetail(): void {
     this.loading = true;
     this.errorMessage = '';
 
     this.apiService.get(`/cases/${this.taskId}`).subscribe({
       next: (response) => {
-        this.ticketStatusName = response?.data?.ticketStatusName || '';
         this.loading = false;
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
@@ -348,23 +339,17 @@ ticketStatusName : string = '';
         this.taskCount = Number(this.task?.taskCount || 0);
         console.log('data', response.data);
         this.addHour = response.data.addHour;
+
+        /** Jam target = jam sekarang + addHour jam, format HH:mm. */
+        // this.targetCompletationTime = this.currentTimeValue(
+        //   this.offsetDate(new Date(), this.addHour),
+        // );
+        
        
-        this.responseDateTime = String(response.data.responseDateTime ?? '');
-        this.targetCompletationDateTime = String(
-          response.data.targetCompletationDateTime ?? '',
-        );
-        this.lockTime = Number(response.data.lockTime ?? 0);
-
-        // Isi form dari DB hanya kalau case sudah pernah di-submit (lockTime = 1).
-        // Kalau belum (lockTime = 0) biarkan default "sekarang" supaya user yang memilih.
-        if (this.lockTime === 1) {
-          this.applyDateTimeFromTask();
-        }
-
         this.ticketSolutionTime = Array.isArray(response.data.ticketSolutionTime)
           ? response.data.ticketSolutionTime
           : [];
-        this.onSubmitDateChange();
+         this.onSubmitDateChange();
       },
       error: (error) => {
         this.loading = false;
@@ -871,16 +856,16 @@ ticketStatusName : string = '';
    * Set ulang response & target completion:
    * responseTime = jam sekarang, targetCompletationTime = jam sekarang + addHour jam.
    */
-  // setResponseNow(): void {
-  //   const now = new Date();
+  setResponseNow(): void {
+    const now = new Date();
 
-  //   this.responseDate = this.currentDateStruct(now);
-  //   this.responseTime = this.currentTimeValue(now);
-  //   this.targetCompletationDate = this.currentDateStruct(now);
-  //   this.targetCompletationTime = this.currentTimeValue(
-  //     this.offsetDate(now, this.addHour),
-  //   );
-  // }
+    this.responseDate = this.currentDateStruct(now);
+    this.responseTime = this.currentTimeValue(now);
+    this.targetCompletationDate = this.currentDateStruct(now);
+    this.targetCompletationTime = this.currentTimeValue(
+      this.offsetDate(now, this.addHour),
+    );
+  }
 
   get allFiles(): File[] {
     return this.rows.flatMap((row) => row.files);
@@ -979,79 +964,6 @@ ticketStatusName : string = '';
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  /**
-   * Memecah string datetime MySQL ("2026-10-06 21:28:00") menjadi
-   * NgbDateStruct (untuk ngbDatepicker) + jam "HH:mm" (untuk <input type="time">).
-   *
-   * Mengembalikan null kalau formatnya tidak dikenali, mis. string kosong
-   * atau tanggal tidak valid (31 Feb yang di-rollover diam-diam oleh JS).
-   */
-  private splitSqlDateTime(value: unknown): {
-    date: NgbDateStruct;
-    time: string;
-  } | null {
-    const match = String(value ?? '')
-      .trim()
-      .match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
-
-    if (!match) {
-      return null;
-    }
-
-    const [, year, month, day, hour, minute] = match;
-
-    const parsed = new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day),
-      Number(hour),
-      Number(minute),
-      0,
-      0,
-    );
-
-    // new Date() melakukan rollover (31 Feb -> 3 Mar), jadi komponennya
-    // dicocokkan ulang agar tanggal tidak valid tidak ikut terisi.
-    const isSameComponents =
-      parsed.getFullYear() === Number(year) &&
-      parsed.getMonth() === Number(month) - 1 &&
-      parsed.getDate() === Number(day);
-
-    if (!isSameComponents) {
-      return null;
-    }
-
-    return {
-      date: {
-        year: Number(year),
-        month: Number(month),
-        day: Number(day),
-      },
-      time: `${hour}:${minute}`,
-    };
-  }
-
-  /**
-   * Mengisi Response & Target Completion dari string datetime yang tersimpan di DB,
-   * supaya form tampilannya sesuai data yang sudah pernah di-submit.
-   * Nilai lama dipertahankan bila string-nya kosong / tidak valid.
-   */
-  private applyDateTimeFromTask(): void {
-    const response = this.splitSqlDateTime(this.responseDateTime);
-
-    if (response) {
-      this.responseDate = response.date;
-      this.responseTime = response.time;
-    }
-
-    const target = this.splitSqlDateTime(this.targetCompletationDateTime);
-
-    if (target) {
-      this.targetCompletationDate = target.date;
-      this.targetCompletationTime = target.time;
-    }
-  }
-
   submitActivity(): void {
     this.saving = true;
     this.message = '';
@@ -1130,20 +1042,20 @@ ticketStatusName : string = '';
   submitInProgress(){
  
     const payload = {
-        responseDateTime :  this.toSqlDateTime(this.responseDate, this.responseTime),
+        responseDateTIme :  this.toSqlDateTime(this.responseDate, this.responseTime),
         targetCompletationDateTime :this.toSqlDateTime(
         this.targetCompletationDate,
         this.targetCompletationTime,
       ),
         ticketSolutionTimeId : this.solution['id'],
         responseHour : this.addHour,
-        assignTo: this.formModel.assignTo,
+        assignTo: this.task?.assignTo,
 
     }
     console.log(payload);
 
 
-     this.apiService.put(`/cases/${this.taskId}/submitInProgress`, payload).subscribe({
+     this.apiService.put(`/casesInProgress/${this.taskId}`, payload).subscribe({
       next: (response) => {
         this.saving = false;
         this.message = response?.message || 'Case updated.';
@@ -1160,27 +1072,4 @@ ticketStatusName : string = '';
 
   }
   
-  submitVerification(){
-    if(confirm(`Are you sure to submit case ${this.taskId} for verification?`)){
-      const payload = { 
-        assignTo : this.formModel.assignTo,
-        updateBy: this.formModel.submitBy,
-      }
-      console.log(payload);
-      this.apiService.put(`/cases/${this.taskId}/submitVerification`, payload).subscribe({
-        next: (response) => {
-          this.saving = false;
-          this.message = response?.message || 'Case submitted for verification.';
-          this.formMode = 'view';
-          this.loadTaskDetail();
-          this.loadTaskDetailLog();
-          this.socketNotificationService.emitReloadAction();
-        },
-        error: (error) => {
-          this.saving = false;
-          this.errorMessage = error?.error?.message || 'Failed to submit case for verification.';
-        },
-      });
-    }
-  }
 }

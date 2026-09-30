@@ -49,45 +49,75 @@
       <h5>Timeline Target Resolution</h5>
     </div>
     <div class="col-6 text-end">
-      <h5>Status : OPEN</h5>
+      <h5>Status : {{ticketStatusName }}</h5>
     </div>
 
     <div class="card border shadow-sm mb-2">
 
 
-      <div class="card-header">
+
+
+      <div
+        class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
         <strong>Client's View</strong>
+
+        <div class="d-flex gap-2" *ngIf="task.ratesBy == '' && task.ticketStatusId <900">
+
+          <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
+            Activity</button>
+          @if (formMode === 'edit') {
+          <button type="submit" class="btn btn-primary btn-sm"
+            [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+          }
+          @if (formMode === 'view') {
+          @if (canUpdate) {
+          <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+          }
+          <!-- @if (canDelete) {
+            <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
+              {{ deleting ? 'Deleting...' : 'Delete' }}
+            </button>
+            } -->
+          } @else {
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
+          }
+        </div>
       </div>
+
       <div class="card-body">
         <div class="row">
 
           <div class="col-4">
-       
-              <label class="form-label">Open Case</label>
-              <div class="form-control form-control-sm bg-light mb-1"> {{ formModel.submitDate | date:'yyyy-MM-dd hh:mm:ss a' }}</div>
 
-              <label class="form-label">Duration Respond Time</label>
-              <div>
-                <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
-                  name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
-                  required>
-                  <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                    severity.duration > 24 ? severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
-                  </option>
-                </select>
-              </div>
-           
+            <label class="form-label">Open Case</label>
+            <div class="form-control form-control-sm bg-light mb-1"> {{ formModel.submitDate | date:'yyyy-MM-dd hh:mm:ss
+              a' }}</div>
+
+            <label class="form-label">Duration Respond Time</label>
+            <div>
+              <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
+                name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
+                required>
+                <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
+                  severity.duration > 24 ? severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
+                </option>
+              </select>
+            </div>
+
           </div>
 
-          <div class="col-4">
+          <div class="col-4 border-start border-2">
             <label class="form-label">Verification</label>
             <div class="form-control form-control-sm bg-light">-</div>
           </div>
 
 
-          <div class="col-4">
+           <div class="col-4 border-start border-2">
             <label class="form-label"><strong>Target Respond</strong></label>
-            <div class="form-control form-control-sm bg-light border-danger border-2"> {{formModel.targetCompletionDate |  date:'yyyy-MM-dd hh:mm:ss a' }}</div>
+            <div class="form-control form-control-sm bg-light border-danger border-2"> {{formModel.targetCompletionDate
+              | date:'yyyy-MM-dd hh:mm:ss a' }}</div>
           </div>
 
 
@@ -100,7 +130,9 @@
       </div>
       <div class="card-body">
         <div class="row">
+          @if(lockTime == 0){
           <div class="col-4">
+       
             <!-- <div>
               <label class="form-label">Response DateTime</label>
             </div>
@@ -116,18 +148,17 @@
 
                 <div class="input-group mb-2">
                   <input id="project-end-date" class="form-control form-control-sm" type="text" name="submitDate"
-                    ngbDatepicker #e1="ngbDatepicker" 
-                      (dateSelect)="onSubmitDateChange()"
-                    readonly  [(ngModel)]="responseDate"   />
+                    ngbDatepicker #e1="ngbDatepicker" (dateSelect)="onSubmitDateChange()" readonly
+                    [(ngModel)]="responseDate" />
                   <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e1.toggle()"
                     type="button"></button>
                   <input type="time" class="form-control form-control-sm" name="responseTime"
-                    (change)="onSubmitDateChange()" [(ngModel)]="responseTime"> 
+                    (change)="onSubmitDateChange()" [(ngModel)]="responseTime">
                 </div>
- 
+
                 <label class="form-label" for="task-submit-date"><em>Assign To <span class="text-danger">
                       *</span></em> </label>
-                <div class="input-group mb-2"> 
+                <div class="input-group mb-2">
                   <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                     [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions" required>
 
@@ -157,53 +188,97 @@
                         </option>
                       </ng-container>
                       }
-                  </select> 
+                  </select>
                   <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select
                         an Assign To</em></small></div>
 
                 </div>
-                <button class="btn btn-sm btn-success mt-2">Submit IN-PROGRESS</button>
-         
+                <button class="btn btn-sm btn-success mt-2" (click)="submitInProgress()">Submit IN-PROGRESS</button>
+
               </div>
-            </div> 
+            </div>
+          </div>
+          }
+          @else{
+          <div class="col-4">
+            <div>
+              <label class="form-label">Response DateTime   <i class="bi bi-lock-fill"></i> </label>
+            </div>
+            <div class="form-control form-control-sm bg-light">{{responseDateTime | date:'yyyy-MM-dd hh:mm:ss a'}}</div>
+          </div>
+          }
+
+           <div class="col-4 border-start border-2">
+            <label class="form-label" for="task-target-completion"><em>Target Completion DateTime <span
+                  class="text-danger">*</span></em> <sup> <small><em> + {{ addHour }} jam</em></small> </sup> </label>
+
+            <div class="input-group mb-2">
+              <input id="task-target-completion" class="form-control form-control-sm" type="text"
+                name="targetCompletationDate" ngbDatepicker #e5="ngbDatepicker" (dateSelect)="onSubmitDateChange()"
+                readonly [(ngModel)]="targetCompletationDate" [minDate]="responseDate" [disabled]="formMode === 'view'"  />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e5.toggle()" [disabled]="formMode === 'view'"
+                type="button"></button>
+              <input type="time" class="form-control form-control-sm" name="targetCompletationTime" [disabled]="formMode === 'view'"
+                (change)="onSubmitDateChange()" [(ngModel)]="targetCompletationTime" />
+
+            </div>
+ 
+              <div class="alert alert-{{solution?.color}} py-1 mb-1">
+                <div><small>Ticket Solution Time </small></div>
+                <b> {{solution?.name  || '-'}} ({{solution?.duration ?? 0}} Hours)</b>
+              </div>
+ 
+
+           
+             @if(lockTime == 1 && formMode !== 'view' && task.ticketStatusId < 900) {
+              <div class="d-grid">
+    <button class="btn btn-sm btn-success mt-2" (click)="submitInProgress()">Update Target Completion</button>
+          
+              </div>
+             }
+            
           </div>
 
 
-          <div class="col-4">
+          <div class="col-4 border-start border-2">
+            <div>
+              <label class="form-label">Actual Working Hour</label>
+            </div>
+            <div class="form-control form-control-sm bg-light mb-2"><small>waiting for verification</small></div>
 
+             @if(lockTime == 1   && task.ticketStatusId < 900) {
+ 
+           
+                 <label class="form-label" for="task-submit-date"><em>Assign To <span class="text-danger">
+                      *</span></em> </label>
+                <div class="input-group ">
+                  <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
+                    [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions" required>
 
-            
-                <label class="form-label" for="task-target-completion"><em>Target Completion DateTime <span
-                        class="text-danger">*</span></em> <sup> <small><em>{{ responseTime }} + {{ addHour }} jam</em></small> </sup> </label>
+                    
+                    
+                      <ng-container *ngFor="let user of internalUsers">
+                        <option *ngIf="user.checked == 1" [ngValue]="user.id">
+                          {{ user.name }} {{ user.asManager == 1 ? '*Manager' : '' }}
+                        </option>
+                      </ng-container>
+                      <ng-container *ngFor="let user of contacts">
+                        <option [ngValue]="user.userId">
+                          {{ user.name }} [Customer]
+                        </option>
+                      </ng-container>
+                    
+                  </select>
+                  <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select
+                        an Assign To</em></small></div>
 
-                <div class="input-group mb-2">
-                  <input id="task-target-completion" class="form-control form-control-sm" type="text" name="targetCompletationDate"
-                    ngbDatepicker #e5="ngbDatepicker"
-                    (dateSelect)="onSubmitDateChange()"
-                    readonly [(ngModel)]="targetCompletationDate" [minDate]="responseDate"/>
-                    <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="e5.toggle()"
-                    type="button"></button>
-                  <input type="time" class="form-control form-control-sm" name="targetCompletationTime"
-                    (change)="onSubmitDateChange()" [(ngModel)]="targetCompletationTime" />
-                 
                 </div>
 
-            <div>
-              <label class="form-label" for="task-submit-date">Ticket Solution Time </label>
-              <div class="form-control form-control-sm bg-light border-2 border-{{solution.color}}"> {{solution.name}} ({{solution.duration}} Hours)</div>
-         
-            </div>
 
-          </div>
-
-
-          <div class="col-4">
-
-
-            <div>
-              <label class="form-label">Action Working DateTime</label>
-            </div>
-            <div class="form-control form-control-sm bg-light">-</div>
+              <div class="d-grid">
+                <button class="btn btn-sm btn-primary mt-2" (click)="submitVerification()">Submit Verification</button>
+              </div>
+              }
           </div>
         </div>
       </div>
@@ -214,30 +289,8 @@
       <div class="card border shadow-sm mb-3">
         <div
           class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 sticky-top">
-          <span class="fw-semibold small">Case Form</span>
-          <div class="d-flex gap-2" *ngIf="task.ratesBy == '' && task.ticketStatusId <900">
+          <strong class="">Case Form</strong>
 
-            <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
-              Activity</button>
-            @if (formMode === 'edit') {
-            <button type="submit" class="btn btn-primary btn-sm"
-              [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
-              {{ saving ? 'Saving...' : 'Save' }}
-            </button>
-            }
-            @if (formMode === 'view') {
-            @if (canUpdate) {
-            <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
-            }
-            <!-- @if (canDelete) {
-            <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
-              {{ deleting ? 'Deleting...' : 'Delete' }}
-            </button>
-            } -->
-            } @else {
-            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
-            }
-          </div>
         </div>
 
 
@@ -355,7 +408,7 @@
             <table class="table table-sm align-middle task-form-table mb-0">
               <tbody>
 
-                <tr>
+                <!-- <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
                       <span class="text-danger">*</span></label>
                   </td>
@@ -368,9 +421,9 @@
                       </option>
                     </select>
                   </td>
-                </tr>
+                </tr> -->
 
-
+                
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign
                       To
@@ -419,7 +472,7 @@
                   </td>
                 </tr>
 
-
+<!-- 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Duration
                       Respond Time
@@ -434,7 +487,7 @@
                       </option>
                     </select>
                   </td>
-                </tr>
+                </tr>   -->
 
                 <tr>
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
