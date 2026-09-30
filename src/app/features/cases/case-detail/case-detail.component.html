@@ -252,7 +252,7 @@
             <div>
               <label class="form-label">Actual Working Hour</label>
             </div>
-            <div class="form-control form-control-sm bg-light mb-2"> {{actualWorkingHour >0 ? actualWorkingHour : 'waiting for verification'}} </div>
+            <div class="form-control form-control-sm bg-light mb-2"> {{task.ticketStatusId  >= 400 ? actualWorkingHour : 'waiting for verification'}} </div>
 
              @if(lockTime == 1   && task.ticketStatusId < 900) {
  
