@@ -1,0 +1,452 @@
+<div class="container-fluid">
+  @if (!canAccessPage) {
+  <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
+  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="page-title">Verification</div>
+      <div class="page-subtitle">
+        Daftar case yang menunggu verifikasi client (ticketStatusId = 400).
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="back()">
+      <i class="bi bi-arrow-left me-1"></i> Back
+    </button>
+  </div>
+
+  @if (message) {
+  <div class="alert alert-success py-2">{{ message }}</div>
+  }
+
+  @if (errorMessage) {
+  <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+  }
+
+  <div class="stat-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-3">
+        <label class="form-label small" for="verification-keyword">Keyword</label>
+        <input id="verification-keyword" class="form-control form-control-sm" [(ngModel)]="form.keyword"
+          (keyup.enter)="loadVerification()" placeholder="Cari id / title" />
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label small" for="verification-client-filter">Client</label>
+        <select id="verification-client-filter" class="form-select form-select-sm" [(ngModel)]="form.clientId"
+          (change)="loadVerification()">
+          <option value="">All client</option>
+          @for (client of clients; track trackById($index, client)) {
+          <option [value]="client.id">{{ client.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label small" for="verification-start-date">Start Date</label>
+        <div class="input-group input-group-sm">
+          <input id="verification-start-date" class="form-control" type="text" name="startDate" ngbDatepicker
+            #startDatePicker="ngbDatepicker" readonly [(ngModel)]="form.startDate" placeholder="dd/mm/yyyy" />
+          <button class="btn btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()"
+            type="button"></button>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label small" for="verification-end-date">End Date</label>
+        <div class="input-group input-group-sm">
+          <input id="verification-end-date" class="form-control" type="text" name="endDate" ngbDatepicker
+            #endDatePicker="ngbDatepicker" readonly [(ngModel)]="form.endDate" placeholder="dd/mm/yyyy" />
+          <button class="btn btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()"
+            type="button"></button>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-1 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadVerification()">Search</button>
+      </div>
+      <div class="col-6 col-md-1 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+   <div class="mb-2 p-2 bg-light border rounded d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+      @if (canUpdate) {
+      <div class="input-group input-group-sm">
+        <select class="form-select form-select-sm d-inline-block w-auto" name="bulkStatus"
+          [(ngModel)]="selectedTicketStatusId">
+          <option *ngFor="let status of verificationStatusOptions" [ngValue]="status.id">{{ status.name }}</option>
+        </select>
+
+        <button type="button" class="btn btn-sm btn-dark" [disabled]="bulkLoading || !selectedCount"
+          (click)="updateAllSelected()">
+          @if (bulkLoading) {
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          }
+          Update All Selected
+        </button>
+
+        <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="bulkLoading || !selectedCount"
+          (click)="clearSelection()">
+          Clear
+        </button>
+      </div>
+      } @else {
+      <div class="small text-muted">You do not have permission to update verification status.</div>
+      }
+
+      <div class="small text-muted">
+        Selected: <span class="fw-semibold">{{ selectedCount }}</span> of {{ rows.length }}
+      </div>
+    </div>
+  <div class="stat-card">
+    @if (loading) {
+    <div class="text-muted">
+      <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+      Loading verification data...
+    </div>
+    } @else if (!rows.length) {
+    <div class="text-muted">No case waiting for verification.</div>
+    } @else {
+   
+    <div class="table-responsive">
+      <table class="table table-sm table-hover table-report report-monospace">
+        <thead>
+          <tr>
+            <td>
+              <i class="bi bi-check-square-fill" *ngIf="checkboxAll" (click)="toggleSelectAll(false)"></i>
+              <i class="bi bi-square" *ngIf="!checkboxAll" (click)="toggleSelectAll(true)"></i>
+            </td>
+            <th>ID</th>
+            <th>Respond Time</th>
+            <th>Client / Project</th>
+            <th>Title</th>
+            <th>Assigned To</th>
+            <th>Verification DateTime</th>
+            <th class="text-end">Working Hour</th>
+            <th class="text-end">Grace Period</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track trackById($index, row)) {
+          <tr>
+            <td>
+
+              <i class="bi bi-check-square-fill" *ngIf="row.checkbox" (click)="row.checkbox = !row.checkbox"></i>
+              <i class="bi bi-square" *ngIf="!row.checkbox" (click)="row.checkbox = !row.checkbox"></i>
+
+            </td>
+            <td>
+              <a href="javascript:;" (click)="open(content, row.id)">{{ row.id }}</a>
+            </td>
+            <td>
+              @if (row.ticketSeverityName) {
+              <span class="badge severity-badge" [ngClass]="severityBadge(row.severityColor)">
+                {{ row.ticketSeverityName }}
+              </span>
+              }
+            </td>
+            <td>
+              <div class="fw-semibold">{{ row.projectName || '-' }}</div>
+              <small class="text-muted">{{ row.clientName || '-' }}</small>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ row.title }}</div>
+              <small class="text-muted">{{ row.ticketCategoryName || '-' }}</small>
+            </td>
+
+            <td>{{ row.assignToName || '-' }}</td>
+            <td>{{ row.verificationDateTime | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td class="text-end">{{ (row.actualWorkingHour ?? row.hours ?? 0) | number:'1.2-2' }}</td>
+            <td class="text-end">{{ row.gracePeriod ?? 0 }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <p class="modal-title" id="modal-verification-title">Verification Detail {{ selectedDetail?.detail?.id ||
+        selectedId }}</p>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      @if (detailLoading) {
+      <div class="text-muted text-center py-4">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Loading detail...
+      </div>
+      } @else if (detailError) {
+      <div class="alert alert-danger py-2">{{ detailError }}</div>
+      } @else if (selectedDetail) {
+
+      <!-- ===== Header: ID + Status ===== -->
+      <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+
+        <div>
+          <div class="status-badge status-verification"> <i class="bi bi-exclamation-triangle me-1"></i> Waiting
+            Verification</div>
+        </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          @if (actionError) {
+          <span class="small text-danger">{{ actionError }}</span>
+          }
+
+          @if (canUpdate) {
+          <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="actionLoading"
+            (click)="cancelCase(content, selectedDetail?.detail?.id, modal)">
+            <i class="bi bi-x-circle me-1"></i> Cancel Case
+          </button>
+
+          <button type="button" class="btn btn-sm btn-success" [disabled]="actionLoading"
+            (click)="closeCase(content, selectedDetail?.detail?.id, modal)">
+            @if (actionLoading) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            }
+            <i class="bi bi-check-circle me-1"></i> Close Case
+          </button>
+          }
+
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="modal.close('Close')">Close</button>
+        </div>
+      </div>
+
+
+
+      <!-- ===== Reference chips ===== -->
+      <div class="ref-chips mb-3">
+        <span class="ref-chip" *ngIf="selectedDetail.detail?.issueNo">
+          <span class="ref-chip-label">Issue No</span> {{ selectedDetail.detail?.issueNo }}
+        </span>
+        <span class="ref-chip" *ngIf="selectedDetail.detail?.crNoRef">
+          <span class="ref-chip-label">CR Ref</span> {{ selectedDetail.detail?.crNoRef }}
+        </span>
+        <span class="ref-chip" *ngIf="selectedDetail.detail?.projectId">
+          <span class="ref-chip-label">Project ID</span> {{ selectedDetail.detail?.projectId }}
+        </span>
+        <span class="ref-chip" *ngIf="selectedDetail.detail?.productChildId">
+          <span class="ref-chip-label">Product</span> {{ selectedDetail.detail?.productChildId }}
+        </span>
+      </div>
+
+      <!-- ===== Info Table ===== -->
+      <div class="table-responsive detail-table-wrap mb-3">
+        <table class="table table-sm detail-table mb-0">
+          <tbody>
+            <tr>
+              <td colspan="4" class="detail-title">
+                <div>
+                  <div class="text-muted small fw-semibold">{{ selectedDetail.detail?.id }}</div>
+                  <h6 class="mb-0 fw-bold">{{ selectedDetail.detail?.title }}</h6>
+                </div>
+
+              </td>
+
+
+            </tr>
+            <tr>
+              <td class="detail-label">Client</td>
+              <td class="detail-value">{{ selectedDetail.detail?.clientName || '-' }}</td>
+              <td class="detail-label">Project</td>
+              <td class="detail-value">{{ selectedDetail.detail?.projectName || '-' }}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Category</td>
+              <td class="detail-value">{{ selectedDetail.detail?.ticketCategory || '-' }}</td>
+              <td class="detail-label">Severity</td>
+              <td class="detail-value">{{ selectedDetail.detail?.ticketSeverityName ?? '-' }}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Submit By</td>
+              <td class="detail-value">{{ selectedDetail.detail?.submitByName || '-' }}</td>
+              <td class="detail-label">Assigned To</td>
+              <td class="detail-value">{{ selectedDetail.detail?.assignToName || '-' }}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Submit Date</td>
+              <td class="detail-value">{{ selectedDetail.detail?.submitDate | date: 'medium' }}</td>
+              <td class="detail-label">Target Completion</td>
+              <td class="detail-value">{{ selectedDetail.detail?.targetCompletionDate | date: 'mediumDate' }}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Verification DateTime</td>
+              <td class="detail-value">
+                {{ (selectedDetail.detail?.verificationDateTime | date: 'medium') || 'waiting for verification' }}
+              </td>
+              <td class="detail-label">Actual Working Hour</td>
+              <td class="detail-value">{{ selectedDetail.detail?.actualWorkingHour ?? 0 }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="content-block mb-3">
+        <p class="fw-semibold mb-1 small text-uppercase text-muted">Description</p>
+        <div class="p-3 bg-light border rounded">
+          <div class="rich-text small" [innerHTML]="selectedDetail.detail?.description"></div>
+        </div>
+      </div>
+
+      <div class="content-block mb-3">
+        <p class="fw-semibold mb-1 small text-uppercase text-muted">Task Solution</p>
+        <div class="p-3 bg-light border rounded">
+          <div class="rich-text small" [innerHTML]="selectedDetail.detail?.taskSolution"></div>
+        </div>
+      </div>
+      <!-- ===== Related Tasks ===== -->
+      <p class="fw-semibold mb-2 small text-uppercase text-muted">
+        Related Tasks
+        <span class="badge bg-light text-secondary fw-normal ms-1">{{ selectedDetail.tasks?.length || 0 }}</span>
+      </p>
+
+      @if (!selectedDetail.tasks?.length) {
+      <div class="text-muted small mb-3">No related task.</div>
+      } @else {
+      <div class="table-responsive detail-table-wrap mb-3">
+        <table class="table table-sm detail-table mb-0">
+          <thead>
+            <tr>
+              <th>Task ID</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+              <th class="text-end">Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of selectedDetail.tasks; track task.id) {
+            <tr>
+              <td class="detail-value">{{ task.id }}</td>
+              <td class="detail-value">{{ task.title }}</td>
+              <td class="detail-value">{{ task.ticketStatusName || '-' }}</td>
+              <td class="detail-value">{{ task.assignToName || '-' }}</td>
+              <td class="detail-value text-end">{{ task.hours ?? 0 }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+
+      <hr class="my-3" />
+
+      <!-- ===== Rating Detail Table ===== -->
+      <p class="fw-semibold mb-2 small text-uppercase text-muted">Rating Detail</p>
+
+      @if (!selectedDetail.rating?.length) {
+      <div class="text-muted small mb-3">No rating data.</div>
+      } @else {
+      <div class="table-responsive rating-table-wrap mb-3">
+        <table class="table table-sm rating-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th class="text-center" style="width: 160px;">Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of selectedDetail.rating; track item.id) {
+            <tr>
+              <td class="small">{{ item.ratingName }}</td>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                  @for (s of [1,2,3,4,5]; track s) {
+                  <i class="bi"
+                    [ngClass]="s <= item.value ? 'bi-star-fill text-warning' : 'bi-star text-secondary'"></i>
+                  }
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+
+      <hr class="my-3" />
+
+      <!-- ===== Activity Log ===== -->
+      <p class="fw-semibold mb-2 small text-uppercase text-muted">
+        Activity Log
+        <span class="badge bg-light text-secondary fw-normal ms-1">{{ selectedDetail.activities?.length || 0 }}</span>
+      </p>
+
+      @if (!selectedDetail.activities?.length) {
+      <div class="text-muted small mb-3">No activity recorded.</div>
+      } @else {
+      <div class="activity-timeline mb-3">
+        @for (act of selectedDetail.activities; track act.id) {
+        <div class="activity-item mb-3">
+          <div class="activity-dot"></div>
+          <div class="activity-content">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+              <span class="activity-user">{{ act.inputBy }}</span>
+              <span class="activity-date">
+                {{ act.inputDate | date: 'dd MMM yyyy, HH:mm' }}
+                @if (act.closeDateTime && act.closeDateTime !== act.starDateTime) {
+                <span class="text-muted"> &ndash; {{ act.closeDateTime | date: 'HH:mm' }}</span>
+                }
+              </span>
+            </div>
+
+            <div class="activity-desc small" [innerHTML]="act.description"></div>
+
+            @if (act.attachment?.length) {
+            <div class="attachment-row">
+              @for (file of act.attachment; track file.id) {
+              <a class="attachment-thumb mx-3" [href]="file.url" target="_blank" rel="noopener"
+                [title]="file.originalName">
+                <i class="bi bi-file-earmark"></i> {{ file.originalName }}
+              </a>
+              }
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      }
+
+      <!-- ===== System Info (collapsible) ===== -->
+      <div class="system-info">
+        <button class="system-info-toggle btn btn-sm btn-dark" type="button" (click)="showSystemInfo = !showSystemInfo">
+          <i class="bi" [ngClass]="showSystemInfo ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+          System Info
+        </button>
+        @if (showSystemInfo) {
+        <div class="detail-grid detail-grid-sm mt-2">
+          <div class="detail-item">
+            <span class="detail-label">Input By</span>
+            <span class="detail-value">{{ selectedDetail.detail?.inputBy || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Input Date</span>
+            <span class="detail-value">{{ selectedDetail.detail?.inputDate | date: 'medium' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Update By</span>
+            <span class="detail-value">{{ selectedDetail.detail?.updateBy || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Update Date</span>
+            <span class="detail-value">{{ selectedDetail.detail?.updateDate | date: 'medium' }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    <div class="modal-footer">
+      @if (selectedId) {
+      <button type="button" class="btn btn-outline-primary" (click)="goToDetail({ id: selectedId })">
+        Open Full Detail
+      </button>
+      }
+      <button type="button" class="btn btn-outline-secondary" (click)="modal.close('Close')">Close</button>
+    </div>
+  </ng-template>
+  }
+</div>

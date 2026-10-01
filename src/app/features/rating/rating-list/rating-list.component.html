@@ -48,7 +48,9 @@
                 <tbody>
                     @for (row of rows; track trackById($index, row)) {
                     <tr>
-                        <td>{{ row.id }}</td>
+                        <td>
+                            <a href="javascript:;" (click)="goToTicket(row)">{{ row.id }}</a>
+                        </td>
                         <td><strong>{{ row.ticketTypeName | uppercase }}</strong></td>
                         <td>
                             <div class="fw-semibold">{{ row.title }}</div>

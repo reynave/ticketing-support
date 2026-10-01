@@ -78,6 +78,7 @@ Gunakan mapping berikut untuk menu dan halaman yang sudah ada:
 | Tasks | 5005 |
 | Cases | 5006 |
 | Change Requests | 5007 |
+| Case Verification | 5106 |
 | Login History | 6000 |
 | Ticket Balance | 6001 |
 | Activity Log | 6002 |
@@ -90,6 +91,7 @@ Status penerapan pola `canAccessPage` / `canCreate` / `canUpdate` / `canDelete` 
 
 - [x] Users (2004) — `UserListComponent`, `UserDetailComponent`
 - [x] Cases (5006) — `CaseListComponent`, `CaseDetailComponent`
+- [x] Case Verification (5106) — `VerificationListComponent` (`features/verification`)
 - [x] Tasks (5005) — `TaskListComponent`, `TaskDetailComponent`
 - [x] Clients (2002) — `ClientListComponent`, `ClientDetailComponent`
 - [x] Projects (2001) — `ProjectListComponent`, `ProjectCreateComponent`, `ProjectDetailComponent`

@@ -61,6 +61,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       badge: '',
       moduleId: 5007,
     },
+    {
+      path: '/verification',
+      label: 'Verification',
+      icon: 'verified',
+      badge: '',
+      moduleId: 5106,
+    },
 
     {
       path: '/projects',

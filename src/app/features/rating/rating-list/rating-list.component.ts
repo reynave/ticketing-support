@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { NgbDatepickerModule, NgbModal, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-rating-list',
@@ -14,6 +15,7 @@ import { NgbDatepickerModule, NgbModal, NgbRatingModule } from '@ng-bootstrap/ng
 export class RatingListComponent implements OnInit {
   private readonly apiService = inject(ApiService);
   private modalService = inject(NgbModal);
+  private router = inject(Router);
   rows: any[] = [];
   ratingQuestions: any[] = [];
   keyword = '';
@@ -50,6 +52,19 @@ export class RatingListComponent implements OnInit {
           error?.error?.message || 'Failed to load rating data.';
       },
     });
+  }
+
+  goToTicket(row: any){
+    console.log('Navigating to ticket with ID:', row);
+    let module  = 'tasks'
+
+    if(row.ticketTypeId === 2) {
+      module = 'cases'
+    }
+    if(row.ticketTypeId === 3) {
+      module = 'change-requests'
+    }
+    this.router.navigate([`/${module}/`+row.id], { queryParams: { originalRoute:'rating' } });
   }
 
   resetFilter(): void {
