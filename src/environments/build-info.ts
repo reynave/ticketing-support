@@ -1,3 +1,3 @@
 export const buildInfo = {
-  buildCode: '2610011528',
+  buildCode: '2610011831',
 };

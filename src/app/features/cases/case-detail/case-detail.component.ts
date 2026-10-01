@@ -286,6 +286,14 @@ ticketStatusName : string = '';
     );
   }
 
+
+  removeHtmlTags(htmlString: string): string {
+  if (!htmlString) return '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  return doc.body.textContent || '';
+}
+
   private getWeekendHours(start: Date, end: Date): number {
     let total = 0;
     let cursor = new Date(
@@ -1174,6 +1182,7 @@ ticketStatusName : string = '';
       const payload = { 
         assignTo : this.formModel.assignTo,
         updateBy: this.formModel.submitBy,
+        taskSolution: this.formModel.taskSolution.trim(),
       }
       console.log(payload);
       this.apiService.put(`/cases/${this.taskId}/submitVerification`, payload).subscribe({
@@ -1188,6 +1197,7 @@ ticketStatusName : string = '';
         error: (error) => {
           this.saving = false;
           this.errorMessage = error?.error?.message || 'Failed to submit case for verification.';
+          alert(this.errorMessage);
         },
       });
     }

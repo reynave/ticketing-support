@@ -34,6 +34,8 @@ import { NotFoundComponent } from './layout/not-found/not-found.component';
 import { ReloginComponent } from './features/auth/relogin/relogin.component';
 import { CrReportComponent } from './features/reports/cr-report/cr-report.component';
 import { VerificationListComponent } from './features/verification/verification-list/verification-list.component';
+import { UsersReportComponent } from './features/reports/users-report/users-report.component';
+import { UserDetailReportComponent } from './features/reports/users-report/user-detail-report/user-detail-report.component';
  
 export const routes: Routes = [
 	{
@@ -138,6 +140,18 @@ export const routes: Routes = [
 				path: 'report/change-requests',
 				component: CrReportComponent,
 			},
+
+
+			{
+				path: 'report/users',
+				component: UsersReportComponent,
+			},
+			{
+				path: 'report/users/:id',
+				component: UserDetailReportComponent,
+			},
+
+
 			{
 				path: 'verification',
 				component: VerificationListComponent,
