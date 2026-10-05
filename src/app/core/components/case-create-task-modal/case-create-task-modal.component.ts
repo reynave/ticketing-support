@@ -91,6 +91,7 @@ export class CaseCreateTaskModalComponent {
       productChildId : Number(this.relatedTaskForm.productChildId || 0),
     };
 
+    console.log('Payload for creating related task:', payload);
     this.savingRelatedTask = true;
 
    
@@ -136,7 +137,7 @@ export class CaseCreateTaskModalComponent {
         day: nextWeek.getDate(),
       },
       assignTo: null,
-      ticketStatusId: 100,
+      ticketStatusId: 1,
       ticketCategoryId: this.ticketCategoryId,
       productChildId : this.productChildId,
     };

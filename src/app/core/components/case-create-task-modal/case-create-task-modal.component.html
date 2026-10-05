@@ -5,101 +5,64 @@
 <ng-template #createTaskModal let-modal>
   <div class="modal-header">
     <h5 class="modal-title">Create Task From Case {{ caseId }}</h5>
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Close"
-      (click)="modal.dismiss('Cross click')"
-    ></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
- 
+
   <form #relatedTaskFormNg="ngForm" (ngSubmit)="saveRelatedTask(relatedTaskFormNg)" novalidate>
     <div class="modal-body">
       <div class="row g-2">
-      
-        <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-title"
-            >Title <span class="text-danger">*</span></label
-          >
-          <input
-            id="related-task-title"
-            class="form-control"
-            name="title"
-            [(ngModel)]="relatedTaskForm.title"
-            #titleNgModel="ngModel"
-            [class.is-invalid]="titleNgModel.invalid && (titleNgModel.touched || relatedTaskFormNg.submitted)"
-            required
-          />
-          <div class="invalid-feedback">Title is required.</div>
-        </div>
 
-         <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-case-id"
-            >  {{ relatedTaskForm.origin }} Id <span class="text-danger">*</span></label
-          >
-          <input
-            readonly
-            id="related-task-case-id"
-            class="form-control"
-            name="caseId"
-            [(ngModel)]="relatedTaskForm.caseId"
-            #caseIdNgModel="ngModel"
+        
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="related-task-case-id"> {{ relatedTaskForm.origin }} Id <span
+              class="text-danger">*</span></label>
+          <input readonly id="related-task-case-id" class="form-control" name="caseId"
+            [(ngModel)]="relatedTaskForm.caseId" #caseIdNgModel="ngModel"
             [class.is-invalid]="caseIdNgModel.invalid && (caseIdNgModel.touched || relatedTaskFormNg.submitted)"
-            required
-          />
+            required />
           <div class="invalid-feedback">Case Id is required.</div>
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-category"
-            >Task Category <span class="text-danger">*</span></label
-          >
-          <select
-            id="related-task-category"
-            class="form-select"
-            name="ticketCategoryId"
-            [(ngModel)]="relatedTaskForm.ticketCategoryId"
-            #ticketCategoryIdNgModel="ngModel"
+          <label class="form-label" for="related-task-category">Task Category <span class="text-danger">*</span></label>
+          <select id="related-task-category" class="form-select" name="ticketCategoryId"
+            [(ngModel)]="relatedTaskForm.ticketCategoryId" #ticketCategoryIdNgModel="ngModel"
             [class.is-invalid]="ticketCategoryIdNgModel.invalid && (ticketCategoryIdNgModel.touched || relatedTaskFormNg.submitted)"
-            required
-          >
+            required>
             <option [ngValue]="null" disabled>Select category</option>
             <option *ngFor="let category of ticketCategories" [ngValue]="category.id">
-              {{ category.name }} 
+              {{ category.name }}
             </option>
           </select>
           <div class="invalid-feedback">Task Category is required.</div>
         </div>
 
-      <div class="col-12 col-md-6"> 
-        
-            <label class="form-label" for="task-assign-to">Modules <span class="text-danger">*</span></label>
-            @if(relatedTaskForm.projectId == '') {
-            <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
-            } @else {
-            <select id="task-assign-to" class="form-select" name="productChildId" [(ngModel)]="relatedTaskForm.productChildId" required>
-              <option *ngFor="let mod of modules" [value]="mod.id">{{ mod.name }} {{ mod.id }}</option>
-            </select>
-            }  
-          </div>
+        <div class="col-12 col-md-6">
+
+          <label class="form-label" for="task-assign-to">Modules <span class="text-danger">*</span></label>
+          @if(relatedTaskForm.projectId == '') {
+          <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
+          } @else {
+          <select id="task-assign-to" class="form-select" name="productChildId"
+            [(ngModel)]="relatedTaskForm.productChildId" required>
+            <option *ngFor="let mod of modules" [value]="mod.id">{{ mod.name }} {{ mod.id }}</option>
+          </select>
+          }
+        </div>
 
 
         <div class="col-12 col-md-6">
-         
+
           <label class="form-label" for="related-task-assign">Assign To <span class="text-danger">*</span></label>
-          <select
-            id="related-task-assign"
-            class="form-select"
-            name="assignTo"
-            [(ngModel)]="relatedTaskForm.assignTo"
+          <select id="related-task-assign" class="form-select" name="assignTo" [(ngModel)]="relatedTaskForm.assignTo"
             #assignToNgModel="ngModel"
             [class.is-invalid]="assignToNgModel.invalid && (assignToNgModel.touched || relatedTaskFormNg.submitted)"
-            required
-          >
+            required>
             <option [ngValue]="null" disabled>Select user</option>
             <ng-container *ngFor="let user of internalUsers">
               <option *ngIf="user.checked == 1" [ngValue]="user.id">
-                {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }} 
+                {{ user.name }} {{ user.asManager == 1 ? '(Manager)' : '' }}
               </option>
             </ng-container>
           </select>
@@ -107,77 +70,56 @@
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-submit-date"
-            >Submit Date <span class="text-danger">*</span></label
-          >
+          <label class="form-label" for="related-task-submit-date">Submit Date <span
+              class="text-danger">*</span></label>
           <div class="input-group">
-            <input
-              id="related-task-submit-date"
-              class="form-control"
-              type="text"
-              name="submitDate"
-              ngbDatepicker
-              #relSubmitDate="ngbDatepicker"
-              readonly
-              [(ngModel)]="relatedTaskForm.submitDate"
+            <input id="related-task-submit-date" class="form-control" type="text" name="submitDate" ngbDatepicker
+              #relSubmitDate="ngbDatepicker" readonly [(ngModel)]="relatedTaskForm.submitDate"
               #submitDateNgModel="ngModel"
               [class.is-invalid]="submitDateNgModel.invalid && (submitDateNgModel.touched || relatedTaskFormNg.submitted)"
-              required
-            />
-            <button
-              class="btn btn-outline-secondary bi bi-calendar3"
-              (click)="relSubmitDate.toggle()"
-              type="button"
-            ></button>
+              required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="relSubmitDate.toggle()"
+              type="button"></button>
           </div>
-          <div class="invalid-feedback d-block" *ngIf="submitDateNgModel.invalid && (submitDateNgModel.touched || relatedTaskFormNg.submitted)">
+          <div class="invalid-feedback d-block"
+            *ngIf="submitDateNgModel.invalid && (submitDateNgModel.touched || relatedTaskFormNg.submitted)">
             Submit Date is required.
           </div>
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="related-task-target-date"
-            >Target Completion <span class="text-danger">*</span></label
-          >
+          <label class="form-label" for="related-task-target-date">Target Completion <span
+              class="text-danger">*</span></label>
           <div class="input-group">
-            <input
-              id="related-task-target-date"
-              class="form-control"
-              type="text"
-              name="targetCompletionDate"
-              ngbDatepicker
-              #relTargetDate="ngbDatepicker"
-              readonly
-              [(ngModel)]="relatedTaskForm.targetCompletionDate"
+            <input id="related-task-target-date" class="form-control" type="text" name="targetCompletionDate"
+              ngbDatepicker #relTargetDate="ngbDatepicker" readonly [(ngModel)]="relatedTaskForm.targetCompletionDate"
               #targetCompletionDateNgModel="ngModel"
               [class.is-invalid]="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)"
-              required
-            />
-            <button
-              class="btn btn-outline-secondary bi bi-calendar3"
-              (click)="relTargetDate.toggle()"
-              type="button"
-            ></button>
+              required />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="relTargetDate.toggle()"
+              type="button"></button>
           </div>
-          <div class="invalid-feedback d-block" *ngIf="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)">
+          <div class="invalid-feedback d-block"
+            *ngIf="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)">
             Target Completion is required.
           </div>
         </div>
 
         <div class="col-12">
-          <label class="form-label" for="related-task-description"
-            >Description <span class="text-danger">*</span></label
-          >
-          <textarea
-            id="related-task-description"
-            class="form-control"
-            rows="3"
-            name="description"
-            [(ngModel)]="relatedTaskForm.description"
-            #descriptionNgModel="ngModel"
+          <label class="form-label" for="related-task-title">Title <span class="text-danger">*</span></label>
+          <input id="related-task-title" class="form-control" name="title" [(ngModel)]="relatedTaskForm.title"
+            #titleNgModel="ngModel"
+            [class.is-invalid]="titleNgModel.invalid && (titleNgModel.touched || relatedTaskFormNg.submitted)"
+            required />
+          <div class="invalid-feedback">Title is required.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="related-task-description">Description <span
+              class="text-danger">*</span></label>
+          <textarea id="related-task-description" class="form-control" rows="3" name="description"
+            [(ngModel)]="relatedTaskForm.description" #descriptionNgModel="ngModel"
             [class.is-invalid]="descriptionNgModel.invalid && (descriptionNgModel.touched || relatedTaskFormNg.submitted)"
-            required
-          ></textarea>
+            required></textarea>
           <div class="invalid-feedback">Description is required.</div>
         </div>
       </div>
@@ -187,11 +129,7 @@
       <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">
         Cancel
       </button>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="relatedTaskFormNg.invalid || savingRelatedTask"
-      >
+      <button type="submit" class="btn btn-primary" [disabled]="relatedTaskFormNg.invalid || savingRelatedTask">
         {{ savingRelatedTask ? 'Saving...' : 'Save Task' }}
       </button>
     </div>

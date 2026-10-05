@@ -250,9 +250,7 @@
             <div class="input-group ">
               <select id="detail-task-assign-to" class="form-select form-select-sm" name="assignTo"
                 [(ngModel)]="formModel.assignTo" [disabled]="loadingOptions || task.ticketStatusId != 100" required>
-
-
-
+ 
                 <ng-container *ngFor="let user of internalUsers">
                   <option *ngIf="user.checked == 1" [ngValue]="user.id">
                     {{ user.name }} {{ user.asManager == 1 ? '*Manager' : '' }}
@@ -266,13 +264,18 @@
 
               </select>
               <div *ngIf="formModel.assignTo === ''" class="alert alert-danger my-2 p-1"><small><em>Please select
-                    an Assign To</em></small></div>
-
+                    an Assign To</em></small></div> 
             </div>
 
 
             <div class="d-grid" *ngIf="task.ticketStatusId == 100">
-              <button class="btn btn-sm btn-primary mt-2" (click)="submitVerification()">Submit Verification</button>
+           
+              @if(allowVerification == 0) {
+                <div class="alert alert-danger my-2 p-1"><small><em>Cannot submit verification because task still not closed</em></small></div>
+              }
+              @else{ 
+              <button class="btn btn-sm btn-primary mt-2" [disabled]="formMode !== 'view'" (click)="submitVerification()">Submit Verification</button>
+              }
             </div>
             }
         </div>
@@ -293,7 +296,7 @@
             Activity</button>
           @if (formMode === 'edit') {
           <button type="submit" class="btn btn-primary btn-sm"
-            [disabled]="taskFormNg.invalid || formModel.ticketEstimationCost < 0 ||  !formModel.taskSolution || saving">
+            [disabled]="taskFormNg.invalid ||  !formModel.taskSolution || saving">
             {{ saving ? 'Saving...' : 'Save' }}
           </button>
           }
@@ -427,21 +430,7 @@
           <table class="table table-sm align-middle task-form-table mb-0">
             <tbody>
 
-              <!-- <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-status">Case Status
-                      <span class="text-danger">*</span></label>
-                  </td>
-                  <td>
-                    <select id="detail-task-status" (change)="onStatusChange($event); formModel.assignTo = ''"
-                      class="form-select form-select-sm" name="ticketStatusId" [(ngModel)]="formModel.ticketStatusId"
-                      [disabled]="formMode === 'view'" required>
-                      <option *ngFor="let status of ticketStatusOptions" [ngValue]="status.id"
-                        [disabled]="status.id >= 900 && taskCount > 0">{{ status.name }}
-                      </option>
-                    </select>
-                  </td>
-                </tr> -->
-
+            
                 @if(formModel.ticketStatusId < 400) {
               <tr >
                 <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-assign-to">Assign
@@ -489,23 +478,7 @@
               </tr>
             }
 
-              <!-- 
-                <tr>
-                  <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-id">Duration
-                      Respond Time
-                    </label>
-                  </td>
-                  <td>
-                    <select id="detail-task-status" (change)="getHours()" class="form-select form-select-sm"
-                      name="ticketSeverityId" [(ngModel)]="formModel.ticketSeverityId" [disabled]="formMode === 'view'"
-                      required>
-                      <option *ngFor="let severity of ticketSeverities" [ngValue]="severity.id">{{ severity.name }} ({{
-                        severity.duration > 24 ? severity.duration / 24 + ' Days' : severity.duration + ' Hours'}} )
-                      </option>
-                    </select>
-                  </td>
-                </tr>   -->
-
+            
               <tr>
                 <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
                     Date / Open Case</label></td>
@@ -542,8 +515,8 @@
                     }}</div>
                 </td>
               </tr>
-
-
+               
+              @if(ticketBased == 1) {
               <tr>
                 <th colspan="2">TICKET CALCULATION</th>
               </tr>
@@ -565,6 +538,7 @@
 
                 </td>
               </tr>
+            }
 
               <tr *ngIf="formModel.ticketEstimationCost * projects.ticketBaseHours > 0">
                 <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-estimated-hours">
@@ -672,7 +646,9 @@
               <th width="140">Task ID</th>
               <th>Title</th>
               <th width="140">Status</th>
+               <th>Assing To</th>
               <th width="160">Target Date</th>
+             
               <th width="120" class="text-end">Action</th>
             </tr>
           </thead>
@@ -682,7 +658,11 @@
                 <strong *ngIf="row.ticketStatusId < 900 "><i class="bi bi-exclamation-diamond-fill"></i> </strong>
               </td>
               <td>{{ row.title }} </td>
-              <td>{{ row.ticketStatusName || row.ticketStatusId }}</td>
+              <td>  
+                <span class="badge text-bg-{{row.color}}">{{ row.ticketStatusName || row.ticketStatusId }}</span>
+
+              </td>
+              <td>{{ row.assignToName }}</td>
               <td>{{ row.targetCompletionDate | date:'mediumDate' }}</td>
               <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-primary"
@@ -713,21 +693,17 @@
         <tbody>
           <tr *ngFor="let log of taskLogs">
             <td class="align-top">
-              <div>{{ log.starDateTime | date:'medium' }}</div>
-
+              <div>{{ log.starDateTime | date:'medium' }}</div> 
               @if (log.closeDateTime) {
               <div class="text-muted small">Close: {{ log.closeDateTime | date:'medium' }}</div>
               }
             </td>
             <td class="align-top">
-              @if(log.parentId != 0){
-
-              <small>Reply from</small>
-              <div class="bg-light p-2 border shadow-sm rounded mb-2">
-
-                <div> <em> <small [innerHTML]="log.replyFrom"></small></em> </div>
-
-              </div>
+              @if(log.parentId != 0){ 
+                <small>Reply from</small>
+                <div class="bg-light p-2 border shadow-sm rounded mb-2"> 
+                  <div> <em> <small [innerHTML]="log.replyFrom"></small></em> </div> 
+                </div>
               }
               <div [innerHTML]="log.description"></div>
               <div>

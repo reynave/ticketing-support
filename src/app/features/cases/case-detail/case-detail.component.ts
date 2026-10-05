@@ -322,7 +322,7 @@ ticketStatusName : string = '';
 
     return total;
   }
-
+allowVerification : number = 0;
   projectId: string = '';
   taskCount: number = 100;
   ticketBased: number = 0;
@@ -346,6 +346,7 @@ ticketStatusName : string = '';
         this.assignTo = this.task.assignTo;
         this.projectId = this.task.projectId;
         this.ticketBased = this.task.ticketBased;
+        this.allowVerification = this.task.allowVerification;
         if (Number(this.task?.ticketTypeId) !== this.taskTypeId) {
           this.task = null;
           this.errorMessage = 'Data ini bukan case (ticketTypeId bukan 2).';
