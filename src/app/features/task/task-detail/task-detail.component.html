@@ -200,7 +200,7 @@
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-submit-date">Submit
                       Date</label></td>
                   <td>
-                    {{ formModel.submitDate | date:'mediumDate' }}
+                    {{ formModel.submitDate  | date:'YYYY-MM-dd HH:mm:ss a' }}
                   </td>
                 </tr>
 
@@ -223,7 +223,7 @@
                 <tr *ngIf="task.ticketStatusId >= 900">
                   <td class="label-col"><label class="form-label small fw-semibold" for="detail-task-actual-date">Actual Completion Date</label></td>
                   <td>
-                    {{formModel.actualCompletionDate | date:'medium'}} 
+                    {{actualCompletionDate  | date:'YYYY-MM-dd HH:mm:ss a'}} 
                   </td>
                 </tr>
 

@@ -162,7 +162,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   goBack(): void {
     history.back();
   }
-
+actualCompletionDate : string = '';
   loadTaskDetail(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -170,6 +170,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.apiService.get(`/ticket/${this.taskId}`).subscribe({
       next: (response) => {
         console.log(response);
+        this.actualCompletionDate = response?.data?.actualCompletionDate || '';
         this.loading = false;
         this.task = response?.data || null;
         this.ticketStatusId = this.task.ticketStatusId;
@@ -370,12 +371,23 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       '-' +
       String(this.formModel.targetCompletionDate['day'] + 1).padStart(2, '0');
 
-    const actualCompletionDate =
-      this.formModel.actualCompletionDate['year'] +
-      '-' +
-      String(this.formModel.actualCompletionDate['month']).padStart(2, '0') +
-      '-' +
-      String(this.formModel.actualCompletionDate['day'] + 1).padStart(2, '0');
+
+      // get courent date
+    const now = new Date();
+
+
+    // get current yyyy-mm-dd
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const currentDate = `${year}-${month}-${day}`;
+
+    // get current hh:mm:ss 
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const actualCompletionDate = currentDate + ` ${hours}:${minutes}:${seconds}`;
+
 
     const payload = {
       ticketTypeId: this.taskTypeId,
@@ -384,7 +396,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       projectId: this.formModel.projectId,
       submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
-      targetCompletionDate: targetCompletionDate,
+      targetCompletionDate: targetCompletionDate + ' 00:00:00',
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
       actualCompletionDate: actualCompletionDate,

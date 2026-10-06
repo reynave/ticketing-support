@@ -33,7 +33,8 @@
               <th>ID</th>
               <th>Code</th>
               <th>Name</th>
-                <th>Industry</th>
+              <th>Industry</th>
+              <th class="text-end">Ticket Balance</th>
               <th>Status</th> 
             </tr>
           </thead>
@@ -44,6 +45,7 @@
                 <td>{{ row.code }}</td>
                 <td>{{ row.name }}</td>
                  <td>{{ row.industryName }}</td>
+                <td class="text-end">{{ row.ticketBalance | number:'1.0-0' }}</td>
                 
                 <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
                 
