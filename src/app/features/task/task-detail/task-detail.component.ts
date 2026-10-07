@@ -396,7 +396,10 @@ actualCompletionDate : string = '';
       projectId: this.formModel.projectId,
       submitBy: this.formModel.submitBy,
       submitDate: this.toApiDateTime(this.formModel.submitDate),
-      targetCompletionDate: targetCompletionDate + ' 00:00:00',
+      targetCompletionDate:
+        targetCompletionDate +
+        ' ' +
+        (this.formModel.targetCompletionTime || '00:00') + ':00',
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
       actualCompletionDate: actualCompletionDate,
@@ -502,6 +505,9 @@ actualCompletionDate : string = '';
       submitBy: '',
       submitDate: this.toDateTimeInputValue(now),
       targetCompletionDate: this.toDateInputValue(plusSevenDays),
+      targetCompletionTime: `${String(now.getHours()).padStart(2, '0')}:${String(
+        now.getMinutes(),
+      ).padStart(2, '0')}`,
       assignTo: '',
       taskSolution: '',
       actualCompletionDate: this.toDateInputValue(plusSevenDays),
@@ -522,13 +528,30 @@ actualCompletionDate : string = '';
       return { year: 0, month: 0, day: 0 }; // atau null kalau form model kamu terima null
     }
 
-    const [yyyy, mm, dd] = dateStr.split('T')[0].split('-');
+    const datePart = String(dateStr).split(' ')[0].split('T')[0];
+    const [yyyy, mm, dd] = datePart.split('-');
 
     return {
       year: Number(yyyy),
       month: Number(mm),
       day: Number(dd),
     };
+  }
+
+  private parseTimeParts(dateStr: string | null | undefined): string {
+    if (!dateStr) {
+      return '00:00';
+    }
+
+    const parts = String(dateStr).split(/[ T]/);
+    const timePart = parts[1] || '';
+
+    if (!timePart) {
+      return '00:00';
+    }
+
+    const [hour = '00', minute = '00'] = timePart.split(':');
+    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   }
 
   private populateFormFromTask(): void {
@@ -546,6 +569,7 @@ actualCompletionDate : string = '';
       submitBy: this.task?.submitBy,
       submitDate: this.toDateTimeLocalInput(this.task?.submitDate),
       targetCompletionDate: targetCompletionDate,
+      targetCompletionTime: this.parseTimeParts(this.task?.targetCompletionDate),
       assignTo: this.task?.assignTo,
       taskSolution: String(this.task?.taskSolution || ''),
       actualCompletionDate: actualCompletionDate,

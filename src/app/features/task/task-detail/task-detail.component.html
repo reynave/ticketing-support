@@ -209,13 +209,18 @@
                       Completion <span class="text-danger">*</span></label>
                   </td>
                   <td>
-                    <div class="input-group">
-                      <input id="detail-task-target-date" class="form-control form-control-sm" type="text" readonly
-                        name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" ngbDatepicker
-                        #d="ngbDatepicker" [readonly]="formMode === 'view'" required />
+                    <div class="d-flex gap-2 align-items-center">
+                      <div class="input-group flex-grow-1">
+                        <input id="detail-task-target-date" class="form-control form-control-sm" type="text" readonly
+                          name="targetCompletionDate" [(ngModel)]="formModel.targetCompletionDate" ngbDatepicker
+                          #d="ngbDatepicker" [readonly]="formMode === 'view'" required />
 
-                      <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
-                        (click)="d.toggle()" type="button"></button>
+                        <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" *ngIf="formMode !== 'view'"
+                          (click)="d.toggle()" type="button"></button>
+                      </div>
+                      <input id="detail-task-target-time" class="form-control form-control-sm" type="time" step="60"
+                        name="targetCompletionTime" [(ngModel)]="formModel.targetCompletionTime"
+                        [readonly]="formMode === 'view'" required style="max-width: 130px;" />
                     </div>
                   </td>
                 </tr>

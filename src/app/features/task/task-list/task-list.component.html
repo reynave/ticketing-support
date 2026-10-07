@@ -188,9 +188,14 @@
             <label class="form-label" for="task-target-date">Target Completion <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="project-end-date" class="form-control" type="text" name="targetCompletionDate" ngbDatepicker
+              <input id="task-target-date" class="form-control" type="text" name="targetCompletionDate" ngbDatepicker
                 #e2="ngbDatepicker" readonly [(ngModel)]="formModel.targetCompletionDate" required />
               <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
+              <input id="task-target-time" class="form-control" type="time" name="targetCompletionTime"
+                [(ngModel)]="formModel.targetCompletionTime" required />
+              
+               
+            
             </div>
           </div>
 

@@ -98,11 +98,14 @@
               required />
             <button class="btn btn-outline-secondary bi bi-calendar3" (click)="relTargetDate.toggle()"
               type="button"></button>
+            <input id="related-task-target-time" class="form-control" type="time" step="60"
+              name="targetCompletionTime" [(ngModel)]="relatedTaskForm.targetCompletionTime" required />
           </div>
           <div class="invalid-feedback d-block"
             *ngIf="targetCompletionDateNgModel.invalid && (targetCompletionDateNgModel.touched || relatedTaskFormNg.submitted)">
             Target Completion is required.
           </div>
+    
         </div>
 
         <div class="col-12">

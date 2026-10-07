@@ -29,6 +29,7 @@ interface TaskFormModel {
   submitBy: string;
   submitDate: any;
   targetCompletionDate: any;
+  targetCompletionTime: string;
   assignTo: string;
   taskSolution: string;
   actualCompletionDate: string;
@@ -287,7 +288,9 @@ modules : any = [];
         '-' +
         String(this.formModel.targetCompletionDate['month']).padStart(2, '0') +
         '-' +
-        String(this.formModel.targetCompletionDate['day']).padStart(2, '0'),
+        String(this.formModel.targetCompletionDate['day']).padStart(2, '0') +
+        ' ' +
+        (this.formModel.targetCompletionTime || '00:00') + ':00',
       assignTo: this.formModel.assignTo,
       taskSolution: this.formModel.taskSolution.trim(),
 
@@ -400,6 +403,9 @@ modules : any = [];
       submitBy: 1,
       submitDate: formattedToday,
       targetCompletionDate: formattedToday,
+      targetCompletionTime: `${String(now.getHours()).padStart(2, '0')}:${String(
+        now.getMinutes(),
+      ).padStart(2, '0')}`,
       assignTo: '',
       taskSolution: '',
       ticketStatusId: 100,

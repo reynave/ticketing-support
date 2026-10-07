@@ -331,6 +331,16 @@ allowVerification : number = 0;
   lockTime : number = 1;
   verificationDateTime : string = '';
   actualWorkingHour : number = 0;
+
+  /** Jam (HH:mm) dari targetCompletionDate, untuk diteruskan ke modal buat task. */
+  get taskTargetCompletionTime(): string {
+    const raw = String(this.task?.targetCompletionDate || '');
+    const match = raw.match(/(\d{1,2}):(\d{2})/);
+    return match
+      ? `${String(match[1]).padStart(2, '0')}:${match[2]}`
+      : '';
+  }
+
   loadTaskDetail(): void {
     this.loading = true;
     this.errorMessage = '';
