@@ -10,6 +10,8 @@ interface UserFormModel {
   userAuthLevelId: number;
   firstName: string;
   lastName: string;
+  phone: string;
+  mobile: string;
   division: string;
   position: string;
   userTypeId: number;
@@ -130,6 +132,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
       lastName: this.userForm.lastName.trim(),
+      phone: this.userForm.phone.trim(),
+      mobile: this.userForm.mobile.trim(),
       division: this.userForm.division.trim(),
       position: this.userForm.position.trim(),
       userTypeId: Number(this.userForm.userTypeId),
@@ -233,6 +237,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: 1,
       firstName: '',
       lastName: '',
+      phone: '',
+      mobile: '',
       division: '',
       position: '',
       userTypeId: 1,
@@ -247,6 +253,8 @@ export class UserDetailComponent implements OnInit {
       userAuthLevelId: Number(this.user?.userAuthLevelId ?? 1),
       firstName: String(this.user?.firstName || ''),
       lastName: String(this.user?.lastName || ''),
+      phone: String(this.user?.phone || ''),
+      mobile: String(this.user?.mobile || ''),
       division: String(this.user?.division || ''),
       position: String(this.user?.position || ''),
       userTypeId: Number(this.user?.userTypeId ?? 1),

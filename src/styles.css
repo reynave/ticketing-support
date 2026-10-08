@@ -26,6 +26,13 @@ body {
 	color: var(--color-text);
 	font-size: 0.9rem;
 }
+ 
+ .form-control:disabled , input[readonly]{
+	background-color: var(--color-bg-subtle);
+	opacity: 1;
+	color: var(--color-text-muted);
+	cursor: not-allowed;
+ }
 
 .top-navbar {
 	height: var(--navbar-h);

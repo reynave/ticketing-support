@@ -76,6 +76,23 @@
                 [(ngModel)]="userForm.email" [readonly]="formMode === 'view'" required placeholder="Input email" />
             </div>
 
+            <div class="row g-1">
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label small fw-semibold" for="detail-edit-phone">Phone / WA</label>
+                  <input id="detail-edit-phone" class="form-control form-control-sm" name="phone"
+                    [(ngModel)]="userForm.phone" [readonly]="formMode === 'view'" placeholder="Input phone" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label small fw-semibold" for="detail-edit-mobile">Mobile (Additional)</label>
+                  <input id="detail-edit-mobile" class="form-control form-control-sm" name="mobile"
+                    [(ngModel)]="userForm.mobile" [readonly]="formMode === 'view'" placeholder="Input mobile" />
+                </div>
+              </div>
+            </div>
+
            
 
             <div class="row g-1">
