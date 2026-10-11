@@ -28,6 +28,7 @@ interface TaskGroup {
   id: number | string;
   name: string;
   data: any[];
+  sorting?: number;
 }
 
 interface TicketBalanceFormModel {
@@ -590,6 +591,17 @@ active = 1;
     return id.includes(keyword) || title.includes(keyword) || category.includes(keyword);
   }
 
+  private compareGroups(a: TaskGroup, b: TaskGroup): number {
+    const aSort = Number(a?.sorting ?? 0);
+    const bSort = Number(b?.sorting ?? 0);
+
+    if (aSort !== bSort) {
+      return aSort - bSort;
+    }
+
+    return String(a?.name ?? '').localeCompare(String(b?.name ?? ''));
+  }
+
   private isChangeRequestTicket(row: any): boolean {
     const ticketTypeName = String(row?.ticketTypeName || '').trim().toLowerCase();
     const ticketTypeCode = String(row?.ticketTypeCode || '').trim().toLowerCase();
@@ -617,10 +629,12 @@ active = 1;
           return {
             id: group?.id,
             name: String(group?.name || group?.id || 'Unknown Category'),
+            sorting: Number(group?.sorting ?? group?.weight ?? 0),
             data: filteredRows,
           };
         })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
+        .sort((a, b) => this.compareGroups(a, b));
     }
 
     // Backward compatibility for older flat task payload.
@@ -657,10 +671,12 @@ active = 1;
           return {
             id: group?.id,
             name: String(group?.name || group?.id || 'Unknown Category'),
+            sorting: Number(group?.sorting ?? group?.weight ?? 0),
             data: filteredRows,
           };
         })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
+        .sort((a, b) => this.compareGroups(a, b));
     }
 
     const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
@@ -692,10 +708,12 @@ active = 1;
           return {
             id: group?.id,
             name: String(group?.name || group?.id || 'Unknown Category'),
+            sorting: Number(group?.sorting ?? group?.weight ?? 0),
             data: filteredRows,
           };
         })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim());
+        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
+        .sort((a, b) => this.compareGroups(a, b));
     }
 
     const fallbackRows = grouped.filter((row) => this.matchesSearch(row));

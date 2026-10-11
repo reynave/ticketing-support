@@ -55,6 +55,7 @@ export class ProjectCreateComponent {
   saving = false;
   errorMessage = '';
   userSearchKeyword = '';
+  divisionFilter = '';
 
   formModel: ProjectFormModel = this.defaultForm();
   loadingTemplateMaster: boolean = false;
@@ -129,7 +130,7 @@ export class ProjectCreateComponent {
         userAuthLevel: user.userAuthLevel || '',
         checked: user.id == this.userId ? true : false,
         readonly: user.id == this.userId ? true : false,
-        
+        division: user.division || '',
         asManager: false,
       }));
       this.users = [...this.allUsers];
@@ -166,18 +167,27 @@ export class ProjectCreateComponent {
     this.formModel.userManager = selectedUser.name;
   }
 
+  get divisionOptions(): string[] {
+    const divisions = this.allUsers
+      .map((user: any) => String(user.division ?? '').trim())
+      .filter((division: string) => division.length > 0);
+
+    return Array.from(new Set(divisions)).sort((a, b) => a.localeCompare(b));
+  }
+
   searchUsers(): void {
     const keyword = this.userSearchKeyword.trim().toLowerCase();
-
-    if (!keyword) {
-      this.users = [...this.allUsers];
-      return;
-    }
+    const division = this.divisionFilter.trim().toLowerCase();
 
     this.users = this.allUsers.filter((user: any) => {
       const name = String(user.name || '').toLowerCase();
       const id = String(user.id || '');
-      return name.includes(keyword) || id.includes(keyword);
+      const userDivision = String(user.division || '').toLowerCase();
+
+      const matchesKeyword = !keyword || name.includes(keyword) || id.includes(keyword);
+      const matchesDivision = !division || userDivision === division;
+
+      return matchesKeyword && matchesDivision;
     });
   }
 
