@@ -656,7 +656,7 @@
               <th width="140">Task ID</th>
               <th>Title</th>
               <th width="140">Status</th>
-               <th>Assing To</th>
+               <th>Assign To</th>
               <th width="160">Target Date</th>
              
               <th width="120" class="text-end">Action</th>
@@ -689,6 +689,8 @@
       <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2 ">
         <span class="fw-semibold small">Logs Activity</span>
       </div>
+
+      
       @if(taskLogs.length === 0) {
       <div class="card-body text-muted">No logs activity.</div>
       } @else {
@@ -729,6 +731,12 @@
         </tbody>
       </table>
       }
+    </div>
+    <div class="row">
+      <div class="col-12 d-grid">
+        <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
+            Activity</button>
+      </div>
     </div>
   </form>
   }

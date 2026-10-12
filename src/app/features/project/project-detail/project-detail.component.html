@@ -344,7 +344,7 @@
                   <td>{{ t.title }}</td>
                   <td>{{ t.ticketStatusName }} </td>
                   <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
-                  <td>{{ t.assignTo }}</td>
+                  <td>{{ t.assignToName }}</td>
                 </tr>
                 }
               }
@@ -387,7 +387,7 @@
               <td>{{ t.ticketStatusName }}</td>
               <td>{{ t.ticketSeverityName }}</td>
               <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
-              <td>{{ t.assignTo }}</td>
+              <td>{{ t.assignToName }}</td>
             </tr>
             }
             }
@@ -430,7 +430,7 @@
               <td>{{ t.ticketStatusName }}</td>
               <td>{{ t.ticketPriorityName }}</td>
               <td>{{ t.createdAt | date: 'medium' }}</td>
-              <td>{{ t.assignTo }}</td>
+              <td>{{ t.assignToName }}</td>
             </tr>
             }
           }
