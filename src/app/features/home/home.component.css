@@ -36,9 +36,8 @@ h6 {
 
 .kanban-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.75rem;
- 
   padding-top: 0.85rem;
 }
 
@@ -65,10 +64,24 @@ h6 {
   box-shadow: 0 7px 14px rgba(25, 48, 57, 0.12);
 }
 
+.kanban-card {
+  cursor: grab;
+  user-select: none;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card.dragging {
+  opacity: 0.45;
+}
+
 .kanban-card-id,
 .kanban-card-meta {
-  color: #718288;
-  font-size: 0.7rem;
+  color: #151515;
+  font-size: 0.9rem;
+  line-height: 120%;
 }
 
 .kanban-card-title {
@@ -101,9 +114,5 @@ h6 {
 @media (max-width: 575.98px) {
   .kanban-board {
     padding: 0.8rem;
-  }
-
-  .kanban-columns {
-    grid-template-columns: 1fr;
   }
 }

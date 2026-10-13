@@ -5,6 +5,8 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 
+type KanbanType = 'tasks' | 'cases' | 'changeRequests';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -27,7 +29,10 @@ export class HomeComponent implements OnInit {
   totalOpenCases = 0;
   totalOpenChangeRequests = 0;
 
+  dragging: { type: KanbanType; index: number; moved: boolean } | null = null;
+  draggable : boolean = true;
   ngOnInit(): void {
+    this.draggable = true;
     console.log('Access rights:', this.authService.getAccessRights());
     this.loadDashboard();
   }
@@ -37,21 +42,16 @@ export class HomeComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const [taskResponse, caseResponse, changeRequestResponse] = await Promise.all([
-        firstValueFrom(this.apiService.get('/ticket', { ticketTypeId: 1 })),
-        firstValueFrom(this.apiService.get('/cases')),
-        firstValueFrom(this.apiService.get('/change-requests', { ticketTypeId: 3 })),
-      ]);
+      const response = await firstValueFrom(this.apiService.get('/home'));
+      const data = response?.data || {};
 
-      this.tasks = Array.isArray(taskResponse?.data) ? taskResponse.data : [];
-      this.cases = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
-      this.changeRequests = Array.isArray(changeRequestResponse?.data)
-        ? changeRequestResponse.data
-        : [];
+      this.tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      this.cases = Array.isArray(data.cases) ? data.cases : [];
+      this.changeRequests = Array.isArray(data.changeRequests) ? data.changeRequests : [];
 
-      this.totalOpenTasks = this.tasks.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
-      this.totalOpenCases = this.cases.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
-      this.totalOpenChangeRequests = this.changeRequests.filter((row) => this.isOpenTicket(row?.ticketStatusId)).length;
+      this.totalOpenTasks = Number(data.totalOpenTasks) || 0;
+      this.totalOpenCases = Number(data.totalOpenCases) || 0;
+      this.totalOpenChangeRequests = Number(data.totalOpenChangeRequests) || 0;
     } catch (error: any) {
       this.tasks = [];
       this.cases = [];
@@ -69,8 +69,92 @@ export class HomeComponent implements OnInit {
     return row?.id;
   }
 
-  private isOpenTicket(statusId: unknown): boolean {
-    const status = Number(statusId);
-    return Number.isFinite(status) && status < 900;
+  onDragStart(event: DragEvent, type: KanbanType, index: number): void {
+    this.dragging = { type, index, moved: false };
+    event.dataTransfer?.setData('text/plain', String(index));
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  onDragOver(event: DragEvent, type: KanbanType, index: number): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    if (!this.dragging || this.dragging.type !== type || this.dragging.index === index) {
+      return;
+    }
+
+    const list = this.getList(type);
+    const [moved] = list.splice(this.dragging.index, 1);
+    list.splice(index, 0, moved);
+    this.dragging.index = index;
+    this.dragging.moved = true;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  onDragEnd(): void {
+    if (!this.dragging) {
+      return;
+    }
+
+    const { type, moved } = this.dragging;
+    this.dragging = null;
+
+    if (moved) {
+      this.persistOrder(type);
+    }
+  }
+
+  private getList(type: KanbanType): any[] {
+    switch (type) {
+      case 'tasks':
+        return this.tasks;
+      case 'cases':
+        return this.cases;
+      case 'changeRequests':
+        return this.changeRequests;
+      default:
+        return [];
+    }
+  }
+
+  private getTicketTypeId(type: KanbanType): number {
+    switch (type) {
+      case 'tasks':
+        return 1;
+      case 'cases':
+        return 2;
+      case 'changeRequests':
+        return 3;
+      default:
+        return 0;
+    }
+  }
+
+  private async persistOrder(type: KanbanType): Promise<void> {
+    const list = this.getList(type);
+    const ids = list.map((row) => row?.id).filter(Boolean);
+
+    if (!ids.length) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.apiService.put('/home/sorting', {
+          ticketTypeId: this.getTicketTypeId(type),
+          ids,
+        }),
+      );
+    } catch (error: any) {
+      console.error('Failed to persist sorting order:', error);
+      await this.loadDashboard();
+    }
   }
 }
