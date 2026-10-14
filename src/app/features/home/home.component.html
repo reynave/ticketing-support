@@ -55,16 +55,21 @@
           @for (row of tasks; track trackById($index, row)) {
             <div class="kanban-card"
                [class.dragging]="dragging?.type === 'tasks' && dragging?.index === $index"
-               [draggable]="draggable" 
+               [draggable]="row.asManager == 1 ? true : false"
                (dragstart)="onDragStart($event, 'tasks', $index)"
                (dragover)="onDragOver($event, 'tasks', $index)"
                (drop)="onDrop($event)"
                (dragend)="onDragEnd()">  
               <a [routerLink]="['/tasks', row.id]">Go to Task</a>
               <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong>
-              , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}</strong>
+              , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}  
+                 </strong>
               </span>
-              <span class="kanban-card-title">{{ row.title || 'Untitled task' }}</span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled task' }} 
+              @if(row.asManager !== 1){
+              <i class="bi bi-file-lock2"></i> 
+          }
+              </span>
               <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
             </div>
           }
@@ -91,16 +96,20 @@
           @for (row of cases; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'cases' && dragging?.index === $index"
-               [draggable]="draggable"
+               [draggable]="row.asManager === 1 ? true : false"
                [routerLink]="['/cases', row.id]"
                (dragstart)="onDragStart($event, 'cases', $index)"
                (dragover)="onDragOver($event, 'cases', $index)"
                (drop)="onDrop($event)"
                (dragend)="onDragEnd()">
               <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong>
-              , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}</strong>
+              , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}  </strong>
               </span>
-              <span class="kanban-card-title">{{ row.title || 'Untitled case' }}</span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled case' }} 
+                 @if(row.asManager !== 1){
+              <i class="bi bi-file-lock2"></i> 
+          }
+              </span>
               <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
             </a>
           }
@@ -127,14 +136,18 @@
           @for (row of changeRequests; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'changeRequests' && dragging?.index === $index"
-               [draggable]="draggable"
+               [draggable]="row.asManager === 1 ? true : false"
                [routerLink]="['/change-requests', row.id]"
                (dragstart)="onDragStart($event, 'changeRequests', $index)"
                (dragover)="onDragOver($event, 'changeRequests', $index)"
                (drop)="onDrop($event)"
                (dragend)="onDragEnd()">
               <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
-              <span class="kanban-card-title">{{ row.title || 'Untitled change request' }}</span>
+              <span class="kanban-card-title">{{ row.title || 'Untitled change request' }}  
+                 @if(row.asManager !== 1){
+              <i class="bi bi-file-lock2"></i> 
+          }
+              </span>
               <span class="kanban-card-meta"><i class="bi bi-folder2-open"></i>{{ row.projectName || 'No project' }}</span>
             </a>
           }
