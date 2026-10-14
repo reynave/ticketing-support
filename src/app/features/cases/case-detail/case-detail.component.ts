@@ -114,6 +114,7 @@ ticketStatusName : string = '';
   message = '';
 
   errorMessage: string | null = null;
+  warningMessage: string | null = null;
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
@@ -1156,7 +1157,11 @@ allowVerification : number = 0;
   }
 
   submitInProgress(){
- 
+    this.saving = true;
+    this.message = '';
+    this.errorMessage = '';
+    this.warningMessage = '';
+
     const payload = {
         responseDateTime :  this.toSqlDateTime(this.responseDate, this.responseTime),
         targetCompletationDateTime :this.toSqlDateTime(
@@ -1174,6 +1179,7 @@ allowVerification : number = 0;
      this.apiService.put(`/cases/${this.taskId}/submitInProgress`, payload).subscribe({
       next: (response) => {
         this.saving = false;
+        this.warningMessage = '';
         this.message = response?.message || 'Case updated.';
         this.formMode = 'view';
         this.loadTaskDetail();
@@ -1182,7 +1188,17 @@ allowVerification : number = 0;
       },
       error: (error) => {
         this.saving = false;
-        this.errorMessage = error?.error?.message || 'Failed to update case.';
+        console.error('[submitInProgress] error:', error);
+
+        const message = error?.error?.message || 'Failed to update case.';
+
+        if (error?.error?.type === 'warning') {
+          this.warningMessage = message;
+          this.errorMessage = '';
+        } else {
+          this.errorMessage = message;
+          this.warningMessage = '';
+        }
       },
     });
 

@@ -22,13 +22,7 @@
   <div class="row g-1 mb-3">
 
 
-    @if (message) {
-    <div class="alert alert-success py-2 mb-3">{{ message }}</div>
-    }
-
-    @if (errorMessage) {
-    <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
-    }
+   
 
     @if (loading) {
     <div class="card border shadow-sm">
@@ -283,6 +277,17 @@
     </div>
 
   </div>
+   @if (message) {
+    <div class="alert alert-success py-2 mb-3">{{ message }}</div>
+    }
+
+    @if (errorMessage) {
+    <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
+    }
+
+    @if (warningMessage) {
+    <div class="alert alert-warning py-2 mb-3">{{ warningMessage }}</div>
+    }
 
   <form #taskFormNg="ngForm" (ngSubmit)="saveCase()">
     <!-- Case Form -->
