@@ -102,6 +102,7 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
   selectedTicketStatusId = '1';
   selectedClientId = '';
   clients: any[] = [];
+  private allClients: any[] = [];
   formModel: ChangeRequestFormModel = this.defaultForm();
   payload: any = null;
   private reloadSubscription?: Subscription;
@@ -153,6 +154,7 @@ export class ChangeRequestListComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
+        this.applyClientFilter();
       },
       error: (error) => {
         this.loading = false;
@@ -190,9 +192,10 @@ firstValueFrom(this.apiService.get('/client', { status: 1 })),
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : []; 
-         this.clients = Array.isArray(clientResponse?.data)
-        ? projectResponse.data
+      this.allClients = Array.isArray(clientResponse?.data)
+        ? clientResponse.data
         : [];
+      this.applyClientFilter();
       this.projects = Array.isArray(projectResponse?.data)
         ? projectResponse.data
         : [];
@@ -206,6 +209,7 @@ firstValueFrom(this.apiService.get('/client', { status: 1 })),
         : [];
     } catch {
       this.clients = [];
+      this.allClients = [];
       this.internalUsers = [];
       this.ticketCategories = [];
       this.ticketSeverities = [];
@@ -213,6 +217,18 @@ firstValueFrom(this.apiService.get('/client', { status: 1 })),
     } finally {
       this.loadingOptions = false;
     }
+  }
+
+  private applyClientFilter(): void {
+    const clientIdsInChangeRequests = new Set(
+      this.rows
+        .map((row) => String(row?.clientId ?? '').trim())
+        .filter((id) => id !== ''),
+    );
+
+    this.clients = this.allClients.filter((client: any) =>
+      clientIdsInChangeRequests.has(String(client?.id ?? '').trim()),
+    );
   }
 
   resetFilter(): void {

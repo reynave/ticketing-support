@@ -105,6 +105,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
   selectedProjectId = '';
   selectedTicketStatusId = '1';
   clients: any[] = [];
+  private allClients: any[] = [];
   formModel: CaseFormModel = this.defaultForm();
   payload: any = null;
   private reloadSubscription?: Subscription;
@@ -156,6 +157,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
+        this.applyClientFilter();
       },
       error: (error) => {
         this.loading = false;
@@ -198,9 +200,10 @@ export class CaseListComponent implements OnInit, OnDestroy {
         ? ticketStatusResponse.data
         : [];
 
-      this.clients = Array.isArray(clientResponse?.data)
+      this.allClients = Array.isArray(clientResponse?.data)
         ? clientResponse.data
         : [];
+      this.applyClientFilter();
 
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
         ? ticketCategoriesResponse.data
@@ -219,11 +222,24 @@ export class CaseListComponent implements OnInit, OnDestroy {
       console.log(this.ticketSeverities);
     } catch {
       this.clients = [];
+      this.allClients = [];
       this.internalUsers = [];
       this.ticketCategories = [];
     } finally {
       this.loadingOptions = false;
     }
+  }
+
+  private applyClientFilter(): void {
+    const clientIdsInCases = new Set(
+      this.rows
+        .map((row) => String(row?.clientId ?? '').trim())
+        .filter((id) => id !== ''),
+    );
+
+    this.clients = this.allClients.filter((client: any) =>
+      clientIdsInCases.has(String(client?.id ?? '').trim()),
+    );
   }
 
   resetFilter(): void {

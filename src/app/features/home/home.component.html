@@ -4,13 +4,25 @@
       <div class="page-title">Home Dashboard</div>
       <div class="page-subtitle">Your dashboard overview.</div>
     </div>
-    <button type="button" class="btn btn-outline-primary btn-sm" (click)="loadDashboard()" [disabled]="loading">
-      {{ loading ? 'Loading...' : 'Refresh' }}
-    </button>
+    <div>
+       <label for="viewByUser" class="form-label mb-1 small text-muted">View by User</label>
+      <select
+        id="viewByUser"
+        class="form-select form-select-sm"
+        [(ngModel)]="selectedUserId"
+        (ngModelChange)="onUserChange()"
+        [disabled]="loading || !canSortHome"
+      >
+        @for (user of users; track user.id) {
+        <option [value]="user.id">{{ user.name }}</option>
+        }
+      </select>
+    </div>
+    
   </div>
 
-  
- 
+   
+
   @if (errorMessage) {
   <div class="alert alert-danger py-2">{{ errorMessage }}</div>
   }
@@ -55,7 +67,7 @@
           @for (row of tasks; track trackById($index, row)) {
             <div class="kanban-card"
                [class.dragging]="dragging?.type === 'tasks' && dragging?.index === $index"
-               [draggable]="row.asManager == 1 ? true : false"
+               [draggable]="canSortHome"
                (dragstart)="onDragStart($event, 'tasks', $index)"
                (dragover)="onDragOver($event, 'tasks', $index)"
                (drop)="onDrop($event)"
@@ -66,7 +78,7 @@
                  </strong>
               </span>
               <span class="kanban-card-title">{{ row.title || 'Untitled task' }} 
-              @if(row.asManager !== 1){
+              @if(canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>
@@ -96,7 +108,7 @@
           @for (row of cases; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'cases' && dragging?.index === $index"
-               [draggable]="row.asManager === 1 ? true : false"
+               [draggable]="canSortHome"
                [routerLink]="['/cases', row.id]"
                (dragstart)="onDragStart($event, 'cases', $index)"
                (dragover)="onDragOver($event, 'cases', $index)"
@@ -106,7 +118,7 @@
               , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}  </strong>
               </span>
               <span class="kanban-card-title">{{ row.title || 'Untitled case' }} 
-                 @if(row.asManager !== 1){
+                 @if(canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>
@@ -136,7 +148,7 @@
           @for (row of changeRequests; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'changeRequests' && dragging?.index === $index"
-               [draggable]="row.asManager === 1 ? true : false"
+               [draggable]="canSortHome"
                [routerLink]="['/change-requests', row.id]"
                (dragstart)="onDragStart($event, 'changeRequests', $index)"
                (dragover)="onDragOver($event, 'changeRequests', $index)"
@@ -144,7 +156,7 @@
                (dragend)="onDragEnd()">
               <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
               <span class="kanban-card-title">{{ row.title || 'Untitled change request' }}  
-                 @if(row.asManager !== 1){
+                 @if(canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>

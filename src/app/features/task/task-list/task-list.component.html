@@ -38,9 +38,6 @@
           }
         </select>
       </div>
-       
-      
-
 
       <div class="col-12 col-md-2 d-flex gap-2">
         <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadTasks()">Search</button>
@@ -60,13 +57,14 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Title</th>
-            <th>Clients</th>
-            <th>Project</th>
-            <th>Status</th>
-            <th>Category</th>
-             <th>Submit Date</th>
-             <th>Assign Id</th>
+            <th>Clients /  Title</th>  
+            <th>Project / Category</th>
+             <th>Status</th>
+            <th>Submit Date</th>
+            <th>Assign Id</th>
+            <th>Last Log Activity</th>
+            <th>Last Post Activity</th>
+            
             <!-- <th *ngIf="canDelete" class="text-end">Action</th> -->
           </tr>
         </thead>
@@ -77,29 +75,40 @@
               <a href="javascript:void(0)" (click)="goToDetail(row)">{{ row.id }}</a>
             </td>
             <td>
+              <div class="text-muted small mb-1 lh-1">{{ row.clientName }}</div>
               <div class="fw-semibold">{{ row.title }}</div>
             </td>
-                  <td>{{ row.clientName }}</td>
-            <td>{{ row.projectName }}</td>
-      
-            <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
            
-            <td>{{ row.ticketCategoryName }}</td>
-             <td>{{ row.submitDate | date: 'mediumDate' }}</td>
-             <td>
+            <td>  <div class="text-muted small mb-1 lh-1"> {{ row.projectName }}</div>
+             {{ row.ticketCategoryName }}</td>
+              
+            <td>{{ row.ticketStatusName || statusNameById(row.ticketStatusId) }}</td>
+
+            <td>{{ row.submitDate | date: 'mediumDate' }}</td>
+            <td>
               <div *ngIf="row.assignToName; else noAssign" title="Assigned ID  {{ row.assignTo }} ">
-             {{ row.assignToName }}
+                {{ row.assignToName }}
               </div>
               <ng-template #noAssign>
                 <span class="text-muted">Not assigned</span>
               </ng-template>
-             </td>
-            <!-- <td *ngIf="canDelete" class="text-end action-buttons">
-              <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
-                (click)="deleteTask(row)">
-                {{ deletingId === row.id ? 'Deleting...' : 'Delete' }}
-              </button>
-            </td> -->
+            </td>
+            <td>
+              <div *ngIf="row.lastActivityDate; else noActivity" title="Last Activity By {{ row.lastActivityByName }}">
+                {{ row.lastActivityDate | date: 'YYYY-MM-dd hh:mm' }}  
+              </div>
+              <ng-template #noActivity>
+                <span class="text-muted">No activity</span>
+              </ng-template>
+            </td>
+            <td>
+              <div *ngIf="row.lastActivityDate; else noActivity" title="Last Activity By {{ row.lastActivityByName }}">
+                {{ row.lastActivityByName   }}
+              </div>
+              <ng-template #noActivity>
+                <span class="text-muted">No activity</span>
+              </ng-template>
+            </td>
           </tr>
           }
         </tbody>
@@ -118,6 +127,23 @@
 
   <form #taskFormNg="ngForm" (ngSubmit)="saveTask(taskFormNg)">
     <div class="modal-body">
+      <div class="mb-3">
+        <label class="form-label" for="task-template-master">Template Master</label>
+        <div class="row g-1">
+          <div class="col-8">
+            <input id="task-template-master" class="form-control form-control-sm" name="templateName"
+              (click)="loadTemplateMaster()" [(ngModel)]="templateName" readonly placeholder="Ex: TMP-001" />
+          </div>
+          <div class="col-2">
+            <button type="button" class="btn btn-sm w-100 btn-primary" (click)="loadTemplateMaster()">Open</button>
+          </div>
+          <div class="col-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+              (click)="resetTemplate()">Reset</button>
+          </div>
+        </div>
+      </div>
+
       <div class="row g-2">
 
         <div class="col-12 col-md-6">
@@ -158,11 +184,12 @@
 
         <div class="col-12 col-md-6">
           <div class="mb-2">
-             <label class="form-label" for="task-assign-to">Module <span class="text-danger">*</span></label>
+            <label class="form-label" for="task-assign-to">Module <span class="text-danger">*</span></label>
             @if(formModel.projectId == '') {
             <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
             } @else {
-            <select id="task-assign-to" class="form-select" name="productChildId" [(ngModel)]="formModel.productChildId" required>
+            <select id="task-assign-to" class="form-select" name="productChildId" [(ngModel)]="formModel.productChildId"
+              required>
               @for (mod of modules; track trackById($index, mod)) {
               <option [value]="mod.id">{{ mod.name }}</option>
               }
@@ -176,7 +203,7 @@
             <div class="form-control bg-light"><small><em>Please select a project first</em></small></div>
             } @else {
             <select id="task-assign-to" class="form-select" name="assignTo" [(ngModel)]="formModel.assignTo" required>
-            
+
               @for (user of internalUsers; track trackById($index, user)) {
               <option [value]="user.id">{{ user.name }} {{ user.asManager ? '(Manager)' : '' }}</option>
               }
@@ -193,9 +220,9 @@
               <button class="btn btn-outline-secondary bi bi-calendar3" (click)="e2.toggle()" type="button"></button>
               <input id="task-target-time" class="form-control" type="time" name="targetCompletionTime"
                 [(ngModel)]="formModel.targetCompletionTime" required />
-              
-               
-            
+
+
+
             </div>
           </div>
 
@@ -213,7 +240,7 @@
           <textarea id="task-description" class="form-control" rows="3" name="description"
             [(ngModel)]="formModel.description" required></textarea>
         </div>
- 
+
       </div>
     </div>
 
@@ -224,4 +251,37 @@
       </button>
     </div>
   </form>
+</ng-template>
+
+<ng-template #templateMasterContent>
+  <div class="modal-header">
+    <strong class="modal-title">Master Template</strong>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeTemplateMasterModal()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+      <table class="table table-sm table-hover">
+        <thead class="sticky-top">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th class="text-center">Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (template of listOfTemplateMaster; track trackById($index, template); let i = $index) {
+          <tr style="cursor: pointer;" (click)="selectTemplateMaster(template)">
+            <td class="align-top">{{ i + 1 }}</td>
+            <td>{{ template.name }}
+              <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">
+                {{ template.description }}
+              </div>
+            </td>
+            <td class="align-top text-center"><code>{{ template.version }}</code></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
 </ng-template>

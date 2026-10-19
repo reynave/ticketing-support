@@ -109,6 +109,15 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
+  dataTemplate: { name: string; description: string; version: string } = {
+    name: '',
+    description: '',
+    version: '',
+  };
+  templateSaving = false;
+  templateError = '';
+  templateModalRef: any = null;
+
   descriptionLog: string = '';
   starDateTime = {
     year: new Date().getFullYear(),
@@ -161,6 +170,71 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
   goBack(): void {
     history.back();
+  }
+
+  convertToTemplate(content: any): void {
+    if (!this.task) {
+      return;
+    }
+
+    const today = new Date();
+    const version =
+      today.getFullYear() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+
+    this.dataTemplate = {
+      name: '',
+      description: this.task?.description || '',
+      version,
+    };
+    this.templateError = '';
+    this.templateModalRef = this.modalService.open(content, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+  }
+
+  closeTemplateModal(): void {
+    this.templateModalRef?.close();
+    this.templateModalRef = null;
+    this.templateError = '';
+  }
+
+  submitTemplate(form: NgForm): void {
+    if (form.invalid || this.templateSaving || !this.taskId) {
+      return;
+    }
+
+    const payload = {
+      name: this.dataTemplate.name.trim(),
+      description: this.dataTemplate.description.trim(),
+      version: this.dataTemplate.version.trim(),
+      tempateType: 'task',
+      json: JSON.stringify({
+        taskId: this.taskId,
+        taskTitle: this.task?.title || '',
+        task: this.task,
+      }),
+      presence: 1,
+    };
+
+    this.templateSaving = true;
+    this.templateError = '';
+    this.apiService.post('/template', payload).subscribe({
+      next: (response) => {
+        this.templateSaving = false;
+        this.closeTemplateModal();
+        this.message = response?.message || 'Template created.';
+        this.errorMessage = '';
+      },
+      error: (error) => {
+        this.templateSaving = false;
+        this.templateError =
+          error?.error?.message || 'Failed to create template.';
+      },
+    });
   }
 actualCompletionDate : string = '';
   loadTaskDetail(): void {

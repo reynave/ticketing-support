@@ -2,13 +2,16 @@
   @if (!canAccessPage) {
   <div class="alert alert-danger py-2">You do not have access to this module.</div>
   } @else {
-  <div class="d-flex  mb-1 flex-wrap gap-2 mb-3">
+  <div class="d-flex mb-1 flex-wrap gap-2 mb-3 align-items-center">
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">Back to List</button>
     <div>
       <h5 class="fw-bold mb-0">Task {{ taskId }}</h5>
-
     </div>
-
+    <div class="ms-auto">
+      @if (task) {
+      <button type="button" class="btn btn-dark btn-sm" (click)="convertToTemplate(modalTemplate)">Convert to <b>Template</b></button>
+      }
+    </div>
   </div>
 
   <div class="row g-1 mb-3">
@@ -521,6 +524,42 @@
       <img [src]="imgUrlLog" class="img-fluid">
     </div>
 
+  </ng-template>
+
+  <ng-template #modalTemplate let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Convert Task to Template</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <form #templateForm="ngForm" (ngSubmit)="submitTemplate(templateForm)">
+      <div class="modal-body">
+        @if (templateError) {
+        <div class="alert alert-danger py-2 mb-3">{{ templateError }}</div>
+        }
+
+        <div class="alert alert-warning py-2 mb-3">
+          <strong>Warning:</strong> This action will create a new template based on the current task data. Please
+          ensure that you have reviewed the task details before proceeding.
+        </div>
+
+        <label class="form-label" for="task-template-name">Template Name <span class="text-danger">*</span></label>
+        <input type="text" id="task-template-name" class="form-control mb-2" name="templateName" required
+          placeholder="Enter template name" [(ngModel)]="dataTemplate.name" />
+
+        <label class="form-label" for="task-template-description">Description</label>
+        <input type="text" id="task-template-description" class="form-control mb-2" name="templateDescription"
+          placeholder="Enter template description" [(ngModel)]="dataTemplate.description" />
+
+        <label class="form-label" for="task-template-version">Version <span class="text-danger">*</span></label>
+        <input type="text" id="task-template-version" class="form-control mb-2" name="templateVersion" required
+          placeholder="Enter template version" [(ngModel)]="dataTemplate.version" />
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel click')">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="templateSaving || templateForm.invalid">{{ templateSaving ? 'Saving...' : 'Confirm' }}</button>
+      </div>
+    </form>
   </ng-template>
   }
 </div>

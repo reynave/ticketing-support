@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
@@ -10,7 +11,7 @@ type KanbanType = 'tasks' | 'cases' | 'changeRequests';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -25,6 +26,15 @@ export class HomeComponent implements OnInit {
   cases: any[] = [];
   changeRequests: any[] = [];
 
+  users: any[] = [];
+  selectedUserId = '';
+
+  readonly homeModuleId = 2000;
+
+  get canSortHome(): boolean {
+    return this.authService.hasPermission(this.homeModuleId, 'u');
+  }
+
   totalOpenTasks = 0;
   totalOpenCases = 0;
   totalOpenChangeRequests = 0;
@@ -33,7 +43,36 @@ export class HomeComponent implements OnInit {
   draggable : boolean = true;
   ngOnInit(): void {
     this.draggable = true;
+    this.selectedUserId = this.authService.currentUser?.id || '';
     console.log('Access rights:', this.authService.getAccessRights());
+    this.loadUsers();
+    this.loadDashboard();
+  }
+
+  async loadUsers(): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.apiService.get('/home/users'));
+      this.users = Array.isArray(response?.data) ? response.data : [];
+    } catch (error: any) {
+      this.users = [];
+      console.error('Failed to load project users:', error);
+    }
+
+    // Pastikan user yang sedang login selalu tersedia sebagai pilihan (default).
+    const currentUser = this.authService.currentUser;
+    const currentId = currentUser?.id ? String(currentUser.id) : '';
+    if (currentId && !this.users.some((user) => String(user.id) === currentId)) {
+      this.users = [
+        {
+          id: currentId,
+          name: currentUser?.name || currentUser?.email || currentId,
+        },
+        ...this.users,
+      ];
+    }
+  }
+
+  onUserChange(): void {
     this.loadDashboard();
   }
 
@@ -42,7 +81,9 @@ export class HomeComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const response = await firstValueFrom(this.apiService.get('/home'));
+      const response = await firstValueFrom(
+        this.apiService.get('/home', { userId: this.selectedUserId }),
+      );
       const data = response?.data || {};
 
       this.tasks = Array.isArray(data.tasks) ? data.tasks : [];
@@ -70,6 +111,11 @@ export class HomeComponent implements OnInit {
   }
 
   onDragStart(event: DragEvent, type: KanbanType, index: number): void {
+    if (!this.canSortHome) {
+      event.preventDefault();
+      return;
+    }
+
     this.dragging = { type, index, moved: false };
     event.dataTransfer?.setData('text/plain', String(index));
     if (event.dataTransfer) {

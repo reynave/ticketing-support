@@ -57,8 +57,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
   private readonly socketNotificationService : any = inject(SocketNotificationService);
 
   @ViewChild('createTaskModal') createTaskModal?: TemplateRef<unknown>;
+  @ViewChild('templateMasterContent') templateMasterContent?: TemplateRef<unknown>;
 
   private modalRef: NgbModalRef | null = null;
+  private templateMasterModalRef: NgbModalRef | null = null;
 
   readonly moduleId = 5005;
 
@@ -98,6 +100,10 @@ selectedClientId : string = '';
   formModel: TaskFormModel = this.defaultForm();
   payload: any = null;
   clients : any[] = [];
+  templateName: string = '';
+  listOfTemplateMaster: any[] = [];
+  loadingTemplateMaster = false;
+  templateDetail: any = null;
   private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
@@ -114,7 +120,7 @@ selectedClientId : string = '';
       });
     this.formModel = this.defaultForm();
     this.loadTasks();
-    this.loadOptions();
+   
   }
 
   ngOnDestroy(): void {
@@ -147,6 +153,7 @@ selectedClientId : string = '';
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
+         this.loadOptions();
       },
       error: (error) => {
         this.loading = false;
@@ -160,16 +167,19 @@ selectedClientId : string = '';
     this.loadingOptions = true;
 
     try {
-      const [projectResponse, clientsResponse, ticketCategoriesResponse, ticketStatusResponse] =
+      const [projectResponse, clientsResponse, ticketCategoriesResponse, ticketStatusResponse, templateMasterResponse] =
         await Promise.all([
           firstValueFrom(this.apiService.get('/project', { status: 1 })),
-         firstValueFrom(this.apiService.get('/client', { status: 1 })),
+         firstValueFrom(this.apiService.get('/client', { status: 1, /*userId: this.payload?.id || '' */ })),
          
           firstValueFrom(
             this.apiService.get('/ticket-categories', { status: 1 }),
           ),
           firstValueFrom(
             this.apiService.get('/master/status/task', { status: 1 }),
+          ),
+          firstValueFrom(
+            this.apiService.get('/template', { tempateType: 'task' }),
           ),
         ]);
 
@@ -179,9 +189,19 @@ selectedClientId : string = '';
 
 
 
-      this.clients = Array.isArray(clientsResponse?.data)
+      const clients = Array.isArray(clientsResponse?.data)
         ? clientsResponse.data
         : [];
+
+      const clientIdsInTasks = new Set(
+        this.rows
+          .map((row) => String(row?.clientId ?? '').trim())
+          .filter((id) => id !== ''),
+      );
+
+      this.clients = clients.filter((client: any) =>
+        clientIdsInTasks.has(String(client?.id ?? '').trim()),
+      );
 
       
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
@@ -190,11 +210,15 @@ selectedClientId : string = '';
       this.ticketStatusOptions = Array.isArray(ticketStatusResponse?.data)
         ? ticketStatusResponse.data
         : [];
+      this.listOfTemplateMaster = Array.isArray(templateMasterResponse?.data)
+        ? templateMasterResponse.data
+        : [];
     } catch {
       this.clients = [];
       this.internalUsers = [];
       this.ticketCategories = [];
       this.ticketStatusOptions = [];
+      this.listOfTemplateMaster = [];
     } finally {
       this.loadingOptions = false;
     }
@@ -237,6 +261,11 @@ modules : any = [];
     this.formModel = this.defaultForm();
     this.errorMessage = '';
     this.message = '';
+    this.templateName = '';
+    this.templateDetail = null;
+    this.selectChildCategory = [];
+    this.internalUsers = [];
+    this.modules = [];
 
     this.modalRef = this.modalService.open(this.createTaskModal, {
       size: 'lg',
@@ -248,6 +277,172 @@ modules : any = [];
   closeModal(): void {
     this.modalRef?.close();
     this.modalRef = null;
+  }
+
+  loadTemplateMaster(): void {
+    if (!this.templateMasterContent) {
+      return;
+    }
+
+    this.loadingTemplateMaster = true;
+    this.templateMasterModalRef = this.modalService.open(
+      this.templateMasterContent,
+      { size: 'xl', centered: true },
+    );
+  }
+
+  closeTemplateMasterModal(): void {
+    this.templateMasterModalRef?.close();
+    this.templateMasterModalRef = null;
+    this.loadingTemplateMaster = false;
+  }
+
+  selectTemplateMaster(template: any): void {
+    if (!template) {
+      return;
+    }
+
+    this.templateName = template.name;
+    this.loadingTemplateMaster = true;
+
+    this.apiService.get(`/template/${template.id}`).subscribe({
+      next: (response) => {
+        const templateDetail = response?.data ?? response;
+        const parsed = this.parseTaskTemplatePayload(templateDetail);
+
+        this.formModel = {
+          ...this.formModel,
+          ...parsed,
+        };
+
+        this.templateDetail =
+          this.tryParseJson(templateDetail?.json) ?? templateDetail?.json ?? null;
+
+        if (this.formModel.projectId) {
+          this.selectTaskCategory();
+        }
+
+        this.closeTemplateMasterModal();
+      },
+      error: (error) => {
+        console.error('Error loading template detail:', error);
+        this.loadingTemplateMaster = false;
+        this.errorMessage =
+          error?.error?.message || 'Failed to load template.';
+      },
+    });
+  }
+
+  resetTemplate(): void {
+    this.templateName = '';
+    this.templateDetail = null;
+    this.formModel = this.defaultForm();
+    this.selectChildCategory = [];
+    this.internalUsers = [];
+    this.modules = [];
+  }
+
+  private parseTaskTemplatePayload(templateDetail: any): Partial<TaskFormModel> {
+    const rawJson = templateDetail?.json ?? templateDetail;
+    const parsedJson = this.tryParseJson(rawJson);
+    const taskData = parsedJson?.task ?? parsedJson;
+
+    return {
+      title: String(taskData?.title ?? this.formModel.title),
+      description: String(taskData?.description ?? this.formModel.description),
+      projectId: String(taskData?.projectId ?? this.formModel.projectId),
+      category: Number(
+        taskData?.ticketCategoryId ??
+          taskData?.category ??
+          this.formModel.category,
+      ),
+      productChildId: String(
+        taskData?.productChildId ?? this.formModel.productChildId,
+      ),
+      assignTo: String(taskData?.assignTo ?? this.formModel.assignTo),
+      taskSolution: String(
+        taskData?.taskSolution ?? this.formModel.taskSolution,
+      ),
+      ticketStatusId: Number(
+        taskData?.ticketStatusId ?? this.formModel.ticketStatusId,
+      ),
+      issueNo: String(taskData?.issueNo ?? this.formModel.issueNo),
+      crNoRef: String(taskData?.crNoRef ?? this.formModel.crNoRef),
+      targetCompletionDate:
+        this.parseDate(taskData?.targetCompletionDate) ??
+        this.formModel.targetCompletionDate,
+      targetCompletionTime:
+        this.parseTime(taskData?.targetCompletionDate) ??
+        this.formModel.targetCompletionTime,
+    };
+  }
+
+  private tryParseJson(value: any): any {
+    if (!value) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    }
+
+    return value;
+  }
+
+  private parseDate(
+    value: any,
+  ): { year: number; month: number; day: number } | null {
+    if (!value) {
+      return null;
+    }
+
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      'year' in value &&
+      'month' in value &&
+      'day' in value
+    ) {
+      return {
+        year: Number(value.year),
+        month: Number(value.month),
+        day: Number(value.day),
+      };
+    }
+
+    if (typeof value === 'string') {
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+      if (match) {
+        return {
+          year: Number(match[1]),
+          month: Number(match[2]),
+          day: Number(match[3]),
+        };
+      }
+    }
+
+    return null;
+  }
+
+  private parseTime(value: any): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      const match = value.match(/(\d{2}):(\d{2})/);
+
+      if (match) {
+        return `${match[1]}:${match[2]}`;
+      }
+    }
+
+    return null;
   }
 
   saveTask(form: NgForm): void {
