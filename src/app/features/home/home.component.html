@@ -78,7 +78,7 @@
                  </strong>
               </span>
               <span class="kanban-card-title">{{ row.title || 'Untitled task' }} 
-              @if(canSortHome){
+              @if(!canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>
@@ -118,7 +118,7 @@
               , Assigned to: <strong>{{ row.assignToName || 'Unassigned' }}  </strong>
               </span>
               <span class="kanban-card-title">{{ row.title || 'Untitled case' }} 
-                 @if(canSortHome){
+                 @if(!canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>
@@ -156,7 +156,7 @@
                (dragend)="onDragEnd()">
               <span class="kanban-card-id">{{ row.id }} <strong>{{ row.ticketStatusName }}</strong></span>
               <span class="kanban-card-title">{{ row.title || 'Untitled change request' }}  
-                 @if(canSortHome){
+                 @if(!canSortHome){
               <i class="bi bi-file-lock2"></i> 
           }
               </span>
