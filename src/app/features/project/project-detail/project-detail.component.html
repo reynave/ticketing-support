@@ -259,21 +259,44 @@
                     <th class="text-center"></th>
                     <th>Name [ID]</th>
                     <th>Auth Level</th>
+                    <th>Division</th>
                     <th class="text-center">PIC</th>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                      <input id="project-detail-user-search" class="form-control form-control-sm"
+                        type="text" placeholder="Search user by name and Enter for search"
+                        name="userSearchKeyword" [(ngModel)]="userSearchKeyword"
+                        (change)="searchUsers()" (keydown)="searchUsers()"/>
+                    </td>
+                    <td>
+                      <select id="project-detail-user-division" class="form-select form-select-sm"
+                        name="divisionFilter" [(ngModel)]="divisionFilter"
+                        (change)="searchUsers()">
+                        <option value="">All Division</option>
+                        @for (division of divisionOptions; track division) {
+                        <option [value]="division">{{ division }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+                        (click)="userSearchKeyword=''; divisionFilter=''; searchUsers()">Clear</button>
+                    </td>
                   </tr>
                 </thead>
                 <tbody>
                   @for (user of users; track user.id ; let i = $index) {
                   <tr>
-                    <td (click)="user.checked = !user.checked" style="cursor: pointer;">
+                    <td class="text-center" (click)="user.checked = !user.checked" style="cursor: pointer;">
                       <i class="bi bi-check-square-fill" *ngIf="user.checked == 1"></i>
                       <i class="bi bi-square" *ngIf="user.checked != 1"></i>
                     </td>
 
                     <td> {{ user.name }} [{{ user.id }}] </td>
                     <td> {{ user.userAuthLevel }} </td>
-
-                    <td (click)="toggleManager(i)" style="cursor: pointer;">
+                    <td> {{ user.division }} </td>
+                    <td class="text-center" (click)="toggleManager(i)" style="cursor: pointer;">
                       <i class="bi bi-check-circle-fill" *ngIf="user.asManager == 1"></i>
                       <i class="bi bi-circle" *ngIf="user.asManager != 1"></i>
                     </td>

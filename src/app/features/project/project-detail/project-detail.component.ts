@@ -88,6 +88,9 @@ active = 1;
   message = '';
   errorMessage = '';
   users : any = [];
+  allUsers: any[] = [];
+  userSearchKeyword = '';
+  divisionFilter = '';
   projectUsers: any[] = [];
   formModel: ProjectFormModel = this.defaultForm();
   task: any[] = [];
@@ -136,7 +139,8 @@ active = 1;
         this.populateFormFromProject();
         this.ticketChildCategories = response?.data?.ticketCategories || [];
 
-        this.users = response?.data?.users || [];
+        this.users = Array.isArray(response?.data?.users) ? response.data.users : [];
+        this.allUsers = [...this.users];
        
         for (const user of this.users) {
           if (user.asManager === 1) {
@@ -231,8 +235,8 @@ active = 1;
   }
   
  toggleManager(index: number): void {
-    for (let i = 0; i < this.users.length; i++) { 
-        this.users[i].asManager = false;
+    for (let i = 0; i < this.allUsers.length; i++) { 
+        this.allUsers[i].asManager = false;
     }
     this.users[index].asManager = true;
     this.users[index].checked = true;
@@ -240,6 +244,30 @@ active = 1;
     this.formModel.userManager = this.users[index].name;
 
   }
+  get divisionOptions(): string[] {
+    const divisions = this.allUsers
+      .map((user: any) => String(user.division ?? '').trim())
+      .filter((division: string) => division.length > 0);
+
+    return Array.from(new Set(divisions)).sort((a, b) => a.localeCompare(b));
+  }
+
+  searchUsers(): void {
+    const keyword = this.userSearchKeyword.trim().toLowerCase();
+    const division = this.divisionFilter.trim().toLowerCase();
+
+    this.users = this.allUsers.filter((user: any) => {
+      const name = String(user.name || '').toLowerCase();
+      const id = String(user.id || '');
+      const userDivision = String(user.division || '').toLowerCase();
+
+      const matchesKeyword = !keyword || name.includes(keyword) || id.includes(keyword);
+      const matchesDivision = !division || userDivision === division;
+
+      return matchesKeyword && matchesDivision;
+    });
+  }
+
   startEdit(): void {
     if (!this.project || !this.canUpdate) {
       return;
@@ -249,12 +277,18 @@ active = 1;
     this.populateFormFromProject();
     this.message = '';
     this.errorMessage = '';
+    this.userSearchKeyword = '';
+    this.divisionFilter = '';
+    this.searchUsers();
   }
 
   cancelEdit(): void {
     this.formMode = 'view';
     this.populateFormFromProject();
     this.errorMessage = '';
+    this.userSearchKeyword = '';
+    this.divisionFilter = '';
+    this.searchUsers();
   }
 
   saveProject(form: NgForm): void {
@@ -273,7 +307,7 @@ active = 1;
       status: Number(this.formModel.status),
       templateMaster: this.formModel.templateMaster.trim() || '0',
       ticketCategoriesId : Number(this.formModel.ticketCategoriesParentId),
-      users: this.users.filter((user: any) => user.checked).map((user : any) => ({
+      users: this.allUsers.filter((user: any) => user.checked).map((user : any) => ({
         id: user.id,
         name: user.name,
         userAuthLevel: user.userAuthLevel,
