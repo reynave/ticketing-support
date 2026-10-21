@@ -834,4 +834,13 @@ actualCompletionDate : string = '';
     this.imgUrlLog = item.url;
     this.modalService.open(content, { size: 'lg' });
   }
+
+  isImageAttachment(item: any): boolean {
+    const mime = String(item?.mimetype || '').toLowerCase();
+    if (mime.startsWith('image/')) {
+      return true;
+    }
+    const name = String(item?.originalName || item?.filename || '').toLowerCase();
+    return /\.(jpe?g|png|gif|webp|bmp)$/i.test(name);
+  }
 }

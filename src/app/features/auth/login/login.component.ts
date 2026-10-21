@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { buildInfo } from './../../../../environments/build-info';
 interface LoginForm {
   email: string;
   password: string;
@@ -26,7 +27,7 @@ export class LoginComponent implements OnInit {
     password: '',
     remember: true,
   };
-
+  ngBuildCode: string = buildInfo.buildCode; // auto-generated on each build
   loading = false;
   errorMessage = '';
   showPassword = false;

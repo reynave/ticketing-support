@@ -3,11 +3,8 @@
     <i class="bi bi-list"></i>
   </button>
   <a class="brand-logo" routerLink="/home">
-    <div class="icon"><i class="bi bi-headset"></i></div>
-    <span class="lh-1">HelpDesk
-      <div> <small>Build {{ngBuildCode}}</small></div>
-    </span>
-
+   
+    <img src="./img/think-tank-solusindo.png" alt="Logo" class="img-fluid" />
   </a>
 
   <div class="nav-search ms-3">
@@ -166,6 +163,8 @@
 
 @if (mobileMenuOpen) {
 <nav class="mobile-navbar" aria-label="Mobile navigation">
+  <div class="text-center"> <small>Build {{ngBuildCode}}</small></div>
+ 
   <a *ngFor="let menu of visibleModuleMenus" [routerLink]="menu.path" class="mobile-navbar-link"
     (click)="closeMobileMenu()">
     {{ menu.label }}
@@ -181,7 +180,10 @@
 }
 
 <aside class="sidebar">
-  <div class="sidebar-section">
+  <div class="sidebar-section"> 
+    <div class="sidebar-label">    <small>Build {{ngBuildCode}}</small> </div>
+
+ 
     <div class="sidebar-label">MENU</div>
     @for (menu of visibleModuleMenus; track menu.path) {
     <a [routerLink]="menu.path" routerLinkActive="active" class="sidebar-link">
@@ -228,11 +230,12 @@
     <div class="p-2 m-2 bg-light rounded">
       <div class="small text-muted">{{ userName }}</div>
       <div class="small text-muted">{{ userEmail }}</div>
-    </div>
-
+    </div> 
   </div>
+
+  
 </aside>
 
 <main class="main-content">
-  <router-outlet></router-outlet>
+  <router-outlet></router-outlet> 
 </main>

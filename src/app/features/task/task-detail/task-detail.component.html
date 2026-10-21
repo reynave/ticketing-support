@@ -353,9 +353,17 @@
               }
               <div [innerHTML]="log.description"></div>
               <div>
-                <span class="pe-2" *ngFor="let item of log.attachments" (click)="imgPopup(content,item )">
-                  <a href="javascript:;">{{item.originalName}}</a>
+                @for (item of log.attachments; track item.id) {
+                @if (isImageAttachment(item)) {
+                <span class="pe-2" (click)="imgPopup(content, item)">
+                  <a href="javascript:;">{{ item.originalName }}</a>
                 </span>
+                } @else {
+                <span class="pe-2">
+                  <a [href]="item.url" target="_blank" rel="noopener">{{ item.originalName }}</a>
+                </span>
+                }
+                }
               </div>
 
               <a href="javascript:void(0)" (click)="open(addActivity, log)">reply</a>
@@ -458,7 +466,7 @@
             <div class="d-flex align-items-center gap-2 mb-2">
               <span class="text-muted small">File {{ rowIdx + 1 }}</span>
               @if (rows.length > 1) {
-              <button class="btn btn-sm btn-outline-danger ms-auto" (click)="removeRow(rowIdx)">
+              <button type="button" class="btn btn-sm btn-outline-danger ms-auto" (click)="removeRow(rowIdx)">
                 Hapus Baris
               </button>
               }
@@ -473,7 +481,7 @@
               <div class="position-relative">
                 <img [src]="preview" alt="preview" class="img-thumbnail"
                   style="width: 80px; height: 80px; object-fit: cover;" />
-                <button class="btn btn-warning btn-sm position-absolute top-0 end-0"
+                <button type="button" class="btn btn-warning btn-sm position-absolute top-0 end-0"
                   style="padding: 0 4px; font-size: 10px;" (click)="removeFile(rowIdx, fileIdx)">✕</button>
               </div>
               }
@@ -484,8 +492,8 @@
 
           <!-- Tambah Baris -->
           <div class="mb-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="addRow()">
-              + Tambah Baris
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addRow()">
+              + Add Row
             </button>
           </div>
 
