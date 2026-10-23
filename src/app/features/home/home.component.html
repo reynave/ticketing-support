@@ -1,10 +1,10 @@
 <div class="container-fluid">
-  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
+  <div class="row mb-3 g-1">
+    <div class="col-6 col-md-6 mb-3 mb-md-0">
       <div class="page-title">Home Dashboard</div>
       <div class="page-subtitle">Your dashboard overview.</div>
     </div>
-    <div>
+    <div class="col-3 col-md-3">
        <label for="viewByUser" class="form-label mb-1 small text-muted">View by User</label>
       <select
         id="viewByUser"
@@ -18,6 +18,23 @@
         }
       </select>
     </div>
+
+    <div class="col-3 col-md-3">
+      <label for="filterByAssignTo" class="form-label mb-1 small text-muted">Filter by Assign to</label>
+      <select
+        id="filterByAssignTo"
+        class="form-select form-select-sm"
+        [(ngModel)]="assignToFilter"
+        [disabled]="loading"
+      >
+        <option value="">All Team</option>
+        @for (assignee of assigneeOptions; track assignee.id) {
+        <option [value]="assignee.id">{{ assignee.name }}</option>
+        }
+      </select>
+    </div>
+
+
     
   </div>
 
@@ -60,14 +77,14 @@
         </div>
         @if (loading) {
         <div class="kanban-empty">Loading task list...</div>
-        } @else if (!tasks.length) {
+        } @else if (!filteredTasks.length) {
         <div class="kanban-empty">No task data.</div>
         } @else {
         <div class="kanban-columns">
-          @for (row of tasks; track trackById($index, row)) {
+          @for (row of filteredTasks; track trackById($index, row)) {
             <div class="kanban-card"
                [class.dragging]="dragging?.type === 'tasks' && dragging?.index === $index"
-               [draggable]="canSortHome"
+               [draggable]="canSortHome && !assignToFilter"
                (dragstart)="onDragStart($event, 'tasks', $index)"
                (dragover)="onDragOver($event, 'tasks', $index)"
                (drop)="onDrop($event)"
@@ -101,14 +118,14 @@
         </div>
         @if (loading) {
         <div class="kanban-empty">Loading case list...</div>
-        } @else if (!cases.length) {
+        } @else if (!filteredCases.length) {
         <div class="kanban-empty">No case data.</div>
         } @else {
         <div class="kanban-columns">
-          @for (row of cases; track trackById($index, row)) {
+          @for (row of filteredCases; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'cases' && dragging?.index === $index"
-               [draggable]="canSortHome"
+               [draggable]="canSortHome && !assignToFilter"
                [routerLink]="['/cases', row.id]"
                (dragstart)="onDragStart($event, 'cases', $index)"
                (dragover)="onDragOver($event, 'cases', $index)"
@@ -141,14 +158,14 @@
         </div>
         @if (loading) {
         <div class="kanban-empty">Loading change request list...</div>
-        } @else if (!changeRequests.length) {
+        } @else if (!filteredChangeRequests.length) {
         <div class="kanban-empty">No change request data.</div>
         } @else {
         <div class="kanban-columns">
-          @for (row of changeRequests; track trackById($index, row)) {
+          @for (row of filteredChangeRequests; track trackById($index, row)) {
             <a class="kanban-card"
                [class.dragging]="dragging?.type === 'changeRequests' && dragging?.index === $index"
-               [draggable]="canSortHome"
+               [draggable]="canSortHome && !assignToFilter"
                [routerLink]="['/change-requests', row.id]"
                (dragstart)="onDragStart($event, 'changeRequests', $index)"
                (dragover)="onDragOver($event, 'changeRequests', $index)"

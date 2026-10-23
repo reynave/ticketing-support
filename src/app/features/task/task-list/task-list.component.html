@@ -22,12 +22,24 @@
 
   <div class="stat-card mb-3">
     <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-7">
+      <div class="col-12 col-md-5">
         <label class="form-label small" for="task-keyword">Keyword</label>
         <input id="task-keyword" class="form-control form-control-sm" [(ngModel)]="keyword" (keyup.enter)="loadTasks()"
           placeholder="Cari id / title / CR / issue" />
       </div>
 
+      <div class="col-12 col-md-5">
+        <label class="form-label small" for="task-project-filter">Projects</label>
+        <select id="task-project-filter" class="form-select form-select-sm" [(ngModel)]="selectedProjectId"
+          (change)="onProjectFilterChange()">
+          <option value="">All projects</option>
+          @for (project of projectFilterOptions; track project.id) {
+          <option [value]="project.id">{{ project.name }} </option>
+          }
+        </select>
+      </div>
+
+      <!-- Clients filter sementara di-hide
       <div class="col-12 col-md-3">
         <label class="form-label small" for="task-client-filter">Clients</label>
         <select id="task-client-filter" class="form-select form-select-sm" [(ngModel)]="selectedClientId"
@@ -38,6 +50,7 @@
           }
         </select>
       </div>
+      -->
 
       <div class="col-12 col-md-2 d-flex gap-2">
         <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadTasks()">Search</button>

@@ -81,6 +81,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
   closed: boolean = false;
   rows: any[] = [];
   projects: any[] = [];
+  projectFilterOptions: any[] = [];
   internalUsers: any[] = [];
   ticketCategories: any[] = [];
 selectedClientId : string = '';
@@ -141,6 +142,10 @@ selectedClientId : string = '';
       query['keyword'] = this.keyword.trim();
     }
 
+    if (this.selectedProjectId !== '') {
+      query['projectId'] = this.selectedProjectId;
+    }
+
     if (this.selectedClientId !== '') {
       query['clientId'] = this.selectedClientId;
     }
@@ -153,6 +158,7 @@ selectedClientId : string = '';
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
+        this.buildProjectFilterOptions();
          this.loadOptions();
       },
       error: (error) => {
@@ -192,16 +198,8 @@ selectedClientId : string = '';
       const clients = Array.isArray(clientsResponse?.data)
         ? clientsResponse.data
         : [];
-
-      const clientIdsInTasks = new Set(
-        this.rows
-          .map((row) => String(row?.clientId ?? '').trim())
-          .filter((id) => id !== ''),
-      );
-
-      this.clients = clients.filter((client: any) =>
-        clientIdsInTasks.has(String(client?.id ?? '').trim()),
-      );
+        console.log('Clients:', clients);
+      this.applyClientFilter(clients);
 
       
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data)
@@ -223,6 +221,51 @@ selectedClientId : string = '';
       this.loadingOptions = false;
     }
   }
+  private applyClientFilter(clients: any[]): void {
+    if (this.selectedProjectId !== '') {
+      const project = this.projects.find(
+        (p) => String(p?.id ?? '') === String(this.selectedProjectId),
+      );
+      const clientId = String(project?.clientId ?? '').trim();
+      this.clients = clientId
+        ? clients.filter(
+            (client: any) => String(client?.id ?? '').trim() === clientId,
+          )
+        : [];
+    } else {
+      const clientIdsInTasks = new Set(
+        this.rows
+          .map((row) => String(row?.clientId ?? '').trim())
+          .filter((id) => id !== ''),
+      );
+      this.clients = clients.filter((client: any) =>
+        clientIdsInTasks.has(String(client?.id ?? '').trim()),
+      );
+    }
+  }
+
+  onProjectFilterChange(): void {
+    this.selectedClientId = '';
+    this.loadTasks();
+  }
+
+  private buildProjectFilterOptions(): void {
+    const map = new Map<string, any>();
+    for (const row of this.rows) {
+      const id = String(row?.projectId ?? '').trim();
+      if (!id || map.has(id)) {
+        continue;
+      }
+      map.set(id, {
+        id,
+        name: row?.projectName || id,
+        clientName: row?.clientName || '',
+      });
+    }
+    this.projectFilterOptions = Array.from(map.values());
+  }
+
+
 modules : any = [];
   selectTaskCategory(): void {
     
@@ -248,6 +291,7 @@ modules : any = [];
 
   resetFilter(): void {
     this.keyword = '';
+    this.selectedProjectId = '';
     this.selectedClientId = '';
     this.selectedTicketStatusId = '';
     this.loadTasks();

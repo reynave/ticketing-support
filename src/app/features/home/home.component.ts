@@ -28,11 +28,50 @@ export class HomeComponent implements OnInit {
 
   users: any[] = [];
   selectedUserId = '';
+  assignToFilter = '';
 
   readonly homeModuleId = 2000;
 
   get canSortHome(): boolean {
     return this.authService.hasPermission(this.homeModuleId, 'u');
+  }
+
+  get assigneeOptions(): { id: string; name: string }[] {
+    const map = new Map<string, string>();
+    const rows = [...this.tasks, ...this.cases, ...this.changeRequests];
+
+    rows.forEach((row) => {
+      const id = row?.assignTo ? String(row.assignTo) : '';
+      if (!id || id === '0' || map.has(id)) {
+        return;
+      }
+
+      map.set(id, row?.assignToName || id);
+    });
+
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  get filteredTasks(): any[] {
+    return this.filterByAssignTo(this.tasks);
+  }
+
+  get filteredCases(): any[] {
+    return this.filterByAssignTo(this.cases);
+  }
+
+  get filteredChangeRequests(): any[] {
+    return this.filterByAssignTo(this.changeRequests);
+  }
+
+  private filterByAssignTo(list: any[]): any[] {
+    if (!this.assignToFilter) {
+      return list;
+    }
+
+    return list.filter((row) => String(row?.assignTo ?? '') === this.assignToFilter);
   }
 
   totalOpenTasks = 0;

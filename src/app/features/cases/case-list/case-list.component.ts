@@ -88,6 +88,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
   closed: boolean = false;
   rows: any[] = [];
   projects: any[] = [];
+  projectFilterOptions: any[] = [];
   internalUsers: any[] = [];
   ticketCategories: any[] = [];
   ticketSeverities: any[] = [];
@@ -145,6 +146,10 @@ export class CaseListComponent implements OnInit, OnDestroy {
       query['keyword'] = this.keyword.trim();
     }
 
+    if (this.selectedProjectId !== '') {
+      query['projectId'] = this.selectedProjectId;
+    }
+
     if (this.selectedClientId !== '') {
       query['clientId'] = this.selectedClientId;
     }
@@ -157,6 +162,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
+        this.buildProjectFilterOptions();
         this.applyClientFilter();
       },
       error: (error) => {
@@ -242,9 +248,31 @@ export class CaseListComponent implements OnInit, OnDestroy {
     );
   }
 
+  onProjectFilterChange(): void {
+    this.selectedClientId = '';
+    this.loadCases();
+  }
+
+  private buildProjectFilterOptions(): void {
+    const map = new Map<string, any>();
+    for (const row of this.rows) {
+      const id = String(row?.projectId ?? '').trim();
+      if (!id || map.has(id)) {
+        continue;
+      }
+      map.set(id, {
+        id,
+        name: row?.projectName || id,
+        clientName: row?.clientName || '',
+      });
+    }
+    this.projectFilterOptions = Array.from(map.values());
+  }
+
   resetFilter(): void {
     this.keyword = '';
     this.selectedProjectId = '';
+    this.selectedClientId = '';
     this.selectedTicketStatusId = '';
     this.loadCases();
   }
