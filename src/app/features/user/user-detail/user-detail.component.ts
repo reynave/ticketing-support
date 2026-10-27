@@ -60,6 +60,8 @@ export class UserDetailComponent implements OnInit {
   userForm: UserFormModel = this.defaultForm();
   formMode: 'view' | 'edit' = 'view';
   accessRightOptions: any[] = [];
+  products: any[] = [];
+  loadingProducts = false;
 
   ngOnInit(): void {
     if (!this.canAccessPage) {
@@ -70,6 +72,7 @@ export class UserDetailComponent implements OnInit {
     this.userId = this.route.snapshot.paramMap.get('id');
     if (this.userId) {
       this.loadUserDetail();
+      this.loadProducts();
     }
   }
 
@@ -105,6 +108,29 @@ export class UserDetailComponent implements OnInit {
     });
   }
 
+  loadProducts(): void {
+    if (!this.userId) {
+      return;
+    }
+
+    this.loadingProducts = true;
+    this.apiService.get(`/user/${this.userId}/products`).subscribe({
+      next: (response) => {
+        this.loadingProducts = false;
+        this.products = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingProducts = false;
+        this.products = [];
+      },
+    });
+  }
+
+  onProductToggle(product: any, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    product.checked = input.checked ? 1 : 0;
+  }
+
   startEdit(): void {
     if (!this.user || !this.canUpdate) {
       return;
@@ -119,6 +145,7 @@ export class UserDetailComponent implements OnInit {
   cancelEdit(): void {
     this.formMode = 'view';
     this.populateFormFromUser();
+    this.loadProducts();
     this.errorMessage = '';
   }
 
@@ -127,7 +154,7 @@ export class UserDetailComponent implements OnInit {
       return;
     }
 
-    const payload: Record<string, string | number> = {
+    const payload: Record<string, any> = {
       email: this.userForm.email.trim(),
       userAuthLevelId: Number(this.userForm.userAuthLevelId),
       firstName: this.userForm.firstName.trim(),
@@ -146,16 +173,37 @@ export class UserDetailComponent implements OnInit {
     this.errorMessage = '';
 
     this.apiService.put(`/user/${this.userId}`, payload).subscribe({
-      next: (response) => {
-        this.saving = false;
-        this.message = response?.message || 'User updated.';
-        this.formMode = 'view';
-        //this.loadUserDetail();
-        this.goBack();
+      next: () => {
+        this.saveUserProducts();
       },
       error: (error) => {
         this.saving = false;
         this.errorMessage = error?.error?.message || 'Failed to update user.';
+      },
+    });
+  }
+
+  private saveUserProducts(): void {
+    if (!this.userId) {
+      this.saving = false;
+      this.goBack();
+      return;
+    }
+
+    const productIds = this.products
+      .filter((product) => Number(product?.checked) === 1)
+      .map((product) => Number(product.id));
+
+    this.apiService.put(`/user/${this.userId}/products`, { productIds }).subscribe({
+      next: (response) => {
+        this.saving = false;
+        this.message = response?.message || 'User updated.';
+        this.formMode = 'view';
+        this.goBack();
+      },
+      error: (error) => {
+        this.saving = false;
+        this.errorMessage = error?.error?.message || 'Failed to update user products.';
       },
     });
   }

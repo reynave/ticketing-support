@@ -99,6 +99,9 @@ export class ClientDetailComponent implements OnInit {
   editingUserId: string | null = null;
 
   projects: any = [];
+  products: any[] = [];
+  loadingProducts = false;
+  savingProducts = false;
   ngOnInit(): void {
     if (!this.canAccessPage) {
       return;
@@ -121,6 +124,7 @@ export class ClientDetailComponent implements OnInit {
     this.loadClientDetail();
     this.loadClientUsers();
     this.loadClientProjects();
+    this.loadClientProducts();
   }
 
   goBack() {
@@ -237,6 +241,56 @@ export class ClientDetailComponent implements OnInit {
       error: () => {
         this.loadingIndustries = false;
         this.industries = [];
+      },
+    });
+  }
+
+  loadClientProducts(): void {
+    if (!this.clientId) {
+      return;
+    }
+
+    this.loadingProducts = true;
+
+    this.apiService.get(`/client/${this.clientId}/products`).subscribe({
+      next: (response) => {
+        this.loadingProducts = false;
+        this.products = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingProducts = false;
+        this.products = [];
+      },
+    });
+  }
+
+  onProductToggle(product: any, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    product.checked = input.checked ? 1 : 0;
+  }
+
+  saveClientProducts(): void {
+    if (!this.clientId || !this.canUpdate || this.savingProducts) {
+      return;
+    }
+
+    const productIds = this.products
+      .filter((product) => Number(product?.checked) === 1)
+      .map((product) => Number(product.id));
+
+    this.savingProducts = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    this.apiService.put(`/client/${this.clientId}/products`, { productIds }).subscribe({
+      next: (response) => {
+        this.savingProducts = false;
+        this.message = response?.message || 'Client products updated.';
+        this.loadClientProducts();
+      },
+      error: (error) => {
+        this.savingProducts = false;
+        this.errorMessage = error?.error?.message || 'Failed to update client products.';
       },
     });
   }

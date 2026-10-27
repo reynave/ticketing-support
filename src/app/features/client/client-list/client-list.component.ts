@@ -54,6 +54,10 @@ export class ClientListComponent {
   message = '';
   errorMessage = '';
   formModel: ClientFormModel = this.defaultForm();
+  products: any[] = [];
+  loadingProducts = false;
+  clientsWithoutProducts: any[] = [];
+  loadingWithoutProducts = false;
 
   constructor() {
     if (!this.canAccessPage) {
@@ -61,6 +65,7 @@ export class ClientListComponent {
     }
 
     this.loadClients();
+    this.loadClientsWithoutProducts();
     this.loadIndustries();
   }
 
@@ -83,7 +88,7 @@ export class ClientListComponent {
     this.loading = true;
     this.errorMessage = '';
 
-    this.apiService.get('/client').subscribe({
+    this.apiService.get('/client', { matchUserProduct: 1 }).subscribe({
       next: (response) => {
         this.loading = false;
         this.rows = Array.isArray(response?.data) ? response.data : [];
@@ -96,6 +101,44 @@ export class ClientListComponent {
     });
   }
 
+  loadClientsWithoutProducts(): void {
+    this.loadingWithoutProducts = true;
+
+    this.apiService.get('/client/without-products').subscribe({
+      next: (response) => {
+        this.loadingWithoutProducts = false;
+        this.clientsWithoutProducts = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingWithoutProducts = false;
+        this.clientsWithoutProducts = [];
+      },
+    });
+  }
+
+  loadProducts(): void {
+    this.loadingProducts = true;
+
+    this.apiService.get('/product-master', { parentId: 0 }).subscribe({
+      next: (response) => {
+        this.loadingProducts = false;
+        this.products = (Array.isArray(response?.data) ? response.data : []).map((product: any) => ({
+          ...product,
+          checked: false,
+        }));
+      },
+      error: () => {
+        this.loadingProducts = false;
+        this.products = [];
+      },
+    });
+  }
+
+  onProductToggle(product: any, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    product.checked = input.checked ? 1 : 0;
+  }
+
   openCreateModal(): void {
     if (!this.createClientModal || !this.canCreate) {
       return;
@@ -103,6 +146,7 @@ export class ClientListComponent {
 
     this.formModel = this.defaultForm();
     this.errorMessage = '';
+    this.loadProducts();
     this.modalRef = this.modalService.open(this.createClientModal, {
       size: 'lg',
       centered: true,
@@ -134,15 +178,15 @@ export class ClientListComponent {
 
     this.apiService.post('/client', payload).subscribe({
       next: (response) => {
-        this.saving = false;
-        this.closeModal();
-
         const id = Number(response?.data?.id);
+
         if (id) {
-          void this.router.navigate(['/clients', id]);
+          this.saveProductsForNewClient(id);
           return;
         }
 
+        this.saving = false;
+        this.closeModal();
         this.message = response?.message || 'Client created.';
         this.loadClients();
       },
@@ -150,6 +194,28 @@ export class ClientListComponent {
         this.saving = false;
         this.errorMessage = error?.error?.message || 'Failed to create client.';
       },
+    });
+  }
+
+  private saveProductsForNewClient(clientId: number): void {
+    const productIds = this.products
+      .filter((product) => Number(product?.checked) === 1)
+      .map((product) => Number(product.id));
+
+    const finish = () => {
+      this.saving = false;
+      this.closeModal();
+      void this.router.navigate(['/clients', clientId]);
+    };
+
+    if (!productIds.length) {
+      finish();
+      return;
+    }
+
+    this.apiService.put(`/client/${clientId}/products`, { productIds }).subscribe({
+      next: () => finish(),
+      error: () => finish(),
     });
   }
 

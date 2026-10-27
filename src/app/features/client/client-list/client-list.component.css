@@ -3,3 +3,6 @@
   justify-content: flex-end;
   gap: 0.35rem;
 }
+.inactive td{
+  text-decoration: line-through;
+}

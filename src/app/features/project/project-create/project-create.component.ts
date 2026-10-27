@@ -87,7 +87,7 @@ export class ProjectCreateComponent {
         ticketCategoriesResponse,
         templateMasterResponse,
       ] = await Promise.all([
-        firstValueFrom(this.apiService.get('/client')),
+        firstValueFrom(this.apiService.get('/client', { matchUserProduct: 1 })),
         firstValueFrom(
           this.apiService.get('/master/project-type', { status: 1 }),
         ),
