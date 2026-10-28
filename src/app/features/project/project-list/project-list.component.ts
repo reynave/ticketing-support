@@ -64,6 +64,7 @@ export class ProjectListComponent {
     this.errorMessage = '';
 
     const query: Record<string, string | number> = {};
+    query['matchUserProduct'] = 1;
 
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
@@ -107,7 +108,7 @@ export class ProjectListComponent {
 
     try {
       const [clientResponse, projectTypeResponse, projectBilleableResponse, productResponse, ticketCategoriesResponse] = await Promise.all([
-        firstValueFrom(this.apiService.get('/client')),
+        firstValueFrom(this.apiService.get('/client', { matchUserProduct: 1 })),
         firstValueFrom(this.apiService.get('/master/project-type', { status: 1 })),
         firstValueFrom(this.apiService.get('/master/project-billeable', { status: 1 })),
         firstValueFrom(this.apiService.get('/product-master', { status: 1, parentId: 0 })),

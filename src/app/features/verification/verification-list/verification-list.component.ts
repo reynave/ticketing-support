@@ -186,6 +186,7 @@ export class VerificationListComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     const query: any = {};
+    query['matchUserProduct'] = 1;
     if (this.form.keyword.trim()) {
       query['keyword'] = this.form.keyword.trim();
     }
@@ -219,7 +220,7 @@ export class VerificationListComponent implements OnInit, OnDestroy {
 
     try {
       const clientResponse = await firstValueFrom(
-        this.apiService.get('/client', { status: 1 }),
+        this.apiService.get('/client', { status: 1, matchUserProduct: 1 }),
       );
 
       this.clients = Array.isArray(clientResponse?.data)

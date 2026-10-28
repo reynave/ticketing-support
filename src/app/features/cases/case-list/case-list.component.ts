@@ -142,6 +142,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       closed: 0,
     };
     query['closed'] = this.closed;
+    query['matchUserProduct'] = 1;
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
     }
@@ -184,7 +185,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
         ticketSeveritiesResponse,
         ticketStatusResponse,
       ] = await Promise.all([
-        firstValueFrom(this.apiService.get('/project', { status: 1 })),
+        firstValueFrom(this.apiService.get('/project', { status: 1, matchUserProduct: 1 })),
         firstValueFrom(this.apiService.get('/client', { status: 1 })),
 
         firstValueFrom(

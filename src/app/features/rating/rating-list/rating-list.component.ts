@@ -34,7 +34,8 @@ export class RatingListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    const query: Record<string, string> = {};
+    const query: Record<string, string | number> = {};
+    query['matchUserProduct'] = 1;
 
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();

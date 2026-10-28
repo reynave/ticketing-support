@@ -34,7 +34,7 @@ export class TaskReportComponent implements OnInit {
 
   async loadProjects(): Promise<void> {
     try {
-      const response = await firstValueFrom(this.apiService.get('/project', { status: 1 }));
+      const response = await firstValueFrom(this.apiService.get('/project', { status: 1, matchUserProduct: 1 }));
       this.projects = Array.isArray(response?.data) ? response.data : [];
     } catch {
       this.projects = [];
@@ -46,6 +46,7 @@ export class TaskReportComponent implements OnInit {
     this.errorMessage = '';
 
     const query: any = {};
+    query['matchUserProduct'] = 1;
     if (this.keyword.trim()) {
       query['keyword'] = this.keyword.trim();
     }
