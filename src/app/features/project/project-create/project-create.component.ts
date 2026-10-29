@@ -95,7 +95,7 @@ export class ProjectCreateComponent {
           this.apiService.get('/master/project-billeable', { status: 1 }),
         ),
         firstValueFrom(
-          this.apiService.get('/product-master', { status: 1, parentId: 0 }),
+          this.apiService.get('/product-master', { status: 1, parentId: 0, matchUserProduct: 1 }),
         ),
         firstValueFrom(this.apiService.get('/user', { status: 1 , userTypeId: 1})),
         firstValueFrom(
