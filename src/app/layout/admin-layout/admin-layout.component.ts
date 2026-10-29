@@ -233,6 +233,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   profileLoading = false;
   profileSaving = false;
   profileError = '';
+  profileProducts: any[] = [];
+  profileProductsLoading = false;
   ngOnInit(): void {
     this.loadbBadge();
 
@@ -336,6 +338,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadProfileProducts(userId);
+
     this.apiService.get(`/user/${userId}`).subscribe({
       next: (response) => {
         const user = response?.data || {};
@@ -353,6 +357,23 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.profileLoading = false;
         this.profileError = error?.error?.message || 'Failed to load profile.';
+      },
+    });
+  }
+
+  loadProfileProducts(userId: string): void {
+    this.profileProductsLoading = true;
+    this.profileProducts = [];
+
+    this.apiService.get(`/user/${userId}/products`).subscribe({
+      next: (response) => {
+        this.profileProductsLoading = false;
+        const all = Array.isArray(response?.data) ? response.data : [];
+        this.profileProducts = all.filter((product: any) => Number(product?.checked) === 1);
+      },
+      error: () => {
+        this.profileProductsLoading = false;
+        this.profileProducts = [];
       },
     });
   }
