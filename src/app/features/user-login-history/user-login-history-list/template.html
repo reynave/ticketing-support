@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="id" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laporan Riwayat Login User</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  body { background: var(--bs-tertiary-bg); }
+  .kpi-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: .75rem; font-size: 1.4rem; }
+  .chart { display: flex; align-items: stretch; gap: 3px; height: 210px; }
+  .bar-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+  .bar-val { font-size: .65rem; height: 14px; color: var(--bs-secondary-color); }
+  .bar-area { position: relative; flex: 1; width: 100%; }
+  .bar { position: absolute; left: 10%; right: 10%; bottom: 0; background: var(--bs-primary); border-radius: 3px 3px 0 0; }
+  .bar.weekend { background: var(--bs-secondary-bg-subtle); border: 1px solid var(--bs-border-color); }
+  .bar.night { background: var(--bs-warning); }
+  .bar-lbl { font-size: .65rem; height: 14px; color: var(--bs-secondary-color); }
+  .anom-item { cursor: pointer; }
+  .anom-item:hover { background: var(--bs-secondary-bg); }
+  .table td, .table th { white-space: nowrap; vertical-align: middle; }
+  .mono { font-family: var(--bs-font-monospace); font-size: .8rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar bg-body border-bottom sticky-top">
+  <div class="container-fluid px-3 px-lg-4">
+    <span class="navbar-brand fw-semibold"><i class="bi bi-shield-lock text-primary me-2"></i>Laporan Riwayat Login</span>
+    <div class="d-flex gap-2">
+      <label class="btn btn-outline-secondary btn-sm mb-0" title="Muat file JSON dari API">
+        <i class="bi bi-upload me-1"></i><span class="d-none d-md-inline">Muat JSON</span>
+        <input type="file" id="fileJson" accept=".json,application/json" hidden>
+      </label>
+      <button class="btn btn-outline-success btn-sm" id="btnCsv"><i class="bi bi-file-earmark-spreadsheet me-1"></i><span class="d-none d-md-inline">Export CSV</span></button>
+      <button class="btn btn-outline-secondary btn-sm" id="btnTheme" title="Ganti tema"><i class="bi bi-moon-stars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container-fluid px-3 px-lg-4 py-4">
+
+  <!-- Filter -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-6 col-md-3 col-xl-2">
+          <label class="form-label small mb-1">Dari tanggal</label>
+          <input type="date" class="form-control form-control-sm" id="fFrom">
+        </div>
+        <div class="col-6 col-md-3 col-xl-2">
+          <label class="form-label small mb-1">Sampai tanggal</label>
+          <input type="date" class="form-control form-control-sm" id="fTo">
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <label class="form-label small mb-1">User</label>
+          <select class="form-select form-select-sm" id="fUser"></select>
+        </div>
+        <div class="col-md-6 col-xl-2">
+          <label class="form-label small mb-1">Flag</label>
+          <select class="form-select form-select-sm" id="fFlag">
+            <option value="">Semua</option>
+            <option value="any">Ada flag apa pun</option>
+            <option value="night">Jam malam</option>
+            <option value="rare">IP jarang</option>
+            <option value="v6">IPv6</option>
+            <option value="burst">Login beruntun</option>
+          </select>
+        </div>
+        <div class="col-md-6 col-xl-2">
+          <label class="form-label small mb-1">Cari (nama / ID / IP)</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="search" class="form-control" id="fQ" placeholder="Cari...">
+          </div>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-sm btn-light border" id="btnReset"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="row g-3 mb-4" id="kpis"></div>
+
+  <!-- Chart harian + top user -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body d-flex justify-content-between align-items-center">
+          <span class="fw-semibold"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Login per Hari</span>
+          <small class="text-body-secondary">kotak abu = Sabtu/Minggu</small>
+        </div>
+        <div class="card-body"><div class="chart" id="chartDaily"></div></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body fw-semibold"><i class="bi bi-trophy me-2 text-warning"></i>User Paling Aktif</div>
+        <div class="card-body" id="topUsers"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jam, browser, anomali -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body d-flex justify-content-between align-items-center">
+          <span class="fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Login per Jam</span>
+          <small class="text-body-secondary">kuning = jam malam</small>
+        </div>
+        <div class="card-body"><div class="chart" id="chartHour" style="height:170px"></div></div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body fw-semibold"><i class="bi bi-window-stack me-2 text-info"></i>Browser</div>
+        <div class="card-body" id="browsers"></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body fw-semibold"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Perlu Dicek</div>
+        <div class="list-group list-group-flush" id="anomalies"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabel -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-body d-flex justify-content-between align-items-center">
+      <span class="fw-semibold"><i class="bi bi-table me-2 text-primary"></i>Detail Login</span>
+      <small class="text-body-secondary" id="tblInfo"></small>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr><th class="ps-3">ID</th><th>Waktu Login</th><th>User</th><th>IP Address</th><th>Browser</th><th>Flag</th></tr>
+        </thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+    <div class="card-footer bg-body d-flex justify-content-between align-items-center">
+      <small class="text-body-secondary" id="pageInfo"></small>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="btnPrev"><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-outline-secondary" id="btnNext"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ========= DATA (format ringkas dari hasil API "User login history") ========= */
+const USERS = [
+  ["IT-DEV","Felix IT Support"],["USR-7016F01D","Lily Yustriana"],["USR-B6BD1C32","Irwan Julis Kurniawan"],
+  ["USR-CF53FDA6","Indah Putri Ratana"],["USR-41162CA3","Naily Pribawa"],["USR-BDB9333A","Sarah Aulia Utami"],
+  ["USR-088FDE72","Edo Suhendra"],["USR-2D67873A","Riska Safitri"],["USR-71FB49CA","Bima Seno"],
+  ["USR-8E03EDCA","Janty"],["USR-D75CD0F1","Dini Azzahra"],["USR-C95B6C3B","Syukri Kurniawan"],
+  ["USR-29FA6F6D","Jefri Napitupulu"],["USR-58751EA8","Nina Ginting"],["USR-F4ED7139","Irma Indriani"],
+  ["USR-E3FA8A75","Ifan Firmansyah"],["USR-5F6BA43A","purwaningrum"],["lily01","Lily"]
+];
+const IPS = [
+  "112.215.171.94","110.139.116.12","2001:448a:90b0:29d4:8cf5:246b:ac51:eba9","111.95.6.91",
+  "2001:448a:90b0:28a8:153b:6b5d:a044:f55d","125.161.52.77","118.137.195.228","125.161.51.170",
+  "125.161.55.165","38.246.34.228","125.161.55.218","125.161.52.42","140.213.250.148","110.139.116.42",
+  "125.161.51.229","133.32.22.37","125.161.55.66","175.103.53.75","103.4.165.146","118.136.186.7"
+];
+const UAS = {C156:"Chrome 156",C155:"Chrome 155",C154:"Chrome 154",F131:"Firefox 131",F157:"Firefox 157",F158:"Firefox 158",S26:"Safari (iPhone)"};
+// id|userIdx|MM-DD HH:MM:SS|ipIdx|ua   (tahun 2026)
+const RAW = [
+"219|0|11-05 12:28:02|0|C156","218|1|11-05 10:56:52|1|F131","217|2|11-05 10:55:40|1|F131","216|1|11-05 09:29:08|1|C156",
+"215|1|11-04 15:06:10|1|C156","214|1|11-04 08:39:04|1|C156","213|1|11-03 08:23:01|1|C156","212|2|11-02 16:07:18|2|F131",
+"211|0|11-02 16:05:59|3|C156","210|1|11-02 13:13:55|1|C156","209|1|10-29 08:37:13|4|C156","208|3|10-28 16:50:03|5|C156",
+"207|1|10-28 15:09:40|5|C156","206|1|10-28 15:09:01|5|C156","205|2|10-28 15:08:22|5|C156","204|1|10-28 15:07:55|5|C156",
+"203|1|10-28 15:05:41|5|C156","202|2|10-28 13:26:01|6|F131","201|0|10-28 13:17:53|3|C156","200|1|10-28 09:22:33|5|C156",
+"199|0|10-27 14:06:17|3|C156","198|4|10-27 09:34:02|5|C156","197|4|10-27 09:33:03|5|C156","196|4|10-27 09:31:08|5|C156",
+"195|1|10-27 08:50:04|5|C156","194|4|10-26 15:30:31|5|C155","193|1|10-26 15:28:02|5|C155","192|4|10-26 14:01:05|5|C155",
+"191|1|10-26 13:43:10|5|C155","190|4|10-26 13:39:02|5|C155","189|1|10-26 13:30:00|5|C155","188|4|10-26 11:13:47|5|C155",
+"187|1|10-26 09:13:15|5|C155","186|4|10-23 17:13:01|7|F131","185|2|10-23 17:04:27|7|F131","184|1|10-23 16:23:11|7|C155",
+"183|0|10-23 15:01:38|3|C155","182|5|10-23 09:44:52|7|C156","181|6|10-22 16:57:58|7|F158","180|0|10-22 16:36:51|3|C155",
+"179|0|10-22 16:36:33|3|C155","178|4|10-22 15:00:38|7|C155","177|1|10-22 14:59:37|7|C155","176|1|10-22 14:51:52|7|C155",
+"175|8|10-22 14:49:52|7|C155","174|1|10-22 14:49:20|7|C155","173|7|10-22 14:29:47|7|F158","172|1|10-22 12:41:12|7|C155",
+"171|1|10-22 12:40:53|7|C155","170|1|10-22 12:40:38|7|C155","169|1|10-22 12:38:31|7|C155","168|1|10-22 11:28:29|7|C155",
+"167|1|10-22 08:53:46|7|C155","166|2|10-21 17:12:44|8|F131","165|5|10-21 16:55:32|8|F158","164|6|10-21 16:54:55|8|F158",
+"163|6|10-21 16:54:02|8|F158","162|9|10-21 16:49:21|8|C155","161|0|10-21 16:33:12|3|C155","160|10|10-21 16:31:01|8|C155",
+"159|11|10-21 16:30:15|9|C155","158|6|10-21 16:10:31|8|F158","157|1|10-21 10:15:25|8|C155","156|1|10-21 10:13:36|8|C155",
+"155|12|10-21 10:12:33|8|C155","154|1|10-20 10:47:00|10|C155","153|7|10-19 10:18:40|11|F158","152|12|10-19 10:15:15|11|C155",
+"151|1|10-19 08:55:56|11|C155","150|6|10-17 16:15:09|12|S26","149|14|10-16 16:39:01|13|C155","148|7|10-16 16:33:33|13|C155",
+"147|2|10-16 15:14:07|13|C155","146|1|10-16 15:13:50|13|C155","145|7|10-16 14:00:24|13|C155","144|13|10-16 13:22:29|13|C155",
+"143|13|10-16 13:13:16|13|C155","142|1|10-16 13:11:50|13|C155","141|1|10-16 13:09:53|13|C155","140|1|10-16 11:59:20|13|C155",
+"139|7|10-16 10:15:30|13|F158","138|2|10-16 10:05:52|13|F131","137|14|10-16 09:47:57|13|C155","136|1|10-16 09:42:32|13|C155",
+"135|12|10-16 09:36:02|13|C155","134|1|10-16 09:31:02|13|C155","133|2|10-15 17:24:20|13|C155","132|12|10-15 17:18:47|13|C155",
+"131|14|10-15 17:05:41|13|C155","130|6|10-15 17:05:18|13|C155","129|1|10-15 17:04:58|13|C155","128|9|10-15 17:04:31|13|C155",
+"127|7|10-15 16:44:54|13|F158","126|3|10-15 16:16:01|13|C155","125|2|10-15 16:06:14|13|F131","124|1|10-15 16:04:43|13|C155",
+"123|6|10-15 16:01:29|13|F131","122|6|10-15 16:00:25|13|F131","121|2|10-15 16:00:03|13|F131","120|6|10-15 15:55:36|13|F131",
+"119|2|10-15 15:55:28|13|F131","118|14|10-15 15:54:53|13|C155","117|6|10-15 15:53:50|13|F131","116|2|10-15 15:51:11|13|F131",
+"115|6|10-15 15:44:49|13|F131","114|9|10-15 14:57:16|13|C155","113|9|10-15 14:35:02|13|C155","112|1|10-15 14:33:36|13|C155",
+"111|9|10-15 14:29:04|13|C155","110|8|10-15 13:57:35|13|C155","109|9|10-15 13:47:38|13|C155","108|9|10-15 13:25:41|13|C155",
+"107|6|10-15 13:09:27|13|C155","106|1|10-15 11:40:13|13|C155","105|2|10-15 09:29:54|13|F131","104|1|10-14 14:49:38|13|C155",
+"103|2|10-14 09:58:44|14|F131","102|0|10-13 23:57:35|15|C155","101|1|10-13 12:12:24|14|C154","100|1|10-13 11:40:39|14|C154",
+"99|2|10-13 10:20:58|14|F131","98|3|10-13 09:54:04|14|C155","97|0|10-12 22:16:01|15|C155","96|15|10-12 17:05:50|16|C154",
+"95|1|10-12 16:26:56|16|C154","94|1|10-12 13:12:57|16|C154","93|14|10-12 11:48:44|18|C155","92|14|10-12 11:44:33|16|C154",
+"91|14|10-12 11:43:03|16|C154","90|2|10-12 10:46:17|16|F131","89|3|10-12 10:00:01|16|C154","88|1|10-12 09:17:22|16|C154",
+"87|1|10-12 08:40:58|16|C154","86|0|10-11 16:02:33|3|C155","85|1|10-09 16:20:25|17|C154","84|1|10-09 15:15:22|16|C154",
+"83|1|10-09 10:51:23|16|C154","82|1|10-09 10:49:03|16|C154","81|1|10-09 10:36:10|16|C154","80|13|10-09 10:33:34|16|C154",
+"79|13|10-09 10:28:17|16|C154","78|13|10-09 10:27:42|16|C154","77|1|10-09 10:27:27|16|C154","76|1|10-09 10:26:59|16|C154",
+"75|16|10-09 10:25:35|16|C154","74|1|10-09 09:14:28|16|C154","73|1|10-09 09:13:41|16|C154","72|1|10-08 12:19:18|16|C154",
+"71|2|10-08 11:44:52|16|F131","70|1|10-08 10:45:42|16|C154","69|1|10-08 10:45:41|16|C154","68|0|10-08 10:43:33|3|C154",
+"67|0|10-08 10:42:10|3|C154","66|6|10-08 10:19:52|16|F157","65|1|10-08 08:47:38|16|C154","64|2|10-07 21:34:05|19|F131",
+"63|6|10-07 18:22:49|16|F157","62|17|10-07 17:50:01|16|C154","61|17|10-07 17:47:41|16|C154","60|0|10-07 17:01:29|3|C154",
+"59|0|10-07 17:01:07|3|C154"
+];
+
+/* ========= Helper ========= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const num = n => n.toLocaleString('id-ID');
+const PAGE_SIZE = 15;
+const FLAGS = {
+  night: {label: 'Jam malam',      cls: 'text-bg-dark',    icon: 'bi-moon-stars',          desc: 'Login di luar 06:00–21:00'},
+  rare:  {label: 'IP jarang',      cls: 'text-bg-warning', icon: 'bi-geo-alt',             desc: 'IP hanya muncul 1–2 kali di seluruh data'},
+  v6:    {label: 'IPv6',           cls: 'text-bg-info',    icon: 'bi-hdd-network',         desc: 'Login via IPv6 (kemungkinan di luar jaringan kantor)'},
+  burst: {label: 'Login beruntun', cls: 'text-bg-danger',  icon: 'bi-lightning-charge',    desc: '≥3 login user yang sama dalam 5 menit'}
+};
+
+function parseUA(ua) {
+  const f = /Firefox\/(\d+)/.exec(ua); if (f) return 'Firefox ' + f[1];
+  const e = /Edg\/(\d+)/.exec(ua);     if (e) return 'Edge ' + e[1];
+  const c = /Chrome\/(\d+)/.exec(ua);  if (c) return 'Chrome ' + c[1];
+  if (/Safari/.test(ua)) return 'Safari' + (/iPhone/.test(ua) ? ' (iPhone)' : '');
+  return 'Lainnya';
+}
+function browserIcon(b) {
+  if (b.startsWith('Chrome'))  return 'bi-browser-chrome';
+  if (b.startsWith('Firefox')) return 'bi-browser-firefox';
+  if (b.startsWith('Safari'))  return 'bi-browser-safari';
+  if (b.startsWith('Edge'))    return 'bi-browser-edge';
+  return 'bi-globe';
+}
+
+/* ========= State ========= */
+let ALL = [], VIEW = [], page = 1;
+
+function loadEmbedded() {
+  return RAW.map(s => {
+    const [id, u, t, ip, ua] = s.split('|');
+    return {id: +id, userId: USERS[u][0], userName: USERS[u][1].trim(), time: '2026-' + t, ip: IPS[ip], browser: UAS[ua]};
+  });
+}
+
+function prepare(rows) {
+  rows.forEach(r => { r.date = r.time.slice(0, 10); r.hour = +r.time.slice(11, 13); r.ts = Date.parse(r.time.replace(' ', 'T')); });
+  const ipCount = {};
+  rows.forEach(r => ipCount[r.ip] = (ipCount[r.ip] || 0) + 1);
+  rows.forEach(r => {
+    r.flags = [];
+    if (r.hour < 6 || r.hour >= 21) r.flags.push('night');
+    if (ipCount[r.ip] <= 2) r.flags.push('rare');
+    if (r.ip.includes(':')) r.flags.push('v6');
+    const n = rows.filter(x => x.userId === r.userId && x.ts <= r.ts && r.ts - x.ts <= 300000).length;
+    if (n >= 3) r.flags.push('burst');
+  });
+  return rows.sort((a, b) => b.ts - a.ts);
+}
+
+function init(rows) {
+  ALL = prepare(rows);
+  const dates = ALL.map(r => r.date).sort();
+  $('#fFrom').value = dates[0] || '';
+  $('#fTo').value = dates[dates.length - 1] || '';
+  const users = {};
+  ALL.forEach(r => users[r.userId] = r.userName);
+  $('#fUser').innerHTML = '<option value="">Semua user</option>' +
+    Object.entries(users).sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([id, n]) => `<option value="${esc(id)}">${esc(n)} (${esc(id)})</option>`).join('');
+  $('#fFlag').value = ''; $('#fQ').value = ''; $('#fUser').value = '';
+  page = 1;
+  render();
+}
+
+function filtered() {
+  const from = $('#fFrom').value, to = $('#fTo').value, user = $('#fUser').value,
+        flag = $('#fFlag').value, q = $('#fQ').value.trim().toLowerCase();
+  return ALL.filter(r =>
+    (!from || r.date >= from) && (!to || r.date <= to) && (!user || r.userId === user) &&
+    (!flag || (flag === 'any' ? r.flags.length : r.flags.includes(flag))) &&
+    (!q || (r.userName + ' ' + r.userId + ' ' + r.ip).toLowerCase().includes(q))
+  );
+}
+
+/* ========= Render ========= */
+function render() {
+  VIEW = filtered();
+  renderKpis(); renderDaily(); renderHourly(); renderTop(); renderBrowsers(); renderAnomalies(); renderTable();
+}
+
+function renderKpis() {
+  const users = new Set(VIEW.map(r => r.userId)).size;
+  const ips = new Set(VIEW.map(r => r.ip)).size;
+  const days = new Set(VIEW.map(r => r.date)).size;
+  const flagged = VIEW.filter(r => r.flags.length).length;
+  const items = [
+    ['Total Login',      num(VIEW.length), 'bi-box-arrow-in-right', 'primary', days ? `rata-rata ${(VIEW.length / days).toFixed(1)} / hari aktif` : '-'],
+    ['User Unik',        num(users),       'bi-people',             'success', `${num(days)} hari aktif`],
+    ['IP Unik',          num(ips),         'bi-diagram-3',          'info',    'termasuk IPv4 & IPv6'],
+    ['Login Berflag',    num(flagged),     'bi-flag',               'danger',  VIEW.length ? `${(flagged / VIEW.length * 100).toFixed(0)}% dari total` : '-']
+  ];
+  $('#kpis').innerHTML = items.map(([t, v, ic, c, sub]) => `
+    <div class="col-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+      <div class="kpi-icon bg-${c}-subtle text-${c}-emphasis"><i class="bi ${ic}"></i></div>
+      <div><div class="text-body-secondary small">${t}</div><div class="fs-3 fw-semibold lh-1">${v}</div><div class="small text-body-secondary mt-1">${sub}</div></div>
+    </div></div></div>`).join('');
+}
+
+function barChart(el, list, empty) {
+  if (!list.length) { el.innerHTML = `<div class="m-auto text-body-secondary small">${empty}</div>`; return; }
+  const max = Math.max(...list.map(x => x.n), 1);
+  el.innerHTML = list.map(x => `
+    <div class="bar-col" title="${esc(x.title)}">
+      <span class="bar-val">${x.n || ''}</span>
+      <div class="bar-area"><div class="bar ${x.cls || ''}" style="height:${x.n / max * 100}%"></div></div>
+      <span class="bar-lbl">${esc(x.label)}</span>
+    </div>`).join('');
+}
+
+function renderDaily() {
+  const cnt = {};
+  VIEW.forEach(r => cnt[r.date] = (cnt[r.date] || 0) + 1);
+  const keys = Object.keys(cnt).sort();
+  const list = [];
+  if (keys.length) {
+    const end = new Date(keys[keys.length - 1] + 'T00:00:00');
+    for (let d = new Date(keys[0] + 'T00:00:00'); d <= end; d.setDate(d.getDate() + 1)) {
+      const k = ymd(d), n = cnt[k] || 0, wd = d.getDay();
+      list.push({n, label: k.slice(8), cls: (wd === 0 || wd === 6) ? 'weekend' : '', title: `${k}: ${n} login`});
+    }
+  }
+  barChart($('#chartDaily'), list, 'Tidak ada data');
+}
+
+function renderHourly() {
+  const cnt = Array(24).fill(0);
+  VIEW.forEach(r => cnt[r.hour]++);
+  barChart($('#chartHour'), cnt.map((n, h) => ({n, label: pad(h), cls: (h < 6 || h >= 21) ? 'night' : '', title: `${pad(h)}:00 – ${n} login`})), 'Tidak ada data');
+}
+
+function progressList(el, entries, color) {
+  if (!entries.length) { el.innerHTML = '<div class="text-body-secondary small">Tidak ada data</div>'; return; }
+  const max = entries[0][1];
+  el.innerHTML = entries.map(([label, n, icon]) => `
+    <div class="mb-3">
+      <div class="d-flex justify-content-between small mb-1"><span class="text-truncate me-2">${icon ? `<i class="bi ${icon} me-1"></i>` : ''}${esc(label)}</span><span class="fw-semibold">${num(n)}</span></div>
+      <div class="progress" style="height:6px"><div class="progress-bar bg-${color}" style="width:${n / max * 100}%"></div></div>
+    </div>`).join('');
+}
+
+function renderTop() {
+  const m = {};
+  VIEW.forEach(r => m[r.userName] = (m[r.userName] || 0) + 1);
+  progressList($('#topUsers'), Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 8), 'primary');
+}
+
+function renderBrowsers() {
+  const m = {};
+  VIEW.forEach(r => m[r.browser] = (m[r.browser] || 0) + 1);
+  progressList($('#browsers'), Object.entries(m).sort((a, b) => b[1] - a[1]).map(([b, n]) => [b, n, browserIcon(b)]), 'info');
+}
+
+function renderAnomalies() {
+  $('#anomalies').innerHTML = Object.entries(FLAGS).map(([k, f]) => {
+    const n = VIEW.filter(r => r.flags.includes(k)).length;
+    return `<div class="list-group-item anom-item d-flex align-items-center gap-3" data-flag="${k}">
+      <span class="badge ${f.cls} fs-6"><i class="bi ${f.icon}"></i></span>
+      <div class="flex-grow-1"><div class="fw-semibold">${f.label}</div><div class="small text-body-secondary">${f.desc}</div></div>
+      <span class="fs-5 fw-semibold">${num(n)}</span></div>`;
+  }).join('') + '<div class="list-group-item small text-body-secondary"><i class="bi bi-hand-index me-1"></i>Klik baris untuk memfilter tabel</div>';
+}
+
+function renderTable() {
+  const pages = Math.max(1, Math.ceil(VIEW.length / PAGE_SIZE));
+  page = Math.min(page, pages);
+  const start = (page - 1) * PAGE_SIZE, slice = VIEW.slice(start, start + PAGE_SIZE);
+  $('#tblBody').innerHTML = slice.length ? slice.map(r => `
+    <tr>
+      <td class="ps-3 text-body-secondary">${r.id}</td>
+      <td>${esc(r.time)}</td>
+      <td><div class="fw-semibold">${esc(r.userName)}</div><div class="small text-body-secondary mono">${esc(r.userId)}</div></td>
+      <td class="mono">${esc(r.ip)}</td>
+      <td><i class="bi ${browserIcon(r.browser)} me-1"></i>${esc(r.browser)}</td>
+      <td>${r.flags.map(k => `<span class="badge ${FLAGS[k].cls} me-1"><i class="bi ${FLAGS[k].icon} me-1"></i>${FLAGS[k].label}</span>`).join('') || '<span class="text-body-secondary">-</span>'}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="text-center text-body-secondary py-4">Tidak ada data sesuai filter</td></tr>';
+  $('#tblInfo').textContent = `${num(VIEW.length)} baris`;
+  $('#pageInfo').textContent = VIEW.length ? `Menampilkan ${start + 1}–${start + slice.length} dari ${num(VIEW.length)} (hal. ${page}/${pages})` : '';
+  $('#btnPrev').disabled = page <= 1;
+  $('#btnNext').disabled = page >= pages;
+}
+
+/* ========= Events ========= */
+['#fFrom', '#fTo', '#fUser', '#fFlag'].forEach(s => $(s).addEventListener('change', () => { page = 1; render(); }));
+$('#fQ').addEventListener('input', () => { page = 1; render(); });
+$('#btnReset').addEventListener('click', () => init(ALL));
+$('#btnPrev').addEventListener('click', () => { page--; renderTable(); });
+$('#btnNext').addEventListener('click', () => { page++; renderTable(); });
+$('#anomalies').addEventListener('click', e => {
+  const el = e.target.closest('.anom-item'); if (!el) return;
+  $('#fFlag').value = el.dataset.flag; page = 1; render();
+  $('#tblBody').scrollIntoView({behavior: 'smooth', block: 'center'});
+});
+
+$('#btnTheme').addEventListener('click', () => {
+  const h = document.documentElement, dark = h.dataset.bsTheme === 'dark';
+  h.dataset.bsTheme = dark ? 'light' : 'dark';
+  $('#btnTheme i').className = 'bi ' + (dark ? 'bi-moon-stars' : 'bi-sun');
+});
+
+$('#btnCsv').addEventListener('click', () => {
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = ['ID,Waktu Login,User ID,Nama,IP,Browser,Flag']
+    .concat(VIEW.map(r => [r.id, r.time, r.userId, r.userName, r.ip, r.browser, r.flags.map(k => FLAGS[k].label).join('; ')].map(q).join(','))).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'}));
+  a.download = 'login-history.csv'; a.click(); URL.revokeObjectURL(a.href);
+});
+
+$('#fileJson').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const j = JSON.parse(fr.result), arr = Array.isArray(j) ? j : j.data;
+      init(arr.map(x => ({id: +x.id, userId: x.userId, userName: (x.userName || '').trim(), time: x.loginTime, ip: x.ipAddress, browser: parseUA(x.userAgent || '')})));
+    } catch (err) { alert('File JSON tidak valid: ' + err.message); }
+  };
+  fr.readAsText(file); e.target.value = '';
+});
+
+init(loadEmbedded());
+</script>
+</body>
+</html>

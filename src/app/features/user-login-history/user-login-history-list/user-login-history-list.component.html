@@ -1,75 +1,289 @@
-<div class="container-fluid">
-  <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <div class="page-title">Login History</div>
-      <div class="page-subtitle">Audit daftar login dari tabel user_login_history.</div>
+<nav class="navbar bg-body border-bottom sticky-top">
+  <div class="container-fluid px-3 px-lg-4">
+    <span class="navbar-brand fw-semibold"><i class="bi bi-shield-lock text-primary me-2"></i>Laporan Riwayat Login</span>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary btn-sm" (click)="load()" [disabled]="loading">
+        <i class="bi bi-arrow-clockwise me-1"></i><span class="d-none d-md-inline">Refresh</span>
+      </button>
+      <button class="btn btn-outline-success btn-sm" (click)="exportCsv()" [disabled]="!viewRows.length">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i><span class="d-none d-md-inline">Export CSV</span>
+      </button>
+      
     </div>
-    <button type="button" class="btn btn-primary-sm" (click)="loadHistory()">Refresh</button>
   </div>
+</nav>
 
-  @if (errorMessage) {
-    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+<main class="container-fluid px-3 px-lg-4 py-4">
+
+  @if (errorMsg) {
+    <div class="alert alert-danger d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-exclamation-octagon me-2"></i>{{ errorMsg }}</span>
+      <button class="btn btn-sm btn-outline-danger" (click)="load()">Coba lagi</button>
+    </div>
   }
 
-  <div class="stat-card mb-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-6">
-        <label class="form-label small" for="login-history-keyword">Keyword</label>
-        <input
-          id="login-history-keyword"
-          class="form-control form-control-sm"
-          [(ngModel)]="keyword"
-          (keyup.enter)="loadHistory()"
-          placeholder="Search user, IP, or user agent"
-        />
-      </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label small" for="login-history-user">User ID</label>
-        <input
-          id="login-history-user"
-          class="form-control form-control-sm"
-          [(ngModel)]="selectedUserId"
-          (keyup.enter)="loadHistory()"
-          placeholder="Filter by user ID"
-        />
-      </div>
-      <div class="col-12 col-md-2 d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="loadHistory()">Search</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilter()">Reset</button>
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="mt-2 text-body-secondary">Memuat data...</div>
+    </div>
+  } @else {
+
+    <!-- Filter -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small mb-1">Dari tanggal</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fFrom" (ngModelChange)="applyFilter()">
+          </div>
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small mb-1">Sampai tanggal</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fTo" (ngModelChange)="applyFilter()">
+          </div>
+          <div class="col-md-6 col-xl-3">
+            <label class="form-label small mb-1">User</label>
+            <select class="form-select form-select-sm" [(ngModel)]="fUser" (ngModelChange)="applyFilter()">
+              <option value="">Semua user</option>
+              @for (u of userOptions; track u.id) {
+                <option [value]="u.id">{{ u.name }} ({{ u.id }})</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6 col-xl-2">
+            <label class="form-label small mb-1">Flag</label>
+            <select class="form-select form-select-sm" [(ngModel)]="fFlag" (ngModelChange)="applyFilter()">
+              <option value="">Semua</option>
+              <option value="any">Ada flag apa pun</option>
+              @for (f of flagList; track f.key) {
+                <option [value]="f.key">{{ f.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6 col-xl-2">
+            <label class="form-label small mb-1">Cari (nama / ID / IP)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="search" class="form-control" placeholder="Cari..." [(ngModel)]="fQ" (ngModelChange)="applyFilter()">
+            </div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-sm btn-light border" (click)="resetFilter()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="stat-card">
-    @if (loading) {
-      <div class="text-muted">Loading login history...</div>
-    } @else if (!rows.length) {
-      <div class="text-muted">No login history data.</div>
-    } @else {
+    <!-- KPI -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-xl-3">
+        <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-primary-subtle text-primary-emphasis"><i class="bi bi-box-arrow-in-right"></i></div>
+          <div>
+            <div class="text-body-secondary small">Total Login</div>
+            <div class="fs-3 fw-semibold lh-1">{{ totalLogin }}</div>
+            <div class="small text-body-secondary mt-1">rata-rata {{ avgPerDay }} / hari aktif</div>
+          </div>
+        </div></div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-success-subtle text-success-emphasis"><i class="bi bi-people"></i></div>
+          <div>
+            <div class="text-body-secondary small">User Unik</div>
+            <div class="fs-3 fw-semibold lh-1">{{ totalUser }}</div>
+            <div class="small text-body-secondary mt-1">{{ totalDays }} hari aktif</div>
+          </div>
+        </div></div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-info-subtle text-info-emphasis"><i class="bi bi-diagram-3"></i></div>
+          <div>
+            <div class="text-body-secondary small">IP Unik</div>
+            <div class="fs-3 fw-semibold lh-1">{{ totalIp }}</div>
+            <div class="small text-body-secondary mt-1">termasuk IPv4 &amp; IPv6</div>
+          </div>
+        </div></div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-danger-subtle text-danger-emphasis"><i class="bi bi-flag"></i></div>
+          <div>
+            <div class="text-body-secondary small">Login Berflag</div>
+            <div class="fs-3 fw-semibold lh-1">{{ totalFlagged }}</div>
+            <div class="small text-body-secondary mt-1">{{ flaggedPct }}% dari total</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- Harian + top user -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-12">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-body d-flex justify-content-between align-items-center">
+            <span class="fw-semibold"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Login per Hari</span>
+            <small class="text-body-secondary">kotak abu = Sabtu/Minggu</small>
+          </div>
+          <div class="card-body">
+            <div class="chart">
+              @for (x of dailyChart; track x.label + $index) {
+                <div class="bar-col" [ngbTooltip]="x.title">
+                  <span class="bar-val">{{ x.n || '' }}</span>
+                  <div class="bar-area"><div class="bar" [class]="'bar ' + x.cls" [style.height.%]="x.pct"></div></div>
+                  <span class="bar-lbl">{{ x.label }}</span>
+                </div>
+              } @empty {
+                <div class="m-auto text-body-secondary small">Tidak ada data</div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Jam, browser, flag -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-body d-flex justify-content-between align-items-center">
+            <span class="fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Login per Jam</span>
+            <small class="text-body-secondary">kuning = jam malam</small>
+          </div>
+          <div class="card-body">
+            <div class="chart sm">
+              @for (x of hourChart; track x.label) {
+                <div class="bar-col" [ngbTooltip]="x.title">
+                  <span class="bar-val">{{ x.n || '' }}</span>
+                  <div class="bar-area"><div class="bar" [class]="'bar ' + x.cls" [style.height.%]="x.pct"></div></div>
+                  <span class="bar-lbl">{{ x.label }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-body fw-semibold"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Perlu Dicek</div>
+          <div class="list-group list-group-flush">
+            @for (f of flagList; track f.key) {
+              <div class="list-group-item anom-item d-flex align-items-center gap-3" (click)="filterByFlag(f.key)">
+                <span class="badge fs-6 {{ f.cls }}"><i class="bi {{ f.icon }}"></i></span>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">{{ f.label }}</div>
+                  <div class="small text-body-secondary">{{ f.desc }}</div>
+                </div>
+                <span class="fs-5 fw-semibold">{{ f.count }}</span>
+              </div>
+            }
+            <div class="list-group-item small text-body-secondary">
+              <i class="bi bi-hand-index me-1"></i>Klik baris untuk memfilter tabel
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-body fw-semibold"><i class="bi bi-trophy me-2 text-warning"></i>User Paling Aktif</div>
+          <div class="card-body">
+            @for (u of topUsers; track u.label) {
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-truncate me-2">{{ u.label }}</span><span class="fw-semibold">{{ u.n }}</span>
+                </div>
+                <div class="progress" style="height:6px"><div class="progress-bar bg-primary" [style.width.%]="u.pct"></div></div>
+              </div>
+            } @empty {
+              <div class="text-body-secondary small">Tidak ada data</div>
+            }
+          </div>
+        </div>
+      </div> 
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-body fw-semibold"><i class="bi bi-window-stack me-2 text-info"></i>Browser</div>
+          <div class="card-body">
+            @for (b of browsers; track b.label) {
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-truncate me-2"><i class="bi {{ browserIcon(b.label) }} me-1"></i>{{ b.label }}</span>
+                  <span class="fw-semibold">{{ b.n }}</span>
+                </div>
+                <div class="progress" style="height:6px"><div class="progress-bar bg-info" [style.width.%]="b.pct"></div></div>
+              </div>
+            } @empty {
+              <div class="text-body-secondary small">Tidak ada data</div>
+            }
+          </div>
+        </div>
+      </div>
+     
+
+
+      
+    </div>
+
+    <!-- Tabel -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-body d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-table me-2 text-primary"></i>Detail Login</span>
+        <small class="text-body-secondary">{{ viewRows.length }} baris</small>
+      </div>
       <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle">
-          <thead>
+        <table class="table table-hover table-sm align-middle mb-0">
+          <thead class="table-light">
             <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>User Name</th>
-              <th>Login Time</th>
-              <th>IP Address</th> 
+              <th class="ps-3">ID</th><th>Waktu Login</th><th>User</th><th>IP Address</th><th>Browser</th><th>Flag</th>
             </tr>
           </thead>
           <tbody>
-            @for (row of rows; track trackById($index, row)) {
+            @for (r of pageRows; track r.id) {
               <tr>
-                <td>{{ row.id }}</td>
-                <td>{{ row.userId }}</td>
-                <td>{{ row.userName || '-' }}</td>
-                <td>{{ row.loginTime | date: 'medium' }}</td>
-                <td>{{ row.ipAddress }}</td> 
+                <td class="ps-3 text-body-secondary">{{ r.id }}</td>
+                <td>{{ r.time }}</td>
+                <td>
+                  <div class="fw-semibold">{{ r.userName }}</div>
+                  <div class="small text-body-secondary mono">{{ r.userId }}</div>
+                </td>
+                <td class="mono">{{ r.ip }}</td>
+                <td><i class="bi {{ browserIcon(r.browser) }} me-1"></i>{{ r.browser }}</td>
+                <td>
+                  @for (k of r.flags; track k) {
+                    <span class="badge me-1 {{ flagMap[k].cls }}"><i class="bi {{ flagMap[k].icon }} me-1"></i>{{ flagMap[k].label }}</span>
+                  } @empty {
+                    <span class="text-body-secondary">-</span>
+                  }
+                </td>
               </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center text-body-secondary py-4">Tidak ada data sesuai filter</td></tr>
             }
           </tbody>
         </table>
       </div>
-    }
-  </div>
-</div>
+      <div class="card-footer bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <small class="text-body-secondary">
+          @if (viewRows.length) {
+            Menampilkan {{ (page - 1) * pageSize + 1 }}–{{ (page - 1) * pageSize + pageRows.length }} dari {{ viewRows.length }}
+          }
+        </small>
+        <ngb-pagination
+          [collectionSize]="viewRows.length"
+          [(page)]="page"
+          [pageSize]="pageSize"
+          [maxSize]="5"
+          [boundaryLinks]="true"
+          size="sm"
+          class="mb-0"
+          (pageChange)="refreshPage()">
+        </ngb-pagination>
+      </div>
+    </div>
+
+  }
+</main>
