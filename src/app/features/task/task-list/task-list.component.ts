@@ -103,8 +103,28 @@ selectedClientId : string = '';
   clients : any[] = [];
   templateName: string = '';
   listOfTemplateMaster: any[] = [];
+  templateMasterKeyword = '';
   loadingTemplateMaster = false;
   templateDetail: any = null;
+
+  get filteredTemplateMaster(): any[] {
+    const keyword = this.templateMasterKeyword.trim().toLowerCase();
+    if (!keyword) {
+      return this.listOfTemplateMaster;
+    }
+
+    return this.listOfTemplateMaster.filter((template) => {
+      const name = String(template?.name ?? '').toLowerCase();
+      const description = String(template?.description ?? '').toLowerCase();
+      const version = String(template?.version ?? '').toLowerCase();
+
+      return (
+        name.includes(keyword) ||
+        description.includes(keyword) ||
+        version.includes(keyword)
+      );
+    });
+  }
   private reloadSubscription?: Subscription;
   constructor() {}
   ngOnInit(): void {
@@ -332,7 +352,7 @@ modules : any = [];
     this.loadingTemplateMaster = true;
     this.templateMasterModalRef = this.modalService.open(
       this.templateMasterContent,
-      { size: 'xl', centered: true },
+      { size: 'xl' ,  backdrop: 'static', scrollable: true },
     );
   }
 

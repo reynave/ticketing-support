@@ -271,18 +271,27 @@
     <strong class="modal-title">Master Template</strong>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeTemplateMasterModal()"></button>
   </div>
-  <div class="modal-body">
-    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-      <table class="table table-sm table-hover">
+  <div class="">
+    <div class="table-responsive"  >
+      <table class="table table-sm table-hover ">
         <thead class="sticky-top">
+         
           <tr>
             <th>#</th>
             <th>Name</th>
             <th class="text-center">Version</th>
           </tr>
+           <tr>
+            <th></th>
+            <th colspan="">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="templateMasterKeyword"
+                placeholder="Search template master" />
+            </th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          @for (template of listOfTemplateMaster; track trackById($index, template); let i = $index) {
+          @for (template of filteredTemplateMaster; track trackById($index, template); let i = $index) {
           <tr style="cursor: pointer;" (click)="selectTemplateMaster(template)">
             <td class="align-top">{{ i + 1 }}</td>
             <td>{{ template.name }}
