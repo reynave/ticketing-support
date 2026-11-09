@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -22,7 +23,7 @@ interface UserFormModel {
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, NgbNavModule],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.css',
 })
@@ -59,9 +60,16 @@ export class UserDetailComponent implements OnInit {
 
   userForm: UserFormModel = this.defaultForm();
   formMode: 'view' | 'edit' = 'view';
+  active = 1;
   accessRightOptions: any[] = [];
   products: any[] = [];
   loadingProducts = false;
+  projects: any[] = [];
+  clients: any[] = [];
+  loadingProjects = false;
+  loadingClients = false;
+  clientKeyword = '';
+  projectKeyword = '';
 
   ngOnInit(): void {
     if (!this.canAccessPage) {
@@ -73,6 +81,8 @@ export class UserDetailComponent implements OnInit {
     if (this.userId) {
       this.loadUserDetail();
       this.loadProducts();
+      this.loadProjects();
+      this.loadClients();
     }
   }
 
@@ -124,6 +134,76 @@ export class UserDetailComponent implements OnInit {
         this.products = [];
       },
     });
+  }
+
+  loadProjects(): void {
+    if (!this.userId) {
+      return;
+    }
+
+    this.loadingProjects = true;
+    this.apiService.get(`/user/${this.userId}/projects`).subscribe({
+      next: (response) => {
+        this.loadingProjects = false;
+        this.projects = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingProjects = false;
+        this.projects = [];
+      },
+    });
+  }
+
+  loadClients(): void {
+    if (!this.userId) {
+      return;
+    }
+
+    this.loadingClients = true;
+    this.apiService.get(`/user/${this.userId}/clients`).subscribe({
+      next: (response) => {
+        this.loadingClients = false;
+        this.clients = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingClients = false;
+        this.clients = [];
+      },
+    });
+  }
+
+  get filteredClients(): any[] {
+    const keyword = this.clientKeyword.trim().toLowerCase();
+    if (!keyword) {
+      return this.clients;
+    }
+
+    return this.clients.filter((client) =>
+      [client.code, client.name, client.industryName, client.relation]
+        .filter((value) => value !== null && value !== undefined && value !== '')
+        .some((value) => String(value).toLowerCase().includes(keyword))
+    );
+  }
+
+  get filteredProjects(): any[] {
+    const keyword = this.projectKeyword.trim().toLowerCase();
+    if (!keyword) {
+      return this.projects;
+    }
+
+    return this.projects.filter((project) =>
+      [
+        project.id,
+        project.name,
+        project.clientName,
+        project.projectTypeName,
+        project.productName,
+        project.roleName,
+        project.projectBilleableName,
+      ]
+        .filter((value) => value !== null && value !== undefined && value !== '')
+        .some((value) => String(value).toLowerCase().includes(keyword))
+    );
   }
 
   onProductToggle(product: any, event: Event): void {

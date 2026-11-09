@@ -21,3 +21,15 @@
 .user-detail-page .form-label {
   margin-bottom: 0.35rem;
 }
+
+.user-detail-page .scroll-table {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.user-detail-page .scroll-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 1;
+}

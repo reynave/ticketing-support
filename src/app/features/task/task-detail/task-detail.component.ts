@@ -17,6 +17,7 @@ import {
   NgbDateStruct,
   NgbDatepickerModule,
   NgbModal,
+  NgbToastModule,
 } from '@ng-bootstrap/ng-bootstrap';
 import { UploadedFile, UploadResponse } from './upload.model';
 import { HttpClient, HttpEventType } from '@angular/common/http';
@@ -35,6 +36,7 @@ import { SocketNotificationService } from '../../../core/services/socket-notific
     FormsModule,
     NgxEditorModule,
     NgbDatepickerModule,
+    NgbToastModule,
     RouterLink,
   ],
   templateUrl: './task-detail.component.html',
@@ -106,6 +108,16 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   message = '';
 
   errorMessage: string | null = null;
+
+  // Checklist
+  checklist: any[] = [];
+  loadingChecklist = false;
+  checklistSaving = false;
+  newParentDescription = '';
+  newChildDescription = '';
+  addChildParentId: number | null = null;
+  draggedChecklistItem: any = null;
+
   taskLogs: any = [];
   formModel: any = this.defaultForm();
 
@@ -162,6 +174,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
     this.loadTaskDetail();
     this.loadTaskDetailLog();
+    this.loadChecklist();
   }
   ngOnDestroy(): void {
     this.editor1.destroy();
@@ -170,6 +183,223 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
   goBack(): void {
     history.back();
+  }
+
+  get checklistParents(): any[] {
+    return this.checklist.filter((item) => Number(item.ticketChecklistId) === 0);
+  }
+
+  childrenOf(parentId: number): any[] {
+    return this.checklist.filter((item) => Number(item.ticketChecklistId) === Number(parentId));
+  }
+
+  loadChecklist(): void {
+    if (!this.taskId) {
+      return;
+    }
+
+    this.loadingChecklist = true;
+    this.apiService.get(`/checklist/${this.taskId}`).subscribe({
+      next: (response) => {
+        this.loadingChecklist = false;
+        this.checklist = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingChecklist = false;
+        this.checklist = [];
+      },
+    });
+  }
+
+  addParentChecklist(): void {
+    const description = this.newParentDescription.trim();
+
+    if (!description || !this.taskId || this.checklistSaving) {
+      return;
+    }
+
+    this.checklistSaving = true;
+    this.apiService
+      .post('/checklist', { ticketId: this.taskId, ticketChecklistId: 0, description })
+      .subscribe({
+        next: () => {
+          this.checklistSaving = false;
+          this.newParentDescription = '';
+          this.loadChecklist();
+        },
+        error: (error) => {
+          this.checklistSaving = false;
+          this.errorMessage = error?.error?.message || 'Failed to add checklist.';
+        },
+      });
+  }
+
+  startAddChild(parent: any): void {
+    this.addChildParentId = Number(parent.id);
+    this.newChildDescription = '';
+  }
+
+  cancelAddChild(): void {
+    this.addChildParentId = null;
+    this.newChildDescription = '';
+  }
+
+  addChildChecklist(parent: any): void {
+    const description = this.newChildDescription.trim();
+
+    if (!description || !this.taskId || this.checklistSaving) {
+      return;
+    }
+
+    this.checklistSaving = true;
+    this.apiService
+      .post('/checklist', { ticketId: this.taskId, ticketChecklistId: Number(parent.id), description })
+      .subscribe({
+        next: () => {
+          this.checklistSaving = false;
+          this.addChildParentId = null;
+          this.newChildDescription = '';
+          this.loadChecklist();
+        },
+        error: (error) => {
+          this.checklistSaving = false;
+          this.errorMessage = error?.error?.message || 'Failed to add checklist.';
+        },
+      });
+  }
+
+  toggleChecklistItem(item: any): void {
+    const nextStatus = Number(item.status) === 1 ? 0 : 1;
+    item.status = nextStatus;
+
+    this.apiService.put(`/checklist/${item.id}`, { status: nextStatus }).subscribe({
+      next: (response) => {
+        item.status = response?.data?.status ?? nextStatus;
+      },
+      error: (error) => {
+        item.status = nextStatus === 1 ? 0 : 1;
+        this.errorMessage = error?.error?.message || 'Failed to update checklist.';
+      },
+    });
+  }
+
+  updateChecklistDescription(item: any): void {
+    const description = String(item.description || '').trim();
+
+    if (!description) {
+      this.loadChecklist();
+      return;
+    }
+
+    this.apiService.put(`/checklist/${item.id}`, { description }).subscribe({
+      next: () => {
+        // description updated locally already
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Failed to update checklist.';
+        this.loadChecklist();
+      },
+    });
+  }
+
+  deleteChecklistItem(item: any): void {
+    const label = Number(item.ticketChecklistId) === 0 ? 'this item and its sub-items' : 'this item';
+    const confirmed = confirm(`Delete ${label}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.apiService.delete(`/checklist/${item.id}`).subscribe({
+      next: () => this.loadChecklist(),
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Failed to delete checklist.';
+      },
+    });
+  }
+
+  scrollToChecklist(): void {
+    const el = document.getElementById('task-checklist-section');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  onChecklistDragStart(item: any, event: DragEvent): void {
+    this.draggedChecklistItem = item;
+    event.dataTransfer?.setData('text/plain', String(item.id));
+
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  onChecklistDragOver(event: DragEvent): void {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  checklistDragEnd(): void {
+    this.draggedChecklistItem = null;
+  }
+
+  onChecklistDrop(target: any, group: any[], event: DragEvent): void {
+    event.preventDefault();
+    const source = this.draggedChecklistItem;
+    this.draggedChecklistItem = null;
+
+    if (!source || Number(source.id) === Number(target.id)) {
+      return;
+    }
+
+    const sourceIdx = group.findIndex((item) => Number(item.id) === Number(source.id));
+    const targetIdx = group.findIndex((item) => Number(item.id) === Number(target.id));
+
+    if (sourceIdx < 0 || targetIdx < 0) {
+      return;
+    }
+
+    const reordered = [...group];
+    reordered.splice(sourceIdx, 1);
+    reordered.splice(targetIdx, 0, source);
+
+    reordered.forEach((item, index) => {
+      item.sorting = index + 1;
+    });
+
+    this.checklist.sort((a, b) => this.compareChecklistItems(a, b));
+
+    const items = reordered.map((item) => ({
+      id: item.id,
+      sorting: item.sorting,
+    }));
+
+    this.apiService.put('/checklist/reorder', { items }).subscribe({
+      next: () => {
+        // reordered optimistically
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Failed to reorder checklist.';
+        this.loadChecklist();
+      },
+    });
+  }
+
+  private compareChecklistItems(a: any, b: any): number {
+    const parentDiff = Number(a.ticketChecklistId) - Number(b.ticketChecklistId);
+
+    if (parentDiff !== 0) {
+      return parentDiff;
+    }
+
+    const sortingDiff = Number(a.sorting) - Number(b.sorting);
+
+    if (sortingDiff !== 0) {
+      return sortingDiff;
+    }
+
+    return Number(a.id) - Number(b.id);
   }
 
   convertToTemplate(content: any): void {
@@ -494,13 +724,14 @@ actualCompletionDate : string = '';
 
     this.apiService.put(`/ticket/${this.taskId}`, payload).subscribe({
       next: (response) => {
-        this.saving = false;
+       this.saving = false;
         this.message = response?.message || 'Task updated.';
-        this.formMode = 'view';
-        this.loadTaskDetail();
-        this.loadTaskDetailLog();
+      //  this.formMode = 'view';
+      //  this.loadTaskDetail();
+     //  this.loadTaskDetailLog();
 
-        this.socketNotificationService.emitReloadAction();
+       this.socketNotificationService.emitReloadAction();
+       
       },
       error: (error) => {
         this.saving = false;

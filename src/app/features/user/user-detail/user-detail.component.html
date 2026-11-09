@@ -246,4 +246,111 @@
   </form>
   }
   }
+@if (user) {
+<div class="card border shadow-sm mb-4">
+  <div class="card-header bg-light py-2 px-3">
+    <span class="fw-semibold small">Related Data</span>
+  </div>
+  <div class="card-body p-3">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+      <li [ngbNavItem]="1">
+        <button ngbNavLink>Related Clients</button>
+        <ng-template ngbNavContent>
+          @if (loadingClients) {
+          <div class="text-muted small">Loading clients...</div>
+          } @else if (!clients.length) {
+          <div class="text-muted small">No client related to this user.</div>
+          } @else {
+          <div class="mb-2">
+            <input class="form-control form-control-sm" name="clientKeyword" [(ngModel)]="clientKeyword"
+              placeholder="Search code, name, industry, relation..." />
+          </div>
+          @if (!filteredClients.length) {
+          <div class="text-muted small">No client matches your search.</div>
+          } @else {
+          <div class="scroll-table">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Client name</th>
+                  <th>Industry</th>
+                  <th>Relation</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (client of filteredClients; track client.id) {
+                <tr [class]="client.status === 1 ? '' : 'table-secondary'">
+                  <td>{{ client.code }}</td>
+                  <td>{{ client.name }}</td>
+                  <td>{{ client.industryName || '-' }}</td>
+                  <td>{{ client.relation || '-' }}</td>
+                  <td>{{ client.status === 1 ? 'Active' : 'Inactive' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
+          }
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="2">
+        <button ngbNavLink>Related Projects</button>
+        <ng-template ngbNavContent>
+          @if (loadingProjects) {
+          <div class="text-muted small">Loading projects...</div>
+          } @else if (!projects.length) {
+          <div class="text-muted small">No project related to this user.</div>
+          } @else {
+          <div class="mb-2">
+            <input class="form-control form-control-sm" name="projectKeyword" [(ngModel)]="projectKeyword"
+              placeholder="Search id, name, client, type, product, role..." />
+          </div>
+          @if (!filteredProjects.length) {
+          <div class="text-muted small">No project matches your search.</div>
+          } @else {
+          <div class="scroll-table">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Project name / Client</th>
+                  
+                  <th>Product / Type</th>  
+                  <th>Period</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (project of filteredProjects; track project.id) {
+                <tr [class]="project.status === 1 ? '' : 'table-secondary'">
+                  <td>{{ project.id }}</td>
+                  <td><strong>{{ project.name }}</strong>
+                    <div class="text-muted">{{ project.clientName || '-' }}</div>
+                  </td>
+              
+                  <td><strong>{{ project.productName || '-' }}</strong>
+                    <div>{{ project.projectTypeName || '-' }} </div></td>
+                 
+                
+                  <td>{{ project.startDate | date: 'dd MMM yyyy' }} - {{ project.endDate | date: 'dd MMM yyyy' }}</td>
+                  <td>{{ project.status === 1 ? 'Active' : 'Inactive' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
+          }
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+  </div>
+</div>
+}
+
+
 </div>

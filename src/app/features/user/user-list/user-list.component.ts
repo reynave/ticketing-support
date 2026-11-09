@@ -60,6 +60,7 @@ export class UserListComponent implements OnInit {
 
   selectedUserTypeFilter :any = '1';
   selectedStatusFilter = '';
+  keyword = '';
   accessRightOptions : any = [];
   userForm: UserFormModel = this.defaultForm();
   modalRef: NgbModalRef | null = null;
@@ -86,6 +87,10 @@ export class UserListComponent implements OnInit {
 
     if (this.selectedStatusFilter !== '') {
       query['status'] = Number(this.selectedStatusFilter);
+    }
+
+    if (this.keyword.trim()) {
+      query['keyword'] = this.keyword.trim();
     }
 
     this.apiService.get('/user', query).subscribe({

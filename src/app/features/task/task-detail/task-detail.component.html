@@ -17,13 +17,17 @@
   <div class="row g-1 mb-3">
 
 
-    @if (message) {
-    <div class="alert alert-success py-2 mb-3">{{ message }}</div>
-    }
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+      <ngb-toast *ngIf="message" header="Success" [autohide]="true" [delay]="3500"
+        [class.text-bg-success]="true" (hidden)="message = ''">
+        {{ message }}
+      </ngb-toast>
 
-    @if (errorMessage) {
-    <div class="alert alert-danger py-2 mb-3">{{ errorMessage }}</div>
-    }
+      <ngb-toast *ngIf="errorMessage" header="Error" [autohide]="false"
+        [class.text-bg-danger]="true" (hidden)="errorMessage = ''">
+        {{ errorMessage }}
+      </ngb-toast>
+    </div>
 
     @if (loading) {
     <div class="card border shadow-sm">
@@ -44,14 +48,19 @@
 
             <button type="button" class="btn btn-success btn-sm" (click)="logId = 0; open(addActivity)">Add
               Activity</button>
+
+ <button type="button" class="btn btn-warning btn-sm" (click)="scrollToChecklist()">Add Checklist</button>
+
+
+
             @if (formMode === 'edit') {
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="taskFormNg.invalid || saving">
+            <button type="submit" class="btn btn-primary btn-sm" (click)="formMode = 'view'" [disabled]="taskFormNg.invalid || saving">
               {{ saving ? 'Saving...' : 'Save' }}
             </button>
             }
             @if (formMode === 'view') {
             @if (canUpdate) {
-            <button type="button" class="btn btn-primary btn-sm" (click)="startEdit()">Edit</button>
+            <button type="button" class="btn btn-primary btn-sm" (click)="startEdit(); ">Edit</button>
             }
             <!-- @if (canDelete) {
             <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="deleting" (click)="deleteTask()">
@@ -277,7 +286,8 @@
                   class="text-danger">*</span></label>
 
               @if (formMode === 'view') {
-              <div class="form-control" [innerHtml]="formModel.description" style="min-height: 100px;"></div>
+              <div class="form-control" (click)="startEdit()"
+              [innerHtml]="formModel.description" style="min-height: 100px;"></div>
               }
               @else{
               <div class="NgxEditor__Wrapper">
@@ -295,13 +305,93 @@
 
       </div>
 
+      <div class="card border shadow-sm mb-2" id="task-checklist-section">
+        <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
+          <span class="fw-semibold small">Checklist</span>
+        </div>
+        <div class="card-body p-3">
+          @if (loadingChecklist) {
+          <div class="text-muted small">Loading checklist...</div>
+          } @else {
+
+            @if(formMode == 'edit') {
+          <div class="input-group input-group-sm mb-3">
+            <input class="form-control form-control-sm" name="newParentDescription" [(ngModel)]="newParentDescription"
+              [ngModelOptions]="{ standalone: true }" placeholder="Add parent checklist item..."
+              (keydown.enter)="$event.preventDefault(); addParentChecklist()" />
+            <button type="button" class="btn btn-outline-primary btn-sm"
+              [disabled]="checklistSaving || !newParentDescription.trim()" (click)="addParentChecklist()">Add</button>
+          </div>
+        }
+
+          @if (!checklistParents.length) {
+          <div class="text-muted small">No checklist yet.</div>
+          } @else {
+          @for (parent of checklistParents; track parent.id) {
+          <div class="border rounded p-2 mb-2">
+            <div class="d-flex align-items-center gap-2" (dragover)="onChecklistDragOver($event)"
+              (drop)="onChecklistDrop(parent, checklistParents, $event)">
+              <span class="text-muted" draggable="true" style="cursor: grab; user-select: none;" title="Drag to reorder"
+                (dragstart)="onChecklistDragStart(parent, $event)" (dragend)="checklistDragEnd()">⋮⋮</span>
+
+              <input class="form-control form-control-sm" name="parentDescription{{ parent.id }}" [(ngModel)]="parent.description"
+                [ngModelOptions]="{ standalone: true }"
+                (keydown.enter)="$event.preventDefault(); updateChecklistDescription(parent)"
+                (change)="updateChecklistDescription(parent)" />
+             
+              <button type="button" class="btn btn-outline-danger btn-sm"
+                (click)="deleteChecklistItem(parent)">✕</button>
+            </div>
+
+            @if (childrenOf(parent.id).length || addChildParentId === parent.id) {
+            <div class="ms-4 mt-2 border-start ps-2">
+              @for (child of childrenOf(parent.id); track child.id) {
+              <div class="d-flex align-items-center gap-2 mb-1 " (dragover)="onChecklistDragOver($event)"
+                (drop)="onChecklistDrop(child, childrenOf(parent.id), $event)">
+                <span class="text-muted" draggable="true" style="cursor: grab; user-select: none;" title="Drag to reorder"
+                  (dragstart)="onChecklistDragStart(child, $event)" (dragend)="checklistDragEnd()">⋮⋮</span>
+                <input class="form-check-input" type="checkbox" [checked]="child.status === 1"
+                  (change)="toggleChecklistItem(child)" />
+                <input class="form-control form-control-sm {{child.status == 1 ? 'bg-light text-decoration-line-through':''}}" name="childDescription{{ child.id }}" [(ngModel)]="child.description"
+                  [ngModelOptions]="{ standalone: true }"
+                  (keydown.enter)="$event.preventDefault(); updateChecklistDescription(child)"
+                  (change)="updateChecklistDescription(child)" />
+                <button type="button" class="btn btn-danger btn-sm"
+                  (click)="deleteChecklistItem(child)">✕</button>
+              
+              </div>
+              }
+
+              @if (addChildParentId === parent.id) {
+              <div class="input-group input-group-sm mt-1">
+                <input class="form-control form-control-sm "  name="newChildDescription" [(ngModel)]="newChildDescription"
+                  [ngModelOptions]="{ standalone: true }" placeholder="Add sub-item..."
+                  (keydown.enter)="$event.preventDefault(); addChildChecklist(parent)" />
+                <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="!newChildDescription.trim()"
+                  (click)="addChildChecklist(parent)">Add</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm"
+                  (click)="cancelAddChild()">Cancel</button>
+              </div>
+              }
+
+               <button type="button" class="btn btn-sm btn-secondary btn-sm text-nowrap ms-5"
+                (click)="startAddChild(parent)">+ Add Item of Checklist</button>
+            </div>
+            }
+          </div>
+          }
+          }
+          }
+        </div>
+      </div>
+
       <div class="card border shadow-sm mb-2">
         <div class="card-body">
 
           <div class="mb-3">
             <label class="form-label small fw-semibold" for="detail-task-solution">Task Solution</label>
             @if (formMode === 'view' ) {
-            <div class="form-control" [innerHtml]="formModel.taskSolution" style="min-height: 100px;"></div>
+            <div class="form-control" [innerHtml]="formModel.taskSolution" (click)="startEdit()" style="min-height: 100px;"></div>
             }
             @else{
             <div class="NgxEditor__Wrapper">
@@ -335,20 +425,16 @@
         <tbody>
           <tr *ngFor="let log of taskLogs">
             <td class="align-top">
-              <div>{{ log.starDateTime | date:'medium' }}</div>
-              
+              <div>{{ log.starDateTime | date:'medium' }}</div> 
               @if (log.closeDateTime) {
               <div class="text-muted small">Close: {{ log.closeDateTime | date:'medium' }}</div>
               }
             </td>
             <td class="align-top">
-              @if(log.parentId != 0){
-
+              @if(log.parentId != 0){ 
               <small>Reply from</small>
-              <div class="bg-light p-2 border shadow-sm rounded mb-2">
-
-                <div> <em> <small [innerHTML]="log.replyFrom"></small></em> </div>
-
+              <div class="bg-light p-2 border shadow-sm rounded mb-2"> 
+                <div> <em> <small [innerHTML]="log.replyFrom"></small></em> </div> 
               </div>
               }
               <div [innerHTML]="log.description"></div>

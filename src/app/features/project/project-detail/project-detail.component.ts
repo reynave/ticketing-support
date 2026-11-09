@@ -24,18 +24,18 @@ interface ProjectFormModel {
   ticketCategoriesParentId : number;
 }
 
-interface TaskGroup {
-  id: number | string;
-  name: string;
-  data: any[];
-  sorting?: number;
-}
-
 interface TicketBalanceFormModel {
   date: string;
   ticketIn: number;
   ticketOut: number;
   note: string;
+}
+
+interface NewTaskFormModel {
+  title: string;
+  description: string;
+  ticketCategoryId: number | null;
+  assignTo: string;
 }
 
 @Component({
@@ -101,6 +101,9 @@ active = 1;
   savingTicketBalance = false;
   ticketBalanceError = '';
   ticketBalanceForm: TicketBalanceFormModel = this.defaultTicketBalanceForm();
+  newTaskForm: NewTaskFormModel = this.defaultNewTaskForm();
+  savingTask = false;
+  addTaskGroupId: number | null = null;
   dataTemplate: { name: string; description: string; version: string } = {
     name: '',
     description: '',
@@ -190,27 +193,11 @@ active = 1;
 
       const caseRows = Array.isArray(caseResponse?.data) ? caseResponse.data : [];
       const crRowsRaw = Array.isArray(crResponse?.data) ? crResponse.data : [];
-      const crRows = crRowsRaw.filter((row: any) => this.isChangeRequestTicket(row));
 
-      const ticketChildCategories = Array.isArray(this.ticketChildCategories) ? this.ticketChildCategories : [];
-      this.task = ticketChildCategories.map((item: any) => ({
-        ...item,
-        data: task.filter((t: any) => t.ticketCategoryId === item.id),
-      }));
-      console.log(this.task)
-
-
-
-      this.cases = ticketChildCategories.map((item: any) => ({
-        ...item,
-        data: caseRows.filter((t: any) => t.ticketCategoryId === item.id),
-      }));
-      console.log(this.cases)
-
-      this.cr = ticketChildCategories.map((item: any) => ({
-        ...item,
-        data: crRows.filter((t: any) => t.ticketCategoryId === item.id),
-      }));
+      // Backend `ticketList` already returns data grouped by ticketCategoryIdParent.
+      this.task = this.mergeGroupedWithCategories(task);
+      this.cases = caseRows;
+      this.cr = this.filterCrGroups(crRowsRaw);
 
       
       this.ticketCategories = Array.isArray(ticketCategoriesResponse?.data) ? ticketCategoriesResponse.data : [];
@@ -510,6 +497,60 @@ active = 1;
     this.ticketBalanceError = '';
   }
 
+  private defaultNewTaskForm(): NewTaskFormModel {
+    return {
+      title: '',
+      description: '',
+      ticketCategoryId: null,
+      assignTo: '',
+    };
+  }
+
+  startAddTask(group: any): void {
+    this.newTaskForm = this.defaultNewTaskForm();
+    this.newTaskForm.ticketCategoryId = Number(group.id);
+    this.addTaskGroupId = Number(group.id);
+  }
+
+  cancelAddTask(): void {
+    this.addTaskGroupId = null;
+  }
+
+  saveNewTask(): void {
+    if (this.savingTask || !this.projectId) {
+      return;
+    }
+
+    if (!this.newTaskForm.title.trim() || !String(this.newTaskForm.assignTo || '').trim()) {
+      this.errorMessage = 'Title and Assign To are required.';
+      return;
+    }
+
+    const payload = {
+      title: this.newTaskForm.title.trim(),
+      description: this.newTaskForm.description.trim(),
+      assignTo: this.newTaskForm.assignTo,
+      ticketCategoryId: this.newTaskForm.ticketCategoryId,
+    };
+
+    this.savingTask = true;
+
+    this.apiService.post(`/project/${this.projectId}/task`, payload).subscribe({
+      next: (response) => {
+        this.savingTask = false;
+        this.addTaskGroupId = null;
+        this.message = response?.message || 'Task created.';
+        this.errorMessage = '';
+        this.active = 1;
+        this.loadOptions();
+      },
+      error: (error) => {
+        this.savingTask = false;
+        this.errorMessage = error?.error?.message || 'Failed to create task.';
+      },
+    });
+  }
+
   openAddContactModal(): void {
     const modalRef = this.modalService.open(AddContactModalComponent, {
       size: 'lg',
@@ -611,31 +652,6 @@ active = 1;
     return Number(rows[0]?.balance || 0);
   }
 
-  private matchesSearch(row: any): boolean {
-    const keyword = this.searchKeyword.trim().toLowerCase();
-
-    if (!keyword) {
-      return true;
-    }
-
-    const id = String(row?.id ?? '').toLowerCase();
-    const title = String(row?.title ?? '').toLowerCase();
-    const category = String(row?.ticketCategoryName ?? row?.name ?? '').toLowerCase();
-
-    return id.includes(keyword) || title.includes(keyword) || category.includes(keyword);
-  }
-
-  private compareGroups(a: TaskGroup, b: TaskGroup): number {
-    const aSort = Number(a?.sorting ?? 0);
-    const bSort = Number(b?.sorting ?? 0);
-
-    if (aSort !== bSort) {
-      return aSort - bSort;
-    }
-
-    return String(a?.name ?? '').localeCompare(String(b?.name ?? ''));
-  }
-
   private isChangeRequestTicket(row: any): boolean {
     const ticketTypeName = String(row?.ticketTypeName || '').trim().toLowerCase();
     const ticketTypeCode = String(row?.ticketTypeCode || '').trim().toLowerCase();
@@ -643,121 +659,49 @@ active = 1;
     return ticketTypeName.includes('change') || ticketTypeCode === 'cr';
   }
 
-  get groupedFilteredTask(): TaskGroup[] {
-    const grouped = Array.isArray(this.task) ? this.task : [];
-
-    // Preferred payload: [{ id, name, data: Task[] }]
-    if (grouped.some((row) => Array.isArray(row?.data))) {
-      return grouped
-        .map((group: any) => {
-          const rows = Array.isArray(group?.data) ? group.data : [];
-          const filteredRows = rows.filter((row: any) => {
-            const enrichedRow = {
-              ...row,
-              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
-            };
-
-            return this.matchesSearch(enrichedRow);
-          });
-
-          return {
-            id: group?.id,
-            name: String(group?.name || group?.id || 'Unknown Category'),
-            sorting: Number(group?.sorting ?? group?.weight ?? 0),
-            data: filteredRows,
-          };
-        })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
-        .sort((a, b) => this.compareGroups(a, b));
+  private filterCrGroups(groups: any[]): any[] {
+    if (!Array.isArray(groups) || !groups.some((group) => Array.isArray(group?.data))) {
+      // Legacy flat list fallback: filter rows directly.
+      return groups.filter((row) => this.isChangeRequestTicket(row));
     }
 
-    // Backward compatibility for older flat task payload.
-    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
-    return [
-      {
-        id: 'ungrouped',
-        name: 'Ungrouped',
-        data: fallbackRows,
-      },
-    ];
+    return groups
+      .map((group) => ({
+        ...group,
+        data: (Array.isArray(group.data) ? group.data : []).filter((row: any) =>
+          this.isChangeRequestTicket(row)
+        ),
+      }))
+      .filter((group) => Array.isArray(group.data) && group.data.length > 0);
   }
 
-  get filteredCases(): any[] {
-    return this.cases.filter((row) => this.matchesSearch(row));
-  }
+  private mergeGroupedWithCategories(groupedTasks: any[]): any[] {
+    const categories = Array.isArray(this.ticketChildCategories) ? this.ticketChildCategories : [];
+    const result = categories.map((category: any) => {
+      const match = groupedTasks.find((group: any) => Number(group?.id) === Number(category.id));
 
-  get groupedFilteredCases(): TaskGroup[] {
-    const grouped = Array.isArray(this.cases) ? this.cases : [];
+      return {
+        id: category.id,
+        name: String(category.name || ''),
+        sorting: Number(category.sorting ?? category.weight ?? 0),
+        data: match && Array.isArray(match.data) ? match.data : [],
+      };
+    });
 
-    if (grouped.some((row) => Array.isArray(row?.data))) {
-      return grouped
-        .map((group: any) => {
-          const rows = Array.isArray(group?.data) ? group.data : [];
-          const filteredRows = rows.filter((row: any) => {
-            const enrichedRow = {
-              ...row,
-              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
-            };
+    const knownIds = new Set(categories.map((c: any) => Number(c.id)));
 
-            return this.matchesSearch(enrichedRow);
-          });
-
-          return {
-            id: group?.id,
-            name: String(group?.name || group?.id || 'Unknown Category'),
-            sorting: Number(group?.sorting ?? group?.weight ?? 0),
-            data: filteredRows,
-          };
-        })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
-        .sort((a, b) => this.compareGroups(a, b));
+    for (const group of groupedTasks) {
+      if (!knownIds.has(Number(group.id))) {
+        result.push({
+          id: group.id,
+          name: String(group.name || group.id || 'Unknown'),
+          sorting: Number(group.sorting ?? group.weight ?? 0),
+          data: Array.isArray(group.data) ? group.data : [],
+        });
+      }
     }
 
-    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
-    return [
-      {
-        id: 'ungrouped-cases',
-        name: 'Ungrouped',
-        data: fallbackRows,
-      },
-    ];
-  }
-
-  get groupedFilteredCr(): TaskGroup[] {
-    const grouped = Array.isArray(this.cr) ? this.cr : [];
-
-    if (grouped.some((row) => Array.isArray(row?.data))) {
-      return grouped
-        .map((group: any) => {
-          const rows = Array.isArray(group?.data) ? group.data : [];
-          const filteredRows = rows.filter((row: any) => {
-            const enrichedRow = {
-              ...row,
-              ticketCategoryName: row?.ticketCategoryName || group?.name || '',
-            };
-
-            return this.matchesSearch(enrichedRow);
-          });
-
-          return {
-            id: group?.id,
-            name: String(group?.name || group?.id || 'Unknown Category'),
-            sorting: Number(group?.sorting ?? group?.weight ?? 0),
-            data: filteredRows,
-          };
-        })
-        .filter((group: TaskGroup) => group.data.length > 0 || !this.searchKeyword.trim())
-        .sort((a, b) => this.compareGroups(a, b));
-    }
-
-    const fallbackRows = grouped.filter((row) => this.matchesSearch(row));
-    return [
-      {
-        id: 'ungrouped-cr',
-        name: 'Ungrouped',
-        data: fallbackRows,
-      },
-    ];
+    return result;
   }
 
   private defaultTicketBalanceForm(): TicketBalanceFormModel {

@@ -9,7 +9,8 @@
     </div>
 
     <div class="ms-auto d-flex align-items-center gap-2">
-      <button type="button" class="btn btn-dark btn-sm" (click)="convertToTemplate(modalTemplate)">Convert to <b>Template</b></button>
+      <button type="button" class="btn btn-dark btn-sm" (click)="convertToTemplate(modalTemplate)">Convert to
+        <b>Template</b></button>
       <button type="button" class="btn btn-outline-secondary btn-sm" (click)="back()">Back to List</button>
     </div>
   </div>
@@ -45,7 +46,8 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel click')">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="templateSaving || templateForm.invalid">{{ templateSaving ? 'Saving...' : 'Confirm' }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="templateSaving || templateForm.invalid">{{
+          templateSaving ? 'Saving...' : 'Confirm' }}</button>
       </div>
     </form>
   </ng-template>
@@ -121,11 +123,11 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label small fw-semibold" for="detail-project-ticket-categories">Ticket Categories  </label>
+            <label class="form-label small fw-semibold" for="detail-project-ticket-categories">Ticket Categories
+            </label>
 
             <select id="detail-project-ticket-categories" class="form-select form-select-sm"
-              name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" disabled
-              required>
+              name="ticketCategoriesParentId" [(ngModel)]="formModel.ticketCategoriesParentId" disabled required>
 
               @for (ticketCategory of ticketCategories; track ticketCategory.id) {
               <option [ngValue]="ticketCategory.id">{{ ticketCategory.name }}</option>
@@ -161,7 +163,7 @@
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-billeable">Project Billeable</label>
             <select id="detail-project-billeable" class="form-select form-select-sm" name="projectBilleableId"
-              [(ngModel)]="formModel.projectBilleableId" disabled  >
+              [(ngModel)]="formModel.projectBilleableId" disabled>
 
               @for (projectBilleable of projectBilleables; track projectBilleable.id) {
               <option [ngValue]="projectBilleable.id">{{ projectBilleable.name }}</option>
@@ -172,7 +174,7 @@
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-product">Product</label>
             <select id="detail-project-product" class="form-select form-select-sm" name="productId"
-              [(ngModel)]="formModel.productId" disabled  >
+              [(ngModel)]="formModel.productId" disabled>
 
               @for (product of products; track product.id) {
               <option [ngValue]="product.id">{{ product.name }}</option>
@@ -180,27 +182,27 @@
             </select>
           </div>
 
-         <div class="col-12 col-md-6"> 
-           <label class="form-label small fw-semibold" for="detail-project-template"> Ticket Based </label>
-           <div class="form-control form-control-sm bg-light">
-            {{ project.ticketBaseHours }} Hour{{project.ticketBaseHours > 1 ? 's' : ''}} per Ticket 
-           </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold" for="detail-project-template"> Ticket Based </label>
+            <div class="form-control form-control-sm bg-light">
+              {{ project.ticketBaseHours }} Hour{{project.ticketBaseHours > 1 ? 's' : ''}} per Ticket
+            </div>
           </div>
 
 
           <div class="col-12 col-md-6" *ngIf=" project.templateName != '' ">
             <label class="form-label small fw-semibold" for="detail-project-template">Template Master</label>
-            <div class="form-control form-control-sm bg-light" >{{ project.templateName }}</div>
+            <div class="form-control form-control-sm bg-light">{{ project.templateName }}</div>
           </div>
 
           <div class="col-12 col-md-6">
             <label class="form-label small fw-semibold" for="detail-project-start-date">Start Date <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="detail-project-start-date" class="form-control form-control-sm" type="text" name="startDate" ngbDatepicker
-                #startDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
-              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()" type="button"
-                [disabled]="formMode === 'view'"></button>
+              <input id="detail-project-start-date" class="form-control form-control-sm" type="text" name="startDate"
+                ngbDatepicker #startDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.startDate" required />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="startDatePicker.toggle()"
+                type="button" [disabled]="formMode === 'view'"></button>
             </div>
           </div>
 
@@ -208,10 +210,10 @@
             <label class="form-label small fw-semibold" for="detail-project-end-date">End Date <span
                 class="text-danger">*</span></label>
             <div class="input-group">
-              <input id="detail-project-end-date" class="form-control form-control-sm" type="text" name="endDate" ngbDatepicker
-                #endDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
-              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()" type="button"
-                [disabled]="formMode === 'view'"></button>
+              <input id="detail-project-end-date" class="form-control form-control-sm" type="text" name="endDate"
+                ngbDatepicker #endDatePicker="ngbDatepicker" readonly [(ngModel)]="formModel.endDate" required />
+              <button class="btn btn-sm btn-outline-secondary bi bi-calendar3" (click)="endDatePicker.toggle()"
+                type="button" [disabled]="formMode === 'view'"></button>
             </div>
           </div>
 
@@ -229,12 +231,14 @@
             {{manager}}
             <div class="alert alert-danger text-center" *ngIf="manager == false">
               <h4>Warning</h4>
-              No PIC assigned to this project. Please assign at least one user as a PIC to ensure proper project management.
-             
+              No PIC assigned to this project. Please assign at least one user as a PIC to ensure proper project
+              management.
+
             </div>
 
 
-            <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span class="text-danger">*</span></label>
+            <label class="form-label   fw-semibold" for="detail-project-user">Users as Project's Team <span
+                class="text-danger">*</span></label>
 
             @if(formMode === 'view') {
             <div class="small text-muted mb-2">List of users assigned to this project </div>
@@ -264,15 +268,13 @@
                   </tr>
                   <tr>
                     <td colspan="3">
-                      <input id="project-detail-user-search" class="form-control form-control-sm"
-                        type="text" placeholder="Search user by name and Enter for search"
-                        name="userSearchKeyword" [(ngModel)]="userSearchKeyword"
-                        (change)="searchUsers()" (keydown)="searchUsers()"/>
+                      <input id="project-detail-user-search" class="form-control form-control-sm" type="text"
+                        placeholder="Search user by name and Enter for search" name="userSearchKeyword"
+                        [(ngModel)]="userSearchKeyword" (change)="searchUsers()" (keydown)="searchUsers()" />
                     </td>
                     <td>
-                      <select id="project-detail-user-division" class="form-select form-select-sm"
-                        name="divisionFilter" [(ngModel)]="divisionFilter"
-                        (change)="searchUsers()">
+                      <select id="project-detail-user-division" class="form-select form-select-sm" name="divisionFilter"
+                        [(ngModel)]="divisionFilter" (change)="searchUsers()">
                         <option value="">All Division</option>
                         @for (division of divisionOptions; track division) {
                         <option [value]="division">{{ division }}</option>
@@ -336,6 +338,9 @@
     <li [ngbNavItem]="1">
       <button ngbNavLink>TASKS</button>
       <ng-template ngbNavContent>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="text-muted small">Tasks related to this project</div>
+        </div>
         <table class="table table-sm table-hover ">
 
           <thead>
@@ -349,27 +354,76 @@
             </tr>
           </thead>
           <tbody>
-            @for (group of groupedFilteredTask; track group.id) {
-              @if(group.data.length > 0) {
+            @for (group of task; track group.id) {
+              @if(group.data.length > 0 || formMode == 'edit') {
+            <tr class="table-light">
+              <td colspan="7" class="fw-semibold">
+                {{ group.name }} ({{ group.data.length }})
+              </td>
+            </tr>
+          }
+        
+          
+              @for (t of group.data; track t.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
+                </td>
+                <td>{{ t.submitDate | date: 'yyyy-MM-dd' }}</td>
+                <td>{{ t.title }}</td>
+                <td>{{ t.ticketStatusName }} </td>
+                <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
+                <td>{{ t.assignToName }}</td>
+                <td></td>
+              </tr>
+              }
+        
 
-                <tr class="table-light">
-                  <td colspan="6" class="fw-semibold">
-                    {{ group.name }} ({{ group.data.length }})
-                  </td>
-                </tr>
+              @if (addTaskGroupId === group.id) {
 
-                @for (t of group.data; track t.id) {
-                <tr>
-                  <td>
-                    <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
-                  </td>
-                  <td>{{ t.submitDate | date: 'yyyy-MM-dd' }}</td>
-                  <td>{{ t.title }}</td>
-                  <td>{{ t.ticketStatusName }} </td>
-                  <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
-                  <td>{{ t.assignToName }}</td>
-                </tr>
-                }
+              <tr>
+                <td>
+                <small class="text-muted">New</small>
+                </td>
+                <td> </td>
+                <td><input class="form-control form-control-sm" type="text" name="inlineTaskTitle"
+                    [(ngModel)]="newTaskForm.title" [ngModelOptions]="{ standalone: true }" placeholder="Task title..." />
+                </td>
+                <td> Open</td>
+                <td> - </td>
+                <td> <select class="form-select form-select-sm" name="inlineTaskAssign" [(ngModel)]="newTaskForm.assignTo"
+                    [ngModelOptions]="{ standalone: true }" style="min-width: 170px;">
+                    <option value="" disabled>Assign To</option>
+                    @for (user of users; track user.id) {
+                    <option [value]="user.id" *ngIf="user.checked == 1">{{ user.name }}</option>
+                    }
+                  </select></td>
+
+               
+              </tr>
+              <tr>
+                  <td colspan="6" class="text-center text-muted small">
+                  <button type="button" class="btn btn-sm btn-primary text-nowrap mx-1"
+                    [disabled]="savingTask || !newTaskForm.title.trim() || !newTaskForm.assignTo"
+                    (click)="saveNewTask()">{{ savingTask ? 'Saving...' : 'Save' }}</button>
+
+                  <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap mx-1"
+                    (click)="cancelAddTask()">Cancel</button>
+
+                </td>
+              </tr>
+
+
+
+              } @else {
+              <tr *ngIf="formMode !== 'view'">
+           
+                <td colspan="6" class="text-center text-muted small">Add new task to this group 
+                  <a href="javascript:void(0)" class="btn btn-sm btn-light border" (click)="startAddTask(group)">+ Add
+                    task</a>
+                </td>
+              
+              </tr>
               }
             }
           </tbody>
@@ -392,8 +446,8 @@
             </tr>
           </thead>
           <tbody>
-            @for (group of groupedFilteredCases; track group.id) {
-              @if(group.data.length > 0) {
+            @for (group of cases; track group.id) {
+            @if(group.data.length > 0) {
             <tr class="table-light">
               <td colspan="7" class="fw-semibold">
                 {{ group.name }} ({{ group.data.length }})
@@ -414,7 +468,7 @@
             </tr>
             }
             }
-          }
+            }
           </tbody>
         </table>
       </ng-template>
@@ -435,8 +489,8 @@
             </tr>
           </thead>
           <tbody>
-            @for (group of groupedFilteredCr; track group.id) {
-              @if(group.data.length > 0) {
+            @for (group of cr; track group.id) {
+            @if(group.data.length > 0) {
             <tr class="table-light">
               <td colspan="7" class="fw-semibold">
                 {{ group.name }} ({{ group.data.length }})
@@ -456,7 +510,7 @@
               <td>{{ t.assignToName }}</td>
             </tr>
             }
-          }
+            }
             }
           </tbody>
         </table>
@@ -496,7 +550,8 @@
 
               </td>
               <td>{{ t.email }}</td>
-              <td>  <a href="https://api.whatsapp.com/send?phone={{ t.phone }}" target="_blank"><i class="bi bi-whatsapp"></i> {{ t.phone }}</a></td>
+              <td> <a href="https://api.whatsapp.com/send?phone={{ t.phone }}" target="_blank"><i
+                    class="bi bi-whatsapp"></i> {{ t.phone }}</a></td>
               <td>{{ t.division }}</td>
               <td>{{ t.position }}</td>
             </tr>
@@ -511,7 +566,7 @@
       </ng-template>
     </li>
 
-     
+
     <li [ngbNavItem]="5">
       <button ngbNavLink>TICKET BALANCE</button>
       <ng-template ngbNavContent>
@@ -533,7 +588,7 @@
                 <a href="javascript:;" (click)="openTicketDetail(t)">
                   {{ t.ticketId }}
                 </a>
-              <div> <small> {{ t.title }} {{ t.note }} </small></div>
+                <div> <small> {{ t.title }} {{ t.note }} </small></div>
               </td>
               <td class="text-end text-primary"><strong>{{ t.ticketIn > 0 ? (t.ticketIn | number) : '-' }}</strong></td>
               <td class="text-end text-danger"><strong>{{ t.ticketOut > 0 ? (t.ticketOut | number) : '-' }}</strong>
@@ -545,7 +600,7 @@
         </table>
       </ng-template>
     </li>
- 
+
   </ul>
 
 

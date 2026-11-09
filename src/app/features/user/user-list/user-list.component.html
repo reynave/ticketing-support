@@ -4,7 +4,8 @@
   } @else {
   <div class="page-header">
     <div>
-      <div class="page-title">Global Users</div>
+      <div class="page-title">Users {{ selectedUserTypeFilter === '1' ? 'Internal' : 'External' }}</div>
+      
       <div class="page-subtitle">Manage internal and external users.</div>
     </div>
   </div>
@@ -18,22 +19,39 @@
   }
 
   <div class="stat-card">
-    
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="stat-value small-title">Users {{ selectedUserTypeFilter === '1' ? 'Internal' : 'External' }}</div>
-      <div class="d-flex gap-2 align-items-center">
-        <select class="form-select form-select-sm" [(ngModel)]="selectedUserTypeFilter" (change)="loadUsers()">
-
-          <option value="1">Internal</option>
-          <option value="2">External</option>
-        </select>
-         
-        @if (canCreate) {
-        <button type="button" class="btn btn-primary-sm" [disabled]="selectedUserTypeFilter == '2'" style="width: 200px;" (click)="openCreateModal()">New User</button>
-        }
+  
+    <div class="row">
+      <div class="col-8">
+        <div class="d-flex gap-2 mb-3">
+          <input class="form-control form-control-sm" name="userListKeyword" [(ngModel)]="keyword"
+            (keyup.enter)="loadUsers()" placeholder="Search by ID, name, email, or phone..."
+            style="max-width: 320px;" />
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="loadUsers()">Search</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+            (click)="keyword = ''; loadUsers()">Reset</button>
+        </div>
        
+
       </div>
+       <div class="col-4">
+          <div class="d-flex gap-2 align-items-center">
+            <select class="form-select form-select-sm" [(ngModel)]="selectedUserTypeFilter" (change)="loadUsers()">
+
+              <option value="1">Internal</option>
+              <option value="2">External</option>
+            </select>
+
+            @if (canCreate) {
+            <button type="button" class="btn btn-primary-sm" [disabled]="selectedUserTypeFilter == '2'"
+              style="width: 200px;" (click)="openCreateModal()">New User</button>
+            }
+
+          </div>
+        </div>
     </div>
+
+   
+
 
     @if (loading) {
     <div class="text-muted">Loading users...</div>
@@ -48,12 +66,12 @@
             <th>Name</th>
             <th>Rules</th>
             <th>Email</th>
-         <th>Phone</th>
-         
+            <th>Phone</th>
+
             <th>division</th>
-            <th>Position</th> 
+            <th>Position</th>
             <th *ngIf="selectedUserTypeFilter == '2'">ClientId</th>
-            <th >Status</th>
+            <th>Status</th>
             <th></th>
           </tr>
         </thead>
@@ -61,26 +79,27 @@
           @for (row of rows; track trackById($index, row)) {
           <tr>
             <td> <a href="javascript:;" [routerLink]="['/users', row.id]">{{ row.id }}</a> </td>
-             <td>{{ row.firstName }} {{ row.lastName }}</td>
+            <td>{{ row.firstName }} {{ row.lastName }}</td>
             <td>{{ row.userAuthLevel }}</td>
-            <td>{{ row.email }}</td> 
+            <td>{{ row.email }}</td>
             <td>
               @if(row.phone){
- <a href="https://api.whatsapp.com/send?phone={{ row.phone }}" target="_blank"><i class="bi bi-whatsapp"></i> {{ row.phone }}</a>
-             
+              <a href="https://api.whatsapp.com/send?phone={{ row.phone }}" target="_blank"><i
+                  class="bi bi-whatsapp"></i> {{ row.phone }}</a>
+
               }
-               </td>
+            </td>
             <td>{{ row.division }}</td>
             <td>{{ row.position }}</td>
 
- 
+
             <td *ngIf="row.userTypeId === 2">
               <a href="javascript:;" [routerLink]="['/clients/',row.clientId]" routerLinkActive="router-link-active">{{
-                row.clientName }}</a> 
+                row.clientName }}</a>
             </td>
             <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
-            <td class="text-end "> 
-             
+            <td class="text-end ">
+
               @if (canDelete) {
               <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="deletingId === row.id"
                 (click)="deleteUser(row)">
