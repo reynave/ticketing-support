@@ -292,6 +292,10 @@ export class ProjectCreateComponent {
   }
 
   loadTemplateMaster(content: any): void {
+    if (this.templateName) {
+      return;
+    }
+
     this.modalService.open(content, { size: 'xl' });
     this.loadingTemplateMaster = true;
   }
@@ -354,6 +358,8 @@ export class ProjectCreateComponent {
       userAuthLevel: user.userAuthLevel || '',
       checked: Boolean(user.checked || user.asManager),
       asManager: Boolean(user.asManager),
+      division: user.division || '',
+      readonly: false,
     }));
     this.users = [...this.allUsers];
 

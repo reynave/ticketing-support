@@ -338,9 +338,7 @@
     <li [ngbNavItem]="1">
       <button ngbNavLink>TASKS</button>
       <ng-template ngbNavContent>
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="text-muted small">Tasks related to this project</div>
-        </div>
+      
         <table class="table table-sm table-hover ">
 
           <thead>
@@ -348,6 +346,7 @@
               <th>ID</th>
               <th>Submit date</th>
               <th>Title</th>
+              <th>Module</th>
               <th>Status</th>
               <th>rating</th>
               <th>Assign To</th>
@@ -365,16 +364,22 @@
         
           
               @for (t of group.data; track t.id) {
-              <tr>
+              <tr (dragover)="onTaskDragOver($event)" (drop)="onTaskDrop(t, group, $event)">
                 <td>
+                  @if (formMode === 'edit') {
+                  <span class="text-muted px-2 mx-1  " draggable="true" style="cursor: grab; user-select: none;"
+                    title="Drag to reorder" (dragstart)="onTaskDragStart(t)" (dragend)="taskDragEnd()">
+                  <i class="bi bi-arrow-down-up"></i></span>
+                  }
                   <a [routerLink]="['/tasks', t.id]" class="text-decoration-none">{{ t.id }}</a>
                 </td>
-                <td>{{ t.submitDate | date: 'yyyy-MM-dd' }}</td>
+                <td>{{ t.submitDate | date: 'yyyy-MM-dd HH:mm' }}</td>
                 <td>{{ t.title }}</td>
+                <td>{{ t.productChildName }}</td>
                 <td>{{ t.ticketStatusName }} </td>
                 <td>{{ t.rating > 0 ? t.rating : 'N/A' }}</td>
                 <td>{{ t.assignToName }}</td>
-                <td></td>
+                
               </tr>
               }
         
@@ -389,7 +394,17 @@
                 <td><input class="form-control form-control-sm" type="text" name="inlineTaskTitle"
                     [(ngModel)]="newTaskForm.title" [ngModelOptions]="{ standalone: true }" placeholder="Task title..." />
                 </td>
-                <td> Open</td>
+              
+                <td>
+                  <select class="form-select form-select-sm" name="inlineProductChildId"
+                    [(ngModel)]="newTaskForm.productChildId" [ngModelOptions]="{ standalone: true }">
+                    <option value="" disabled>Select module</option>
+                    @for (module of projectModules; track module.id) {
+                    <option [value]="module.id">{{ module.name }}</option>
+                    }
+                  </select>
+                </td>
+                  <td> Open</td>
                 <td> - </td>
                 <td> <select class="form-select form-select-sm" name="inlineTaskAssign" [(ngModel)]="newTaskForm.assignTo"
                     [ngModelOptions]="{ standalone: true }" style="min-width: 170px;">
@@ -402,7 +417,7 @@
                
               </tr>
               <tr>
-                  <td colspan="6" class="text-center text-muted small">
+                  <td colspan="7" class="text-center text-muted small">
                   <button type="button" class="btn btn-sm btn-primary text-nowrap mx-1"
                     [disabled]="savingTask || !newTaskForm.title.trim() || !newTaskForm.assignTo"
                     (click)="saveNewTask()">{{ savingTask ? 'Saving...' : 'Save' }}</button>

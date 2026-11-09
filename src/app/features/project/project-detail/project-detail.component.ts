@@ -36,6 +36,7 @@ interface NewTaskFormModel {
   description: string;
   ticketCategoryId: number | null;
   assignTo: string;
+  productChildId: string;
 }
 
 @Component({
@@ -104,6 +105,7 @@ active = 1;
   newTaskForm: NewTaskFormModel = this.defaultNewTaskForm();
   savingTask = false;
   addTaskGroupId: number | null = null;
+  draggedTask: any = null;
   dataTemplate: { name: string; description: string; version: string } = {
     name: '',
     description: '',
@@ -503,7 +505,12 @@ active = 1;
       description: '',
       ticketCategoryId: null,
       assignTo: '',
+      productChildId: '',
     };
+  }
+
+  get projectModules(): any[] {
+    return Array.isArray(this.project?.modules) ? this.project.modules : [];
   }
 
   startAddTask(group: any): void {
@@ -514,6 +521,65 @@ active = 1;
 
   cancelAddTask(): void {
     this.addTaskGroupId = null;
+  }
+
+  onTaskDragStart(t: any): void {
+    this.draggedTask = t;
+  }
+
+  onTaskDragOver(event: DragEvent): void {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  taskDragEnd(): void {
+    this.draggedTask = null;
+  }
+
+  onTaskDrop(target: any, group: any, event: DragEvent): void {
+    event.preventDefault();
+    const source = this.draggedTask;
+    this.draggedTask = null;
+
+    if (!source || String(source.id) === String(target.id)) {
+      return;
+    }
+
+    const data = Array.isArray(group?.data) ? group.data : [];
+    const sourceIdx = data.findIndex((row: any) => String(row.id) === String(source.id));
+    const targetIdx = data.findIndex((row: any) => String(row.id) === String(target.id));
+
+    if (sourceIdx < 0 || targetIdx < 0) {
+      return;
+    }
+
+    const reordered = [...data];
+    reordered.splice(sourceIdx, 1);
+    reordered.splice(targetIdx, 0, source);
+
+    reordered.forEach((row: any, index: number) => {
+      row.projectSorting = index + 1;
+    });
+
+    group.data = reordered;
+
+    const items = reordered.map((row: any) => ({
+      id: row.id,
+      projectSorting: Number(row.projectSorting),
+    }));
+
+    this.apiService.put('/project/task/reorder', { items }).subscribe({
+      next: () => {
+        // reordered optimistically
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Failed to reorder tasks.';
+        this.loadOptions();
+      },
+    });
   }
 
   saveNewTask(): void {
@@ -531,6 +597,7 @@ active = 1;
       description: this.newTaskForm.description.trim(),
       assignTo: this.newTaskForm.assignTo,
       ticketCategoryId: this.newTaskForm.ticketCategoryId,
+      productChildId: this.newTaskForm.productChildId,
     };
 
     this.savingTask = true;
