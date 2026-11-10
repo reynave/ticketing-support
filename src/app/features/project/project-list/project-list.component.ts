@@ -33,12 +33,14 @@ export class ProjectListComponent {
   }
 
   rows: any[] = [];
+  drafts: any[] = [];
   clients: any[] = [];
   projectTypes: any[] = [];
   projectBilleables: any[] = [];
   products: any[] = [];
   ticketCategories: any[] = [];
   loading = false;
+  loadingDrafts = false;
   loadingOptions = false;
   deletingId: string | null = null;
 
@@ -56,6 +58,7 @@ export class ProjectListComponent {
     }
 
     this.loadProjects();
+    this.loadDrafts();
     void this.loadOptions();
   }
 
@@ -91,6 +94,21 @@ export class ProjectListComponent {
         this.loading = false;
         this.rows = [];
         this.errorMessage = error?.error?.message || 'Failed to load project master data.';
+      },
+    });
+  }
+
+  loadDrafts(): void {
+    this.loadingDrafts = true;
+
+    this.apiService.get('/project/drafts').subscribe({
+      next: (response) => {
+        this.loadingDrafts = false;
+        this.drafts = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingDrafts = false;
+        this.drafts = [];
       },
     });
   }
@@ -132,14 +150,70 @@ export class ProjectListComponent {
     }
   }
  
-  openCreateModal(): void {
+  async openCreateModal(): Promise<void> {
     if (!this.canCreate) {
       return;
     }
 
     this.errorMessage = '';
     this.message = '';
-    void this.router.navigate(['/project/create']);
+
+    try {
+      const response = await firstValueFrom(this.apiService.post('/project/draft', {}));
+      const id = String(response?.data?.id ?? response?.data ?? '').trim();
+
+      if (!id) {
+        this.errorMessage = 'Failed to create project draft.';
+        return;
+      }
+
+      await this.router.navigate(['/project/create', id]);
+    } catch (error: any) {
+      this.errorMessage = error?.error?.message || 'Failed to create project draft.';
+    }
+  }
+
+  openDraft(row: any): void {
+    const id = String(row?.id || '').trim();
+
+    if (!id) {
+      return;
+    }
+
+    void this.router.navigate(['/project/create', id]);
+  }
+
+  deleteDraft(row: any): void {
+    if (!this.canDelete) {
+      return;
+    }
+
+    const id = String(row?.id || '').trim();
+
+    if (!id) {
+      return;
+    }
+
+    const confirmed = confirm(`Delete draft ${id}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingId = id;
+    this.errorMessage = '';
+
+    this.apiService.delete(`/project/${id}`).subscribe({
+      next: (response) => {
+        this.deletingId = null;
+        this.message = response?.message || 'Project draft deleted.';
+        this.loadDrafts();
+      },
+      error: (error) => {
+        this.deletingId = null;
+        this.errorMessage = error?.error?.message || 'Failed to delete project draft.';
+      },
+    });
   }
 
   goToDetail(row: any): void {

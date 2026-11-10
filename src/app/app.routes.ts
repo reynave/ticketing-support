@@ -93,7 +93,7 @@ export const routes: Routes = [
 				component: ProjectListComponent,
 			},
 			{
-				path: 'project/create',
+				path: 'project/create/:id',
 				component: ProjectCreateComponent,
 			},
 			{

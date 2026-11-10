@@ -22,6 +22,48 @@
    <div class="alert alert-danger py-2">{{ errorMessage }}</div>
    }
 
+   <div class="stat-card mb-3" *ngIf="drafts.length > 0">
+      <!-- DRAFT (presence = 4) -->
+      <div class="card-header bg-light py-2 px-3">
+         <strong>Draft Projects</strong> 
+      </div>
+      <div class="table-responsive">
+         @if (loadingDrafts) {
+         <div class="text-muted p-3">Loading drafts...</div>
+         } @else if (!drafts.length) {
+         <div class="text-muted p-3">No draft projects.</div>
+         } @else {
+         <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+               <tr>
+                  <th>ID</th>
+                  <th>Project name</th>
+                  <th>Created</th>
+                  <th class="text-end" style="width: 160px;">Action</th>
+               </tr>
+            </thead>
+            <tbody>
+               @for (draft of drafts; track trackById($index, draft)) {
+               <tr>
+                  <td><a href="javascript:void(0)" (click)="openDraft(draft)">{{ draft.id }}</a></td>
+                  <td>{{ draft.name || '(Untitled draft)' }}</td>
+                  <td>{{ draft.inputDate | date: 'dd MMM yyyy HH:mm' }}</td>
+                  <td class="text-end">
+                     <button type="button" class="btn btn-sm btn-outline-primary"
+                        (click)="openDraft(draft)">Edit</button>
+                     @if (canDelete) {
+                     <button type="button" class="btn btn-sm btn-outline-danger ms-1"
+                        (click)="deleteDraft(draft)" [disabled]="deletingId === draft.id">Delete</button>
+                     }
+                  </td>
+               </tr>
+               }
+            </tbody>
+         </table>
+         }
+      </div>
+   </div>
+  
    <div class="stat-card mb-3">
       <div class="row g-2 align-items-end">
          <div class="col-12 col-md-3">
@@ -80,11 +122,11 @@
             <thead>
                <tr>
                   <th>ID</th>
-                  <th>Project name</th>
+                  <th>Project name / Product</th>
                   <th>Client</th>
                   <th>Type</th>
                   <th>Billeable</th>
-                  <th>Product</th>
+                
                   <th>Period</th>
                   <th>Status</th>
                </tr>
@@ -93,11 +135,14 @@
                @for (row of rows; track trackById($index, row)) {
                <tr [class]="row.status === 1 ? '' : 'disabled'">
                   <td> <a href="javascript:void(0)" (click)="goToDetail(row)">{{ row.id }}</a> </td>
-                  <td>{{ row.name }}</td>
+                  <td>{{ row.name }}
+
+                     <div class="text-muted">{{ row.productName || row.productId }}</div>
+                  </td>
                   <td>{{ row.clientName || row.clientId }}</td>
                   <td>{{ row.projectTypeName || row.projectTypeId }}</td>
                   <td>{{ row.projectBilleableName || row.projectBilleableId }}</td>
-                  <td>{{ row.productName || row.productId }}</td>
+         
                   <td>{{ row.startDate | date: 'dd MMM yyyy' }} - {{ row.endDate | date: 'dd MMM yyyy' }}</td>
                   <td>{{ row.status === 1 ? 'Active' : 'Inactive' }}</td>
 
@@ -109,4 +154,6 @@
       }
    </div>
    }
+
+   
 </div>

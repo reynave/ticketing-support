@@ -172,7 +172,7 @@ Route terproteksi (children `AdminLayoutComponent`, `canActivate: [authGuard]`):
 | `/clients`, `/clients/:id` | `ClientListComponent`, `ClientDetailComponent` | |
 | `/users`, `/users/:id` | `UserListComponent`, `UserDetailComponent` | |
 | `/projects` | `ProjectListComponent` | |
-| `/project/create` | `ProjectCreateComponent` | |
+| `/project/create/:id` | `ProjectCreateComponent` | Buat/publish project dari draft (`presence=4` → `1`) |
 | `/project/:id` | `ProjectDetailComponent` | |
 | `/tasks`, `/tasks/:id` | `TaskListComponent`, `TaskDetailComponent` | |
 | `/cases`, `/cases/:id` | `CaseListComponent`, `CaseDetailComponent` | |
