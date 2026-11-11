@@ -70,5 +70,54 @@
         </div>
         }
     </div>
+
+    <div class="stat-card mt-3">
+        <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Task Templates</strong> <span class="text-muted small">(tempateType = 'task')</span>
+            </div>
+            @if (canDelete) {
+            <button class="btn btn-sm btn-danger" (click)="deleteSelectedTasks()" [disabled]="disabledTaskDelete || deletingTasks">
+                Delete
+            </button>
+            }
+        </div>
+
+        @if (loadingTasks) {
+        <div class="p-3 text-muted">Loading task templates...</div>
+        } @else if (!taskRows.length) {
+        <div class="p-3 text-muted">No task template data found.</div>
+        } @else {
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;"></th>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th class="text-center">Version</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of taskRows; track trackById($index, row) ; let i = $index) {
+                    <tr>
+                        <th class="align-top text-center" (click)="toggleTaskRowChecked(row)">
+                            <i class="bi bi-square" *ngIf="!row.checked"></i>
+                            <i class="bi bi-check-square-fill" *ngIf="row.checked"></i>
+                        </th>
+                        <td class="align-top">{{ i + 1 }}</td>
+                        <td>{{ row.name }}
+                            <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">{{ row.description }}</div>
+                        </td>
+                        <td class="text-center align-top"><code>{{ row.version }}</code></td>
+                        <td class="text-muted">{{ row.inputDate | date: 'dd MMM yyyy' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
     }
 </div>

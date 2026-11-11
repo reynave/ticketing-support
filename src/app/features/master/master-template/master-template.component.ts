@@ -36,6 +36,10 @@ export class MasterTemplateComponent {
   errorMessage = '';
   deleting = false;
   usingId: number | null = null;
+  taskRows: any[] = [];
+  loadingTasks = false;
+  deletingTasks = false;
+  disabledTaskDelete = true;
 
   constructor() {
     if (!this.canAccessPage) {
@@ -43,6 +47,7 @@ export class MasterTemplateComponent {
     }
 
     this.loadRows();
+    this.loadTaskTemplates();
   }
 
   loadRows(): void {
@@ -65,6 +70,81 @@ export class MasterTemplateComponent {
           error?.error?.message || 'Failed to load template data.';
       },
     });
+  }
+
+  loadTaskTemplates(): void {
+    this.loadingTasks = true;
+
+    this.apiService.get('/template/task').subscribe({
+      next: (response) => {
+        this.loadingTasks = false;
+        this.taskRows = (Array.isArray(response?.data) ? response.data : []).map(
+          (row: any) => ({ ...row, checked: false }),
+        );
+        this.updateTaskDeleteState();
+      },
+      error: () => {
+        this.loadingTasks = false;
+        this.taskRows = [];
+        this.updateTaskDeleteState();
+      },
+    });
+  }
+
+  toggleTaskRowChecked(row: any): void {
+    row.checked = !row.checked;
+    this.updateTaskDeleteState();
+  }
+
+  async deleteSelectedTasks(): Promise<void> {
+    if (this.deletingTasks || !this.canDelete) {
+      return;
+    }
+
+    const selectedRows = this.taskRows.filter((row) => Boolean(row?.checked));
+
+    if (!selectedRows.length) {
+      this.updateTaskDeleteState();
+      return;
+    }
+
+    const ids = selectedRows
+      .map((row) => String(row?.id ?? '').trim())
+      .filter((id) => id.length > 0);
+
+    if (!ids.length) {
+      this.updateTaskDeleteState();
+      return;
+    }
+
+    const confirmed = confirm(`Delete ${ids.length} selected task template(s)?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingTasks = true;
+    this.errorMessage = '';
+
+    try {
+      const results = await Promise.allSettled(
+        ids.map((id) => firstValueFrom(this.apiService.delete(`/template/${id}`))),
+      );
+
+      const failedCount = results.filter(
+        (result) => result.status === 'rejected',
+      ).length;
+
+      if (failedCount > 0) {
+        this.errorMessage = `${failedCount} task template(s) failed to delete.`;
+      }
+
+      this.loadTaskTemplates();
+    } catch {
+      this.errorMessage = 'Failed to delete selected task template(s).';
+    } finally {
+      this.deletingTasks = false;
+    }
   }
 
   trackById(_: number, row: any): any {
@@ -173,5 +253,10 @@ export class MasterTemplateComponent {
   private updateDeleteState(): void {
     this.disabledDelete =
       this.deleting || !this.canDelete || !this.rows.some((row) => Boolean(row?.checked));
+  }
+
+  private updateTaskDeleteState(): void {
+    this.disabledTaskDelete =
+      this.deletingTasks || !this.canDelete || !this.taskRows.some((row) => Boolean(row?.checked));
   }
 }

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/user/user-detail/user-detail.component.css"],
-  "sourcesContent": [".user-detail-page .card {\r\n  border-color: #e9ecef;\r\n}\r\n\r\n.user-detail-page .card-header {\r\n  border-bottom: 1px solid #e9ecef;\r\n}\r\n\r\n.user-meta-grid .meta-value {\r\n  background: #f8f9fa;\r\n  border: 1px solid #edf0f2;\r\n  border-radius: 6px;\r\n  padding: 8px 10px;\r\n  min-height: 38px;\r\n  display: flex;\r\n  align-items: center;\r\n  color: #212529;\r\n  font-size: 14px;\r\n}\r\n\r\n.user-detail-page .form-label {\r\n  margin-bottom: 0.35rem;\r\n}\r\n\r\n.user-detail-page .scroll-table {\r\n  max-height: 360px;\r\n  overflow: auto;\r\n}\r\n\r\n.user-detail-page .scroll-table thead th {\r\n  position: sticky;\r\n  top: 0;\r\n  background: #f8f9fa;\r\n  z-index: 1;\r\n}\r\n"],
-  "mappings": ";AAAA,CAAC,iBAAiB,CAAC;AACjB,gBAAc;AAChB;AAEA,CAJC,iBAIiB,CAAC;AACjB,iBAAe,IAAI,MAAM;AAC3B;AAEA,CAAC,eAAe,CAAC;AACf,cAAY;AACZ,UAAQ,IAAI,MAAM;AAClB,iBAAe;AACf,WAAS,IAAI;AACb,cAAY;AACZ,WAAS;AACT,eAAa;AACb,SAAO;AACP,aAAW;AACb;AAEA,CApBC,iBAoBiB,CAAC;AACjB,iBAAe;AACjB;AAEA,CAxBC,iBAwBiB,CAAC;AACjB,cAAY;AACZ,YAAU;AACZ;AAEA,CA7BC,iBA6BiB,CALC,aAKa,MAAM;AACpC,YAAU;AACV,OAAK;AACL,cAAY;AACZ,WAAS;AACX;",
-  "names": []
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/ticket-history/ticket-history-list/ticket-history-list.component.css"],
-  "sourcesContent": [".table td {\r\n  vertical-align: middle;\r\n}\r\n /* CSS Tambahan untuk Garis Timeline Vertikal */\r\n        .timeline {\r\n            position: relative;\r\n            padding-left: 1.5rem;\r\n        }\r\n        .timeline::before {\r\n            content: '';\r\n            position: absolute;\r\n            top: 0;\r\n            bottom: 0;\r\n            left: 20px;\r\n            width: 3px;\r\n            background-color: #e9ecef;\r\n        }\r\n        .timeline-item {\r\n            position: relative;\r\n            margin-bottom: 1.5rem;\r\n        }\r\n        .timeline-badge {\r\n            position: absolute;\r\n            left: -1.5rem;\r\n            top: 15px;\r\n            transform: translateX(-50%);\r\n            width: 36px;\r\n            height: 36px;\r\n            border-radius: 50%;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            z-index: 1;\r\n        }\r\n"],
-  "mappings": ";AAAA,CAAC,MAAM;AACL,kBAAgB;AAClB;AAEQ,CAAC;AACG,YAAU;AACV,gBAAc;AAClB;AACA,CAJC,QAIQ;AACL,WAAS;AACT,YAAU;AACV,OAAK;AACL,UAAQ;AACR,QAAM;AACN,SAAO;AACP,oBAAkB;AACtB;AACA,CAAC;AACG,YAAU;AACV,iBAAe;AACnB;AACA,CAAC;AACG,YAAU;AACV,QAAM;AACN,OAAK;AACL,aAAW,WAAW;AACtB,SAAO;AACP,UAAQ;AACR,iBAAe;AACf,WAAS;AACT,eAAa;AACb,mBAAiB;AACjB,WAAS;AACb;",
-  "names": []
-}

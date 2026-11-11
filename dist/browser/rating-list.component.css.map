@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/rating/rating-list/rating-list.component.css"],
-  "sourcesContent": [".table td {\r\n  vertical-align: middle;\r\n}"],
-  "mappings": ";AAAA,CAAC,MAAM;AACL,kBAAgB;AAClB;",
-  "names": []
-}

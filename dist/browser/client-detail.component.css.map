@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/client/client-detail/client-detail.component.css"],
-  "sourcesContent": [".action-buttons {\r\n  display: flex;\r\n  justify-content: flex-end;\r\n  gap: 0.35rem;\r\n}\r\n\r\n.small-title {\r\n  font-size: 1.05rem;\r\n}\r\n\r\n.disabled td{\r\n  opacity: 0.7;\r\n}"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,mBAAiB;AACjB,OAAK;AACP;AAEA,CAAC;AACC,aAAW;AACb;AAEA,CAAC,SAAS;AACR,WAAS;AACX;",
-  "names": []
-}
