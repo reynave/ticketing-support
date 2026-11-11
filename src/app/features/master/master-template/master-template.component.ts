@@ -27,10 +27,15 @@ export class MasterTemplateComponent {
     return this.authService.hasPermission(this.moduleId, 'd');
   }
 
+  get canUse(): boolean {
+    return this.authService.hasPermission(2001, 'c');
+  }
+
   rows: any[] = [];
   loading = false;
   errorMessage = '';
   deleting = false;
+  usingId: number | null = null;
 
   constructor() {
     if (!this.canAccessPage) {
@@ -44,7 +49,7 @@ export class MasterTemplateComponent {
     this.loading = true;
     this.errorMessage = '';
 
-    this.apiService.get('/template', { status: 1 }).subscribe({
+    this.apiService.get('/project/templates').subscribe({
       next: (response) => {
         this.loading = false;
         this.rows = (Array.isArray(response?.data) ? response.data : []).map(
@@ -57,19 +62,9 @@ export class MasterTemplateComponent {
         this.rows = [];
         this.updateDeleteState();
         this.errorMessage =
-          error?.error?.message || 'Failed to load template master data.';
+          error?.error?.message || 'Failed to load template data.';
       },
     });
-  }
-
-  goToDetail(row: any): void {
-    const id = Number(row?.id || 0);
-
-    if (!id) {
-      return;
-    }
-
-    void this.router.navigate(['/master-template', id]);
   }
 
   trackById(_: number, row: any): any {
@@ -81,6 +76,46 @@ export class MasterTemplateComponent {
   toggleRowChecked(row: any): void {
     row.checked = !row.checked;
     this.updateDeleteState();
+  }
+
+  async useTemplate(row: any): Promise<void> {
+    if (this.usingId !== null || !this.canUse) {
+      return;
+    }
+
+    const id = String(row?.id ?? '').trim();
+
+    if (!id) {
+      return;
+    }
+
+    const confirmed = confirm(`Create a new draft from template "${row?.name || id}"?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.usingId = Number(row?.id) || null;
+    this.errorMessage = '';
+
+    try {
+      const response = await firstValueFrom(
+        this.apiService.post(`/project/template/${id}/instantiate`, {}),
+      );
+
+      const draftId = String(response?.data?.id ?? '').trim();
+
+      if (!draftId) {
+        this.errorMessage = 'Failed to create draft from template.';
+        return;
+      }
+
+      await this.router.navigate(['/project/create', draftId]);
+    } catch (error: any) {
+      this.errorMessage = error?.error?.message || 'Failed to create draft from template.';
+    } finally {
+      this.usingId = null;
+    }
   }
 
   async deleteSelected(): Promise<void> {
@@ -96,8 +131,8 @@ export class MasterTemplateComponent {
     }
 
     const ids = selectedRows
-      .map((row) => Number(row?.id || 0))
-      .filter((id) => id > 0);
+      .map((row) => String(row?.id || '').trim())
+      .filter((id) => id.length > 0);
 
     if (!ids.length) {
       this.errorMessage = 'Selected rows contain invalid template id.';
@@ -116,7 +151,7 @@ export class MasterTemplateComponent {
 
     try {
       const results = await Promise.allSettled(
-        ids.map((id) => firstValueFrom(this.apiService.delete(`/template/${id}`))),
+        ids.map((id) => firstValueFrom(this.apiService.delete(`/project/template/${id}`))),
       );
 
       const failedCount = results.filter(

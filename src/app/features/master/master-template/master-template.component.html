@@ -10,7 +10,7 @@
         <div>
             @if (canDelete) {
             <button class="btn btn-sm btn-danger" (click)="deleteSelected()" [disabled]="disabledDelete || deleting">
-                  Delete
+                Delete
             </button>
             }
         </div>
@@ -31,32 +31,38 @@
             <table class="table table-sm table-hover align-middle">
                 <thead>
                     <tr>
-                  
                         <th style="width: 50px;"></th>
                         <th>#</th>
                         <th>Name</th>
-
                         <th class="text-center">Version</th>
+                        <th>Project Type</th>
+                        <th>Client</th>
+                        <th>Product</th>
+                        <th>Created</th>
+                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (row of rows; track trackById($index, row) ; let i = $index) {
-                    <tr style="cursor: pointer;" >
-                        
+                    <tr>
                         <th class="align-top text-center" (click)="toggleRowChecked(row)">
                             <i class="bi bi-square" *ngIf="!row.checked"></i>
-
                             <i class="bi bi-check-square-fill" *ngIf="row.checked"></i>
-                            
                         </th>
-                        <td class="align-top" (click)="goToDetail(row)">{{ i + 1 }}</td>
-                        <td (click)="goToDetail(row)">{{ row.name }}
-                            <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">
-                                {{ row.description }}
-                            </div>
+                        <td class="align-top">{{ i + 1 }}</td>
+                        <td>{{ row.name }}
+                            <div class="text-muted small" style="white-space: pre-wrap; word-break: break-word;">{{ row.description }}</div>
                         </td>
-
-                        <td (click)="goToDetail(row)" class="align-top text-center"><code>{{ row.version }}</code></td>
+                        <td class="text-center align-top"><code>{{ row.version }}</code></td>
+                        <td>{{ row.projectTypeName || '-' }}</td>
+                        <td>{{ row.clientName || '-' }}</td>
+                        <td>{{ row.productName || '-' }}</td>
+                        <td class="text-muted">{{ row.inputDate | date: 'dd MMM yyyy' }}</td>
+                        <td class="text-end">
+                            @if (canUse) {
+                            <button type="button" class="btn btn-sm btn-outline-primary" (click)="useTemplate(row)" [disabled]="usingId !== null">Use</button>
+                            }
+                        </td>
                     </tr>
                     }
                 </tbody>

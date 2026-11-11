@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/master/master-product/master-product.component.css"],
+  "sourcesContent": [":host {\r\n  display: block;\r\n}\r\n.parent td {\r\n  font-weight: bold;\r\n}"],
+  "mappings": ";AAAA;AACE,WAAS;AACX;AACA,CAAC,OAAO;AACN,eAAa;AACf;",
+  "names": []
+}

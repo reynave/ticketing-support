@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbDatepickerModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerModule, NgbModal, NgbModalModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,7 +26,7 @@ interface ProjectFormModel {
 @Component({
   selector: 'app-project-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule],
+  imports: [CommonModule, FormsModule, NgbDatepickerModule, NgbNavModule, NgbModalModule],
   styleUrls: ['./project-create.component.css'],
   templateUrl: './project-create.component.html',
 })
@@ -845,123 +845,62 @@ export class ProjectCreateComponent implements OnDestroy {
   }
 
   loadTemplateMaster(content: any): void {
-    alert('On process, coming soon');
-    // if (this.templateName) {
-    //   return;
-    // }
+    this.loadingTemplateMaster = true;
+    this.listOfTemplateMaster = [];
 
-    // this.modalService.open(content, { size: 'xl' });
-    // this.loadingTemplateMaster = true;
-  }
+    this.modalService.open(content, { size: 'xl' });
 
-  templateDetail : any = null;
-  selectTemplateMaster(template: any): void {
-    if (!template) {
-      return;
-    }
-
-    this.templateName = template.name;
-    this.formModel.templateMaster = String(template.id);
-
-    this.apiService.get(`/template/${template.id}`).subscribe({
+    this.apiService.get('/project/templates').subscribe({
       next: (response) => {
-
-        const templateDetail = response?.data ?? response;
-        const parsedTemplate = this.parseTemplatePayload(
-          templateDetail,
-          template,
-        );
-
-        this.formModel = {
-          ...this.formModel,
-          ...parsedTemplate.formModel,
-        };
-
-
-              //  console.log('Template detail response:', response.data.json);
-        // convert json to object if it's a string
-        this.templateDetail = this.tryParseJson(response.data.json) ?? response.data.json;
-        console.log('Parsed template detail:', this.templateDetail);
-
         this.loadingTemplateMaster = false;
-        this.modalService.dismissAll();
+        this.listOfTemplateMaster = Array.isArray(response?.data) ? response.data : [];
       },
       error: (error) => {
-        console.error('Error loading template detail:', error);
         this.loadingTemplateMaster = false;
+        this.listOfTemplateMaster = [];
+        this.errorMessage = error?.error?.message || 'Failed to load templates.';
       },
     });
   }
 
-  private parseTemplatePayload(
-    templateDetail: any,
-    template: any,
-  ): {
-    formModel: Partial<ProjectFormModel>;
-  } {
-    const rawJson = templateDetail?.json ?? templateDetail;
-    const parsedJson = this.tryParseJson(rawJson);
-    const projectData = parsedJson?.project ?? parsedJson;
+  templateDetail : any = null;
+  selectTemplateMaster(template: any): void {
+    if (!template || !this.draftId) {
+      return;
+    }
 
-    const users = Array.isArray(projectData?.users) ? projectData.users : [];
-    const managerUser = users.find((user: any) => Boolean(user?.asManager));
+    const templateId = String(template?.id ?? '').trim();
 
-    this.allUsers = users.map((user: any) => ({
-      id: user.id,
-      name: String(user.name || ''),
-      userAuthLevel: user.userAuthLevel || '',
-      checked: Boolean(user.checked || user.asManager),
-      asManager: Boolean(user.asManager),
-      division: user.division || '',
-      readonly: false,
-    }));
-    this.users = [...this.allUsers];
+    if (!templateId) {
+      return;
+    }
 
-    return {
-      formModel: {
-        id: String(projectData?.id ?? this.formModel.id),
-        name: String(projectData?.name ?? this.formModel.name),
-        projectTypeId: Number(
-          projectData?.projectTypeId ?? this.formModel.projectTypeId,
-        ),
-        projectBilleableId: Number(
-          projectData?.projectBilleableId ?? this.formModel.projectBilleableId,
-        ),
-        productId: Number(projectData?.productId ?? this.formModel.productId),
-        clientId: String(projectData?.clientId ?? this.formModel.clientId),
-        startDate:
-          this.parseDate(projectData?.startDate) ?? this.formModel.startDate,
-        endDate: this.parseDate(projectData?.endDate) ?? this.formModel.endDate,
-        status: Number(projectData?.status ?? this.formModel.status),
-        templateMaster: String(template?.id ?? this.formModel.templateMaster),
-        userManager: String(
-          managerUser?.name ??
-            projectData?.userManager ??
-            this.formModel.userManager,
-        ),
-        ticketCategoriesParentId: Number(
-          projectData?.ticketCategoriesParentId ??
-            this.formModel.ticketCategoriesParentId,
-        ),
-        ticketBaseHours: this.formModel.ticketBaseHours, 
+    this.loadingTemplateMaster = true;
+    this.errorMessage = '';
+
+    this.apiService.post(`/project/${this.draftId}/apply-template/${templateId}`, {}).subscribe({
+      next: (response) => {
+        this.loadingTemplateMaster = false;
+
+        const data = response?.data ?? null;
+
+        if (data) {
+          this.applyDraftToForm(data);
+          this.savedUsers = Array.isArray(data?.users) ? data.users : [];
+          this.mergeSavedUsers();
+        }
+
+        this.templateName = template.name || templateId;
+        this.formModel.templateMaster = templateId;
+        this.templateDetail = null;
+        this.modalService.dismissAll();
+        void this.loadDraftTasks();
       },
-    };
-  }
-
-  private tryParseJson(value: any): any {
-    if (!value) {
-      return null;
-    }
-
-    if (typeof value === 'string') {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return null;
-      }
-    }
-
-    return value;
+      error: (error) => {
+        this.loadingTemplateMaster = false;
+        this.errorMessage = error?.error?.message || 'Failed to apply template.';
+      },
+    });
   }
 
   private parseDate(

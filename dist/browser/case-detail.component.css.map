@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/cases/case-detail/case-detail.component.css"],
+  "sourcesContent": [".task-detail-page .card {\r\n  border-color: #e9ecef;\r\n}\r\n\r\n.task-detail-page .card-header {\r\n  border-bottom: 1px solid #e9ecef;\r\n}\r\n\r\n.task-detail-page .form-label {\r\n  margin-bottom: 0.35rem;\r\n}\r\n\r\n.task-form-table {\r\n  border: 1px solid #e9ecef;\r\n}\r\n\r\n.task-form-table td {\r\n  padding: 0.1rem 0.75rem;\r\n  vertical-align: middle;\r\n  border-color: #eef1f4;\r\n}\r\n\r\n.task-form-table .label-col {\r\n  width: 180px;\r\n  background: #f8f9fb;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .task-form-table .label-col {\r\n    width: 140px;\r\n  }\r\n}\r\n "],
+  "mappings": ";AAAA,CAAC,iBAAiB,CAAC;AACjB,gBAAc;AAChB;AAEA,CAJC,iBAIiB,CAAC;AACjB,iBAAe,IAAI,MAAM;AAC3B;AAEA,CARC,iBAQiB,CAAC;AACjB,iBAAe;AACjB;AAEA,CAAC;AACC,UAAQ,IAAI,MAAM;AACpB;AAEA,CAJC,gBAIgB;AACf,WAAS,OAAO;AAChB,kBAAgB;AAChB,gBAAc;AAChB;AAEA,CAVC,gBAUgB,CAAC;AAChB,SAAO;AACP,cAAY;AACd;AAEA,OAAO,CAAC,SAAS,EAAE;AACjB,GAhBD,gBAgBkB,CAND;AAOd,WAAO;AACT;AACF;",
+  "names": []
+}

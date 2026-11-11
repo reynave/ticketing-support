@@ -1,7 +1,7 @@
 # Agent: Angular 18 Builder — Thinktank Ticketing (Admin Frontend)
 
 > 📌 **Dokumen ini adalah sumber kebenaran (single source of truth) untuk frontend Angular admin (`ng18`).**
-> Terakhir di-sync dengan kode: **10 November 2026** (draft project + draft task).
+> Terakhir di-sync dengan kode: **11 November 2026** (draft project + draft task + template project relasional).
 > Jika ada perubahan kode, dokumen ini **wajib** di-update pada sesi yang sama.
 > AI agent lain **tidak perlu membaca ulang isi folder `ng18`** — baca dokumen ini dulu, lalu buka file spesifik hanya jika perlu detail implementasi.
 
@@ -12,6 +12,7 @@
 - ✅ **Selesai**: Login/Logout/Relogin (JWT + access right), Layout admin (sidebar/navbar + search global + profil user).
 - ✅ **Selesai**: Master Data (generic `master/:masterKey` + halaman khusus Product, Template, Ticket Categories), Client, Project, User.
 - ✅ **Selesai**: Draft Project (`/project/create/:id`: auto-save, publish, delete) + Draft Task (add/edit/delete + drag-drop `projectSorting`).
+- ✅ **Selesai**: Template Project relasional — "Convert to Template", list/manage template (read-only + delete), tombol **"Use"** (instantiate → draft baru), dan picker **"Template Master"** di `project-create` (apply template → header + users + contacts + ticket_draft ke draft yang sedang diedit).
 - ✅ **Selesai**: Transaksi **Task / Case / Change Request** + log aktivitas + upload attachment + countdown SLA + submit verification.
 - ✅ **Selesai**: Laporan (Task / Case / CR / Users), Rating, Ticket History, Ticket Balance History, User Login History, Verification.
 - 🟡 **Sebagian**: Access right — guard `canAccessPage`/`canCreate`/`canUpdate`/`canDelete` sudah diterapkan di banyak halaman, namun sebagian modul belum tuntas. Lihat `AGENT/access-right-usage.md`.
@@ -26,6 +27,7 @@
 - Client (external user) & portalnya ada di aplikasi **terpisah**: `frontEnd/ng18-client` (di luar scope dokumen ini).
 - Halaman **Project List** punya tabel **Draft Projects** (`presence = 4`) terpisah dari project published (`presence = 1`).
 - **Project Create** (`/project/create/:id`) adalah editor draft project: auto-save (debounce 1 detik) + tab **Draft Tasks**, lalu **Publish** (`presence 4→1`) yang me-copy draft task ke tabel `ticket`.
+- **Template Project** disimpan **relasional** (bukan JSON lama `template.json`): metadata `name`/`description`/`version` di tabel `template` (`tempateType='project'`), header project di `template_project` (dengan `templateId` → `template.id`), team di `template_project_users`, contact di `template_project_contact`, task blueprint di `template_project_ticket_draft`. Sudah **tidak memakai `presence = 100`**.
 
 ---
 
@@ -306,6 +308,7 @@ Contoh endpoint yang dipanggil frontend:
 - CRUD: `/client`, `/client/:id`, `/user`, `/user/:id`, `/user/:id/password`, `/project`, `/project/contact`
 - Project draft: `POST /project/draft`, `GET /project/drafts`, `PUT /project/:id` (publish `presence:1`)
 - Draft task: `GET/POST /project/draftTasks`, `PUT /project/draftTasks/reorder`, `PUT/DELETE /project/draftTasks/:id`
+- Project template: `GET /project/templates`, `POST /project/:id/template` (save-as-template), `POST /project/template/:id/instantiate` (buat draft baru dari template), `POST /project/:id/apply-template/:templateId` (apply template ke draft yang ada), `DELETE /project/template/:id`
 - Transaksi: `/tasks`, `/cases`, `/change-requests` (+ `/:id`, `/:id/logs`, `/:id/tasks`, `/:id/submitInProgress`, `/:id/submitVerification`)
 - Master: `/master/:masterKey` (+ `/:id`), `/master/industry`, `/master/module`, `/master/user-access-right`, `/master/searchTickets`, `/master/loadbBadge`
 - Upload: `POST /upload` (multipart/form-data)
