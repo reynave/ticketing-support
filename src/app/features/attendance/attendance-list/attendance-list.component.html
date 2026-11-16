@@ -1,0 +1,99 @@
+<div class="container-fluid">
+  @if (!canAccessPage) {
+    <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <div class="page-title">Attendance</div>
+        <div class="page-subtitle">Record Attendance (check-in / check-out) users.</div>
+      </div>
+      <button type="button" class="btn btn-primary-sm" (click)="load()">Refresh</button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small mb-1">Dari tanggal</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.workDateFrom" (ngModelChange)="load()" />
+          </div>
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small mb-1">Sampai tanggal</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.workDateTo" (ngModelChange)="load()" />
+          </div>
+          <div class="col-6 col-md-3 col-xl-3">
+            <label class="form-label small mb-1">User ID</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Contoh: USR-ADMIN" [(ngModel)]="filter.userId" (ngModelChange)="load()" />
+          </div>
+          <div class="col-6 col-md-3 col-xl-3">
+            <label class="form-label small mb-1">Cari</label>
+            <input type="search" class="form-control form-control-sm" placeholder="Nama / alamat / IP" [(ngModel)]="filter.keyword" (ngModelChange)="load()" />
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-sm btn-light border" (click)="resetFilter()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      @if (loading) {
+        <div class="text-muted">Loading attendance data...</div>
+      } @else if (!rows.length) {
+        <div class="text-muted">No attendance data.</div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee</th>
+                <th>Work Date</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track trackById($index, row)) {
+                <tr>
+                  <td>{{ row.id }}</td>
+                  <td>
+                    <div class="fw-semibold">{{ row.userName }}</div>
+                    <div class="small text-muted">{{ row.userId }}</div>
+                  </td>
+                  <td>{{ row.workDate }}</td>
+                  <td>
+                    @if (row.checkIn) {
+                      <div class="fw-semibold">{{ row.checkInDateTime }}</div>
+                      <div class="small text-muted">{{ row.checkInAddress || '-' }}</div>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td>
+                    @if (row.checkOut) {
+                      <div class="fw-semibold">{{ row.checkOutDateTime }}</div>
+                      <div class="small text-muted">{{ row.checkOutAddress || '-' }}</div>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    <span class="badge" [ngClass]="row.presence === 1 ? 'text-bg-success' : 'text-bg-secondary'">
+                      {{ row.presence === 1 ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;1996e11123ea368a7ff9318a0d6cd5e19b7e0fd7ec48df67daa4f60638b885a9;C:/nodejs/8thinktank-ticketing/frontEnd/ng18/src/app/features/change-requests/change-request-detail/countdown.component.ts"],
+  "sourcesContent": ["\n    .countdown { \n      font-family: monospace;\n    }\n    .countdown.overdue {\n      color: #d33;\n    }\n    .countdown-invalid { \n      color: #999;\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,eAAa;AACf;AACA,CAHC,SAGS,CAAC;AACT,SAAO;AACT;AACA,CAAC;AACC,SAAO;AACT;",
+  "names": []
+}

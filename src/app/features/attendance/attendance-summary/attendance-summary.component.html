@@ -1,0 +1,149 @@
+<div class="container-fluid px-3 px-lg-4 ">
+  @if (!canAccessPage) {
+    <div class="alert alert-danger py-2">You do not have access to this module.</div>
+  } @else {
+
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <div class="page-title">Attendance Summary</div>
+        <div class="page-subtitle">Record Attendance (check-in / check-out) users.</div>
+      </div>
+      <button type="button" class="btn btn-primary-sm" (click)="load()">Refresh</button>
+    </div>
+    
+    @if (errorMessage) {
+      <div class="alert alert-danger py-2">{{ errorMessage }}</div>
+    }
+
+    <!-- Filters -->
+    <div class="card mb-4">
+      <div class="card-body py-3">
+        <form class="row g-2 align-items-end ">
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small text-body-secondary mb-1">Period</label>
+            <select class="form-select" [(ngModel)]="filter.period" name="period">
+              <option>This month</option>
+              <option>Last month</option>
+              <option>Custom range</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small text-body-secondary mb-1">Location</label>
+            <select class="form-select" [(ngModel)]="filter.location" name="location">
+              <option value="">All locations</option>
+              <option>Kantor Utama</option>
+              <option>Menara BCA</option>
+              <option>The Plaza</option>
+              <option>Jl. Jend. Sudirman Kav. 1</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3 col-xl-2">
+            <label class="form-label small text-body-secondary mb-1">Status</label>
+            <select class="form-select" [(ngModel)]="filter.status" name="status">
+              <option value="">All statuses</option>
+              <option>Working</option>
+              <option>Late</option>
+              <option>Checked out</option>
+              <option>Not checked in</option>
+              <option>Missing check-out</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3 col-xl-3">
+            <label class="form-label small text-body-secondary mb-1">Employee</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="search" class="form-control" placeholder="Name or ID" [(ngModel)]="filter.employee" name="employee" />
+            </div>
+          </div>
+          <div class="col-12 col-xl-3 d-flex gap-2 justify-content-xl-end">
+            <button type="button" class="btn btn-outline-secondary" (click)="resetFilter()"><i class="bi bi-x-circle me-1"></i>Reset</button>
+            <button type="button" class="btn btn-primary" (click)="load()"><i class="bi bi-funnel me-1"></i>Apply</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Monthly summary -->
+    <div class="card" id="monthly">
+      <div class="card-header bg-transparent d-flex flex-wrap align-items-center gap-2 py-3">
+        <h2 class="h6 mb-0"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Monthly summary per employee</h2>
+        <small class="text-body-secondary">{{ dashboard.periodLabel }}</small>
+        <div class="ms-auto d-flex gap-2">
+          <select class="form-select form-select-sm" style="width:auto" [(ngModel)]="month" name="month" (change)="load()">
+            @for (opt of dashboard.monthOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="printDashboard()"><i class="bi bi-printer me-1"></i>Print</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="exportCsv()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Export</button>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="card-body text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-body-secondary">Loading monthly summary...</div>
+        </div>
+      } @else {
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Employee</th>
+                <th class="text-center">Present</th>
+                <th class="text-center">Late</th>
+                <th class="text-center">Absent</th>
+                <th class="text-center">Missing out</th>
+                <th class="text-end">Total hours</th>
+                <th class="text-end">Avg / day</th>
+                <th style="min-width:170px">Attendance rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of filteredEmployees; track e.userId) {
+                <tr>
+                  <td><span class="fw-semibold">{{ e.name }}</span><br /><small class="text-body-secondary">{{ e.userId }}</small></td>
+                  <td class="text-center">{{ e.present }}</td>
+                  <td class="text-center">
+                    @if (e.late > 0) { <span class="badge bg-warning-subtle text-warning-emphasis">{{ e.late }}</span> } @else { 0 }
+                  </td>
+                  <td class="text-center">
+                    @if (e.absent > 0) { <span class="badge bg-danger-subtle text-danger-emphasis">{{ e.absent }}</span> } @else { 0 }
+                  </td>
+                  <td class="text-center">
+                    @if (e.missingOut > 0) { <span class="badge bg-danger-subtle text-danger-emphasis">{{ e.missingOut }}</span> } @else { 0 }
+                  </td>
+                  <td class="text-end">{{ e.totalHours }}</td>
+                  <td class="text-end">{{ e.avgPerDay }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress flex-grow-1" style="height:.5rem">
+                        <div class="progress-bar" [ngClass]="rateClass(e.rate)" [style.width.%]="e.rate"></div>
+                      </div>
+                      <small class="fw-semibold" style="width:2.5rem">{{ e.rate }}%</small>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="8" class="text-center text-body-secondary py-4">No employees match your filter.</td></tr>
+              }
+            </tbody>
+            <tfoot class="table-light fw-semibold">
+              <tr>
+                <td>Team total</td>
+                <td class="text-center">{{ dashboard.totals.present }}</td>
+                <td class="text-center">{{ dashboard.totals.late }}</td>
+                <td class="text-center">{{ dashboard.totals.absent }}</td>
+                <td class="text-center">{{ dashboard.totals.missingOut }}</td>
+                <td class="text-end">{{ dashboard.totals.totalHours }}</td>
+                <td class="text-end">{{ dashboard.totals.avgPerDay }}</td>
+                <td>{{ dashboard.totals.rate }}% average</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

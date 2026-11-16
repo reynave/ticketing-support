@@ -346,6 +346,57 @@
           }
         </ng-template>
       </li>
+      <li [ngbNavItem]="3">
+        <button ngbNavLink>Attendance</button>
+        <ng-template ngbNavContent>
+          @if (loadingAttendance) {
+          <div class="text-muted small">Loading attendance...</div>
+          } @else if (!attendances.length) {
+          <div class="text-muted small">No attendance related to this user.</div>
+          } @else {
+          <div class="scroll-table">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Work Date</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of attendances; track row.id) {
+                <tr>
+                  <td>{{ row.workDate }}</td>
+                  <td>
+                    @if (row.checkIn) {
+                    <div class="fw-semibold">{{ row.checkInDateTime }}</div>
+                    <div class="small text-muted">{{ row.checkInAddress || '-' }}</div>
+                    } @else {
+                    <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td>
+                    @if (row.checkOut) {
+                    <div class="fw-semibold">{{ row.checkOutDateTime }}</div>
+                    <div class="small text-muted">{{ row.checkOutAddress || '-' }}</div>
+                    } @else {
+                    <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="row.presence === 1 ? 'text-bg-success' : 'text-bg-secondary'">
+                      {{ row.presence === 1 ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
+        </ng-template>
+      </li>
     </ul>
     <div [ngbNavOutlet]="nav" class="mt-2"></div>
   </div>

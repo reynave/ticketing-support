@@ -108,6 +108,26 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'change_circle',
       moduleId: 5007,
     },
+
+     {
+      path: '/report/attendance/list',
+      label: 'Attendance List',
+      icon: 'event_available',
+      moduleId: 7001,
+    },
+    {
+      path: '/report/attendance/summary',
+      label: 'Attendance Summary',
+      icon: 'table_view',
+      moduleId: 7001,
+    },
+
+    {
+      path: '/report/attendance/dashboard',
+      label: 'Attendance Dashboard', 
+      icon: 'stacked_bar_chart',
+      moduleId: 7001,
+    },
     //   { path: '/ticket-history', label: 'Ticket History', icon: 'conversion_path'  },
   ];
 

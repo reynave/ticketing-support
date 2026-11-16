@@ -70,6 +70,8 @@ export class UserDetailComponent implements OnInit {
   loadingClients = false;
   clientKeyword = '';
   projectKeyword = '';
+  attendances: any[] = [];
+  loadingAttendance = false;
 
   ngOnInit(): void {
     if (!this.canAccessPage) {
@@ -83,6 +85,7 @@ export class UserDetailComponent implements OnInit {
       this.loadProducts();
       this.loadProjects();
       this.loadClients();
+      this.loadAttendance();
     }
   }
 
@@ -168,6 +171,24 @@ export class UserDetailComponent implements OnInit {
       error: () => {
         this.loadingClients = false;
         this.clients = [];
+      },
+    });
+  }
+
+  loadAttendance(): void {
+    if (!this.userId) {
+      return;
+    }
+
+    this.loadingAttendance = true;
+    this.apiService.get(`/user/${this.userId}/attendance`).subscribe({
+      next: (response) => {
+        this.loadingAttendance = false;
+        this.attendances = Array.isArray(response?.data) ? response.data : [];
+      },
+      error: () => {
+        this.loadingAttendance = false;
+        this.attendances = [];
       },
     });
   }

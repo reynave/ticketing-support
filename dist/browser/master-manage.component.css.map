@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/master/master-manage/master-manage.component.css"],
+  "sourcesContent": [".filter-input {\r\n  width: 180px;\r\n}\r\n\r\n.action-col {\r\n  width: 110px;\r\n}\r\n\r\n.cell-badge,\r\n.cell-text {\r\n  display: inline-flex;\r\n  align-items: center;\r\n  gap: 0.35rem;\r\n}\r\n\r\n.cell-badge i,\r\n.cell-text i {\r\n  font-size: 0.8rem;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,SAAO;AACT;AAEA,CAAC;AACC,SAAO;AACT;AAEA,CAAC;AACD,CAAC;AACC,WAAS;AACT,eAAa;AACb,OAAK;AACP;AAEA,CAPC,WAOW;AACZ,CAPC,UAOU;AACT,aAAW;AACb;",
+  "names": []
+}

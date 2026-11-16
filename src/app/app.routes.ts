@@ -36,6 +36,9 @@ import { CrReportComponent } from './features/reports/cr-report/cr-report.compon
 import { VerificationListComponent } from './features/verification/verification-list/verification-list.component';
 import { UsersReportComponent } from './features/reports/users-report/users-report.component';
 import { UserDetailReportComponent } from './features/reports/users-report/user-detail-report/user-detail-report.component';
+import { AttendanceListComponent } from './features/attendance/attendance-list/attendance-list.component';
+import { AttendanceSummaryComponent } from './features/attendance/attendance-summary/attendance-summary.component';
+import { AttendanceDashboardComponent } from './features/attendance/attendance-dashboard/attendance-dashboard.component';
  
 export const routes: Routes = [
 	{
@@ -140,6 +143,19 @@ export const routes: Routes = [
 			{
 				path: 'report/change-requests',
 				component: CrReportComponent,
+			},
+
+			{
+				path: 'report/attendance/list',
+				component: AttendanceListComponent,
+			},
+			{
+				path: 'report/attendance/summary',
+				component: AttendanceSummaryComponent,
+			},
+			{
+				path: 'report/attendance/dashboard',
+				component: AttendanceDashboardComponent,
 			},
 
 

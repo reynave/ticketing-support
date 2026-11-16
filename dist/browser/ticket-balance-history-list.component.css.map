@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/ticket-balance-history/ticket-balance-history-list/ticket-balance-history-list.component.css"],
+  "sourcesContent": [".text-end {\r\n  white-space: nowrap;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,eAAa;AACf;",
+  "names": []
+}

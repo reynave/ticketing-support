@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/auth/login/login.component.css"],
+  "sourcesContent": [" .form-icon-left {\r\n  border-radius: 8px 0 0 8px;\r\n  border-color: #d1d5db;\r\n}\r\n\r\n.form-icon {\r\n  font-size: 0.9rem;\r\n}\r\n\r\n.forgot-link {\r\n  color: #1a56db;\r\n  font-size: 0.8rem;\r\n  cursor: pointer;\r\n}\r\n\r\n.forgot-link:hover {\r\n  text-decoration: underline;\r\n}\r\n\r\n.btn-login:disabled {\r\n  opacity: 0.7;\r\n}\r\n"],
+  "mappings": ";AAAC,CAAC;AACA,iBAAe,IAAI,EAAE,EAAE;AACvB,gBAAc;AAChB;AAEA,CAAC;AACC,aAAW;AACb;AAEA,CAAC;AACC,SAAO;AACP,aAAW;AACX,UAAQ;AACV;AAEA,CANC,WAMW;AACV,mBAAiB;AACnB;AAEA,CAAC,SAAS;AACR,WAAS;AACX;",
+  "names": []
+}
