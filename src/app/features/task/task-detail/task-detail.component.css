@@ -35,3 +35,13 @@
   font-weight: bolder;;
 }
  
+
+.mychecklist input {
+  border: 2px solid #9a9999 ; 
+  background-color: #f8f9fb;
+}
+
+
+.mychecklist input[type="checkbox"] {
+  color: #353535;
+}

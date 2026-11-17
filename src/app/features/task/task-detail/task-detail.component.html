@@ -307,14 +307,14 @@
 
       <div class="card border shadow-sm mb-2" id="task-checklist-section">
         <div class="card-header bg-light d-flex align-items-center justify-content-between py-2 px-3 flex-wrap gap-2">
-          <span class="fw-semibold small">Checklist</span>
+          <span class="fw-semibold small">My Checklist</span>
         </div>
-        <div class="card-body p-3">
+        <div class="card-body p-3 mychecklist">
           @if (loadingChecklist) {
           <div class="text-muted small">Loading checklist...</div>
           } @else {
 
-            @if(formMode == 'edit') {
+       
           <div class="input-group input-group-sm mb-3">
             <input class="form-control form-control-sm" name="newParentDescription" [(ngModel)]="newParentDescription"
               [ngModelOptions]="{ standalone: true }" placeholder="Add parent checklist item..."
@@ -322,7 +322,7 @@
             <button type="button" class="btn btn-outline-primary btn-sm"
               [disabled]="checklistSaving || !newParentDescription.trim()" (click)="addParentChecklist()">Add</button>
           </div>
-        }
+      
 
           @if (!checklistParents.length) {
           <div class="text-muted small">No checklist yet.</div>
@@ -332,7 +332,7 @@
             <div class="d-flex align-items-center gap-2" (dragover)="onChecklistDragOver($event)"
               (drop)="onChecklistDrop(parent, checklistParents, $event)">
               <span class="text-muted" draggable="true" style="cursor: grab; user-select: none;" title="Drag to reorder"
-                (dragstart)="onChecklistDragStart(parent, $event)" (dragend)="checklistDragEnd()">⋮⋮</span>
+                (dragstart)="onChecklistDragStart(parent, $event)" (dragend)="checklistDragEnd()"><i class="bi bi-arrow-down-up"></i></span>
 
               <input class="form-control form-control-sm" name="parentDescription{{ parent.id }}" [(ngModel)]="parent.description"
                 [ngModelOptions]="{ standalone: true }"
@@ -342,16 +342,16 @@
               <button type="button" class="btn btn-outline-danger btn-sm"
                 (click)="deleteChecklistItem(parent)">✕</button>
             </div>
-
-            @if (childrenOf(parent.id).length || addChildParentId === parent.id) {
+ 
             <div class="ms-4 mt-2 border-start ps-2">
               @for (child of childrenOf(parent.id); track child.id) {
               <div class="d-flex align-items-center gap-2 mb-1 " (dragover)="onChecklistDragOver($event)"
                 (drop)="onChecklistDrop(child, childrenOf(parent.id), $event)">
                 <span class="text-muted" draggable="true" style="cursor: grab; user-select: none;" title="Drag to reorder"
-                  (dragstart)="onChecklistDragStart(child, $event)" (dragend)="checklistDragEnd()">⋮⋮</span>
-                <input class="form-check-input" type="checkbox" [checked]="child.status === 1"
-                  (change)="toggleChecklistItem(child)" />
+                  (dragstart)="onChecklistDragStart(child, $event)" (dragend)="checklistDragEnd()"><i class="bi bi-arrow-down-up"></i></span>
+                <a href="javascript:;" role="button" title="Toggle checklist item" style="cursor: pointer;" (click)="toggleChecklistItem(child)">
+                  <i [class]="child.status === 1 ? 'bi bi-check-square-fill' : 'bi bi-app'"></i>
+                </a>
                 <input class="form-control form-control-sm {{child.status == 1 ? 'bg-light text-decoration-line-through':''}}" name="childDescription{{ child.id }}" [(ngModel)]="child.description"
                   [ngModelOptions]="{ standalone: true }"
                   (keydown.enter)="$event.preventDefault(); updateChecklistDescription(child)"
@@ -374,10 +374,10 @@
               </div>
               }
 
-               <button type="button" class="btn btn-sm btn-secondary btn-sm text-nowrap ms-5"
-                (click)="startAddChild(parent)">+ Add Item of Checklist</button>
+               <button type="button" class="btn btn-sm btn-secondary btn-sm text-nowrap"
+                (click)="startAddChild(parent)">+ Add Item</button>
             </div>
-            }
+            
           </div>
           }
           }
