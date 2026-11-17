@@ -1,5 +1,5 @@
 const apiBaseUrl = 'https://crm.co.id/api-dev';
-const production = false;
+const production = true;
 
 /**
  * This file is used to define environment variables for the application.

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/user/user-list/user-list.component.css"],
-  "sourcesContent": [".stat-card {\r\n  background: white;\r\n  border-radius: 8px;\r\n  padding: 20px;\r\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);\r\n}\r\n\r\n.page-header {\r\n  margin-bottom: 24px;\r\n}\r\n\r\n.page-title {\r\n  font-size: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 4px;\r\n}\r\n\r\n.page-subtitle {\r\n  font-size: 14px;\r\n  color: #666;\r\n}\r\n\r\n.action-buttons {\r\n  display: flex;\r\n  gap: 8px;\r\n  justify-content: flex-end;\r\n}\r\n\r\n.btn-primary-sm {\r\n  padding: 6px 12px;\r\n  font-size: 14px;\r\n  background-color: #007bff;\r\n  color: white;\r\n  border: none;\r\n  border-radius: 4px;\r\n  cursor: pointer;\r\n}\r\n\r\n.btn-primary-sm:hover {\r\n  background-color: #0056b3;\r\n}\r\n\r\n.btn-primary-sm:disabled {\r\n  opacity: 0.5;\r\n  cursor: not-allowed;\r\n}\r\n"],
-  "mappings": ";AAAA,CAAC;AACC,cAAY;AACZ,iBAAe;AACf,WAAS;AACT,cAAY,EAAE,IAAI,IAAI,KAAK,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE;AACtC;AAEA,CAAC;AACC,iBAAe;AACjB;AAEA,CAAC;AACC,aAAW;AACX,eAAa;AACb,iBAAe;AACjB;AAEA,CAAC;AACC,aAAW;AACX,SAAO;AACT;AAEA,CAAC;AACC,WAAS;AACT,OAAK;AACL,mBAAiB;AACnB;AAEA,CAAC;AACC,WAAS,IAAI;AACb,aAAW;AACX,oBAAkB;AAClB,SAAO;AACP,UAAQ;AACR,iBAAe;AACf,UAAQ;AACV;AAEA,CAVC,cAUc;AACb,oBAAkB;AACpB;AAEA,CAdC,cAcc;AACb,WAAS;AACT,UAAQ;AACV;",
-  "names": []
-}

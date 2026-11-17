@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/project/project-create/project-create.component.css"],
-  "sourcesContent": ["tbody tr th{\r\n    background-color: #f4f4f4;\r\n} "],
-  "mappings": ";AAAA,MAAM,GAAG;AACL,oBAAkB;AACtB;",
-  "names": []
-}

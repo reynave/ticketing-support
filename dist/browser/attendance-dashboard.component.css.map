@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/attendance/attendance-dashboard/attendance-dashboard.component.css"],
-  "sourcesContent": [":host {\r\n  display: block;\r\n}\r\n\r\n.table > :not(caption) > * > * {\r\n  padding-top: 0.7rem;\r\n  padding-bottom: 0.7rem;\r\n}"],
-  "mappings": ";AAAA;AACE,WAAS;AACX;AAEA,CAAC,MAAM,EAAE,KAAK,SAAS,EAAE,EAAE,EAAE;AAC3B,eAAa;AACb,kBAAgB;AAClB;",
-  "names": []
-}
