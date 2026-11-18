@@ -1,7 +1,7 @@
 # Agent: Angular 18 Builder — Thinktank Ticketing (Admin Frontend)
 
 > 📌 **Dokumen ini adalah sumber kebenaran (single source of truth) untuk frontend Angular admin (`ng18`).**
-> Terakhir di-sync dengan kode: **11 November 2026** (draft project + draft task + template project relasional).
+> Terakhir di-sync dengan kode: **17 November 2026** (draft project + draft task + template project relasional + attendance report).
 > Jika ada perubahan kode, dokumen ini **wajib** di-update pada sesi yang sama.
 > AI agent lain **tidak perlu membaca ulang isi folder `ng18`** — baca dokumen ini dulu, lalu buka file spesifik hanya jika perlu detail implementasi.
 
@@ -15,6 +15,7 @@
 - ✅ **Selesai**: Template Project relasional — "Convert to Template", list/manage template (read-only + delete), tombol **"Use"** (instantiate → draft baru), dan picker **"Template Master"** di `project-create` (apply template → header + users + contacts + ticket_draft ke draft yang sedang diedit).
 - ✅ **Selesai**: Transaksi **Task / Case / Change Request** + log aktivitas + upload attachment + countdown SLA + submit verification.
 - ✅ **Selesai**: Laporan (Task / Case / CR / Users), Rating, Ticket History, Ticket Balance History, User Login History, Verification.
+- ✅ **Selesai**: Attendance report (absen) — Attendance List, Summary, Dashboard (module **7001**) di `/report/attendance/*`; data check-in/check-out diinput pegawai lewat aplikasi terpisah `frontEnd/absen`.
 - 🟡 **Sebagian**: Access right — guard `canAccessPage`/`canCreate`/`canUpdate`/`canDelete` sudah diterapkan di banyak halaman, namun sebagian modul belum tuntas. Lihat `AGENT/access-right-usage.md`.
 - ⏳ **Belum ada**: Unit test menyeluruh (hanya 3 file `.spec.ts`), i18n, server-side pagination di frontend, refresh token.
 
@@ -28,6 +29,7 @@
 - Halaman **Project List** punya tabel **Draft Projects** (`presence = 4`) terpisah dari project published (`presence = 1`).
 - **Project Create** (`/project/create/:id`) adalah editor draft project: auto-save (debounce 1 detik) + tab **Draft Tasks**, lalu **Publish** (`presence 4→1`) yang me-copy draft task ke tabel `ticket`.
 - **Template Project** disimpan **relasional** (bukan JSON lama `template.json`): metadata `name`/`description`/`version` di tabel `template` (`tempateType='project'`), header project di `template_project` (dengan `templateId` → `template.id`), team di `template_project_users`, contact di `template_project_contact`, task blueprint di `template_project_ticket_draft`. Sudah **tidak memakai `presence = 100`**.
+- **Attendance (absen)** dicatat pegawai lewat aplikasi terpisah `frontEnd/absen` (check-in/check-out + riwayat). Admin `ng18` **hanya menampilkan rekap** (list per user, summary bulanan, dashboard harian) via endpoint `GET /attendance`, `GET /attendance/dashboard`, `GET /attendance/summary`; access right module **7001**.
 
 ---
 
@@ -54,7 +56,7 @@
 
 - Root project: `c:\nodejs\8thinktank-ticketing\frontEnd\ng18`
 - Repository Git berada **di dalam folder `ng18/`** (bukan di root workspace).
-- Struktur paralel: `frontEnd/ng18-client` = aplikasi portal **client** (Angular, terpisah). Dokumen ini khusus admin `ng18`.
+- Struktur paralel: `frontEnd/ng18-client` = aplikasi portal **client** (Angular, terpisah); `frontEnd/absen` = aplikasi **attendance/absen** pegawai (Angular, terpisah). Dokumen ini khusus admin `ng18`.
 
 ---
 
@@ -130,6 +132,7 @@ src/
 │   │   ├── admin-layout/         # shell navbar + sidebar
 │   │   └── not-found/            # halaman 404
 │   └── features/
+│       ├── attendance/           # attendance-list, attendance-summary, attendance-dashboard (report admin)
 │       ├── auth/                 # login, logout, relogin
 │       ├── home/                 # dashboard
 │       ├── cases/                # case-list, case-detail (+countdown, upload)
@@ -187,6 +190,9 @@ Route terproteksi (children `AdminLayoutComponent`, `canActivate: [authGuard]`):
 | `/report/task` | `TaskReportComponent` | |
 | `/report/cases` | `CaseReportComponent` | |
 | `/report/change-requests` | `CrReportComponent` | |
+| `/report/attendance/list` | `AttendanceListComponent` | |
+| `/report/attendance/summary` | `AttendanceSummaryComponent` | |
+| `/report/attendance/dashboard` | `AttendanceDashboardComponent` | |
 | `/report/users`, `/report/users/:id` | `UsersReportComponent`, `UserDetailReportComponent` | |
 | `/user-login-history` | `UserLoginHistoryListComponent` | |
 | `/ticket-balance-history` | `TicketBalanceHistoryListComponent` | |
@@ -253,6 +259,7 @@ Mapping moduleId (sumber: tabel `module` DB — sinkron ulang bila ada modul bar
 | 1008 | Ticket Severity / Respond Time |
 | 1009 | Ticket Solution Time |
 | 1010 | Template |
+| 2000 | Home |
 | 2001 | Projects |
 | 2002 | Clients |
 | 2003 | Contacts |
@@ -265,6 +272,7 @@ Mapping moduleId (sumber: tabel `module` DB — sinkron ulang bila ada modul bar
 | 6000 | Login History |
 | 6001 | Ticket Balance |
 | 6002 | Activity Log |
+| 7001 | Attendance |
 
 > Menu sidebar (`admin-layout.component.ts`) menyimpan `moduleId` di tiap item dan difilter via `filterMenusByAccess()` menggunakan `hasPermission(moduleId, 'r')`.
 
@@ -311,6 +319,7 @@ Contoh endpoint yang dipanggil frontend:
 - Project template: `GET /project/templates`, `POST /project/:id/template` (save-as-template), `POST /project/template/:id/instantiate` (buat draft baru dari template), `POST /project/:id/apply-template/:templateId` (apply template ke draft yang ada), `DELETE /project/template/:id`
 - Transaksi: `/tasks`, `/cases`, `/change-requests` (+ `/:id`, `/:id/logs`, `/:id/tasks`, `/:id/submitInProgress`, `/:id/submitVerification`)
 - Master: `/master/:masterKey` (+ `/:id`), `/master/industry`, `/master/module`, `/master/user-access-right`, `/master/searchTickets`, `/master/loadbBadge`
+- Attendance: `GET /attendance`, `GET /attendance/dashboard`, `GET /attendance/summary`
 - Upload: `POST /upload` (multipart/form-data)
 
 Pola save di halaman transaksi (Case/CR/Task):
@@ -327,11 +336,12 @@ Pola save di halaman transaksi (Case/CR/Task):
 | 🔴 Tinggi | `upload.service.ts` **hardcode** `apiUrl = 'http://localhost:3000'` (bukan `environment.apiBaseUrl`) | `case-detail`, `change-request-detail`, `task-detail` |
 | 🟡 Sedang | `AppComponent` auto-reload tiap 55 menit (`window.location.reload()`) | `app.component.ts` |
 | 🟡 Sedang | Unit test belum ada (hanya 3 `.spec.ts`: logout, relogin, not-found) | seluruh app |
-| 🟡 Sedang | Access right belum tuntas di beberapa modul (Rating, CR, Login History, Ticket Balance, Activity Log, Contacts) | `AGENT/access-right-usage.md` |
+| 🟡 Sedang | Access right belum tuntas di beberapa modul (Rating, Login History, Contacts) | `AGENT/access-right-usage.md` |
 | 🟡 Sedang | `public/root.css` (design tokens) duplikat dengan `src/styles.css` `:root` | `public/root.css` |
 | 🟢 Rendah | Banyak `console.log` debug tersisa | berbagai komponen |
 | 🟢 Rendah | Notifikasi sukses/gagal belum terstandar (masih `alert()`/`confirm()`) | seluruh app |
 | 🟢 Rendah | Komponen `logout` & `user-manage` ada tapi tidak ter-registrasi di route (dead code) | `features/auth/logout`, `features/user/user-manage` |
+| 🟢 Rendah | File `.html` referensi (`attendance-dashboard.html`, `attendance-summary.html`) tersisa di root `features/attendance/` (bukan komponen aktif) | `features/attendance/` |
 
 ---
 

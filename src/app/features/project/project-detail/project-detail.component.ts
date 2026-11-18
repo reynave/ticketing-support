@@ -660,9 +660,15 @@ active = 1;
     this.savingTicketBalance = true;
     this.ticketBalanceError = '';
 
+    const today = new Date();
+
+    const curTime = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+
+
     const payload = {
       projectId: this.projectId,
       date: this.ticketBalanceForm.date,
+      curTime: curTime,
       ticketIn,
       ticketOut,
       note: this.ticketBalanceForm.note.trim(),

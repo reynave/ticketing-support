@@ -70,6 +70,7 @@ Gunakan mapping berikut untuk menu dan halaman yang sudah ada:
 | User Auth Level | 1006 |
 | Global Setting | 1007 |
 | Template | 1010 |
+| Home | 2000 |
 | Projects | 2001 |
 | Clients | 2002 |
 | Contacts | 2003 |
@@ -82,6 +83,7 @@ Gunakan mapping berikut untuk menu dan halaman yang sudah ada:
 | Login History | 6000 |
 | Ticket Balance | 6001 |
 | Activity Log | 6002 |
+| Attendance | 7001 |
 
 Sumber data resmi: tabel `module` di database. Sinkron ulang tabel ini bila ada `INSERT INTO module` baru.
 
@@ -104,12 +106,13 @@ Status penerapan pola `canAccessPage` / `canCreate` / `canUpdate` / `canDelete` 
 - [x] Global Setting (1007) — via `MasterManageComponent` (`masterKey: global-setting`)
 - [x] Sidebar/mobile menu filtering — `admin-layout.component.ts` (`filterMenusByAccess`), `master-home.component.ts` (`visibleMasterMenus`)
 - [x] Template (1010) — `MasterTemplateComponent`, `MasterTemplateDetailComponent`
+- [x] Attendance (7001) — `AttendanceListComponent`, `AttendanceSummaryComponent`, `AttendanceDashboardComponent`
 - [ ] Contacts (2003) — belum ada component terpisah yang teridentifikasi
 - [ ] Rating (2005) — `features/rating` (belum digarap)
-- [ ] Change Requests (5007) — belum ada component terpisah yang teridentifikasi
+- [x] Change Requests (5007) — `ChangeRequestListComponent`, `ChangeRequestDetailComponent`
 - [ ] Login History (6000) — `features/user-login-history` (belum digarap)
-- [ ] Ticket Balance (6001) — `features/ticket-balance-history` (belum digarap)
-- [ ] Activity Log (6002) — belum ada component terpisah yang teridentifikasi
+- [x] Ticket Balance (6001) — `TicketBalanceHistoryListComponent`
+- [x] Activity Log (6002) — `TicketHistoryListComponent`
 
 ## Menu Rules
 
